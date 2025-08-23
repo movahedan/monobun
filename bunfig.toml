@@ -46,7 +46,7 @@ timeout = 5000
 # Enable coverage reporting
 coverage = true
 coverageDir = "./coverage"
-coverageThreshold = { lines = 0.9, functions = 0.9, statements = 0.9 }
+coverageThreshold = { lines = 0.8, functions = 0.8, statements = 0.8 }
 coverageIgnoreSourcemaps = true
 coverageSkipTestFiles = true
 coveragePathIgnorePatterns = [

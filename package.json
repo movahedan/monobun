@@ -7,6 +7,9 @@
 		"packages/*"
 	],
 	"packageManager": "bun@1.2.19",
+	"intershell": {
+		"config": "i.config.ts"
+	},
 	"scripts": {
 		"commit": "bun run scripts/commit.ts",
 		"commit:check": "bun run scripts/commit-check.ts",
