@@ -3,5 +3,6 @@ export * from "./branch";
 export * from "./changelog";
 export * from "./commit";
 export * from "./compose";
+export * from "./config/default";
 export * from "./packages";
 export * from "./tag";
