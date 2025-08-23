@@ -1,5 +1,5 @@
-import fs from "node:fs";
-import { $ } from "bun";
+import { readFileSync } from "node:fs";
+import { $, file, write } from "bun";
 import type { PackageJson, PackageValidationError, PackageValidationResult } from "./types";
 
 const semanticVersionRegex = /^\d+\.\d+\.\d+$/;
@@ -29,7 +29,7 @@ export class EntityPackages {
 
 		const jsonPath = this.getJsonPath();
 		try {
-			const json = fs.readFileSync(jsonPath, "utf8");
+			const json = readFileSync(jsonPath, "utf8");
 			const packageJson = JSON.parse(json);
 			return packageJson;
 		} catch (error) {
@@ -37,7 +37,7 @@ export class EntityPackages {
 		}
 	}
 	async writeJson(data: PackageJson): Promise<void> {
-		await Bun.write(this.getJsonPath(), JSON.stringify(data, null, 2));
+		await write(this.getJsonPath(), JSON.stringify(data, null, 2));
 		this.packageJson = data;
 		await $`bun biome check --write --no-errors-on-unmatched ${this.getJsonPath()}`.quiet();
 	}
@@ -57,15 +57,15 @@ export class EntityPackages {
 	}
 	readChangelog(): string {
 		const changelogPath = this.getChangelogPath();
-		const changelog = fs.readFileSync(changelogPath, "utf8");
+		const changelog = readFileSync(changelogPath, "utf8");
 		return changelog || "";
 	}
 	async writeChangelog(content: string): Promise<void> {
-		const isExists = await Bun.file(this.getChangelogPath()).exists();
+		const isExists = await file(this.getChangelogPath()).exists();
 		if (isExists) {
-			await Bun.write(this.getChangelogPath(), content);
+			await write(this.getChangelogPath(), content);
 		} else {
-			await Bun.write(this.getChangelogPath(), content, { createPath: true });
+			await write(this.getChangelogPath(), content, { createPath: true });
 		}
 		await $`bun biome check --write --no-errors-on-unmatched ${this.getJsonPath()}`.quiet();
 	}
@@ -130,12 +130,12 @@ export class EntityPackages {
 			[...apps, ...pkgs].map(async (pkg) => {
 				const packageInstance = new EntityPackages(pkg);
 				const packageJsonPath = packageInstance.getJsonPath();
-				const exists = await Bun.file(packageJsonPath).exists();
+				const exists = await file(packageJsonPath).exists();
 
 				if (!exists) return null;
 
 				try {
-					const packageJson = await Bun.file(packageJsonPath).json();
+					const packageJson = await file(packageJsonPath).json();
 					const name = packageJson.name;
 
 					if (!name) return null;

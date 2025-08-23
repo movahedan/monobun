@@ -22,8 +22,7 @@
 	},
 	"devDependencies": {
 		"@repo/test-preset": "workspace:*",
-		"@repo/typescript-config": "workspace:*",
-		"yaml": "2.8.1"
+		"@repo/typescript-config": "workspace:*"
 	},
 	"keywords": [
 		"cli",
