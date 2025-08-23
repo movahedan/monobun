@@ -2,11 +2,13 @@
 	"extends": "../typescript-config/base.json",
 	"compilerOptions": {
 		"outDir": "./dist",
-		"rootDir": "./src",
 		"declaration": true,
 		"declarationMap": true,
-		"sourceMap": true
+		"sourceMap": true,
+		"paths": {
+			"@repo/test-preset/*": ["../test-preset/*"]
+		}
 	},
-	"include": ["src/**/*"],
-	"exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.spec.ts", "./src/interactive/**"]
+	"include": ["."],
+	"exclude": ["./src/interactive/**"]
 }

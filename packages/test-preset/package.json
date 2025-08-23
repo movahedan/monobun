@@ -6,6 +6,7 @@
 	"main": "./test-setup.ts",
 	"exports": {
 		".": "./test-setup.ts",
+		"./mock-modules": "./mock-modules.ts",
 		"./testing-library": "./testing-library.ts",
 		"./happydom": "./happydom.ts"
 	},
