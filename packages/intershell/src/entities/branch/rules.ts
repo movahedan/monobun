@@ -7,13 +7,10 @@ const defaultConfig: BranchConfig = {
 		list: [
 			"master",
 			"develop",
-			"development",
 			"feature",
-			"bugfix",
 			"fix",
 			"hotfix",
 			"release",
-			"support",
 			"docs",
 			"refactor",
 			"ci",
