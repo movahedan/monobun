@@ -5,12 +5,13 @@ const mockBunFile = (content: string | undefined) => ({
 	write: () => Promise.resolve(0),
 });
 
-const mockBunWrite = () => Promise.resolve(0);
-
 const mockBunCommand = (
 	options: { text?: string; exitCode?: number; quietResolves?: boolean } = {},
 ) => ({
 	text: () => options.text || "mocked output",
+	stdout: {
+		toString: () => options.text || "mocked output",
+	},
 	exitCode: () => options.exitCode || 0,
 	nothrow: () => ({
 		quiet: () => ({
@@ -42,7 +43,14 @@ export const mockBunModule = (
 
 	return {
 		file: (_path: string | URL) => mockBunFile(file),
-		write: mockBunWrite,
+		write: (
+			_path: string | URL,
+			_content: string | Buffer,
+			_options?: { createPath?: boolean },
+		) => {
+			// Mock write operation to prevent actual file/directory creation
+			return Promise.resolve(0);
+		},
 		$: (_strings: TemplateStringsArray, ..._values: unknown[]) => mockBunCommand(commandOptions),
 	};
 };
