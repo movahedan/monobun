@@ -2,8 +2,11 @@
 
 import { colorify, createScript, type ScriptConfig } from "@repo/intershell/core";
 import { EntityBranch, EntityCommit } from "@repo/intershell/entities";
+import { getEntitiesConfig } from "../packages/intershell/src/entities/config/config";
 
 const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
+const branchConfig = getEntitiesConfig().getConfig().branch;
+const branchInstance = new EntityBranch(branchConfig);
 
 const scriptConfig = {
 	name: "Commit Check",
@@ -89,16 +92,16 @@ export const commitCheck = createScript(scriptConfig, async (args, xConsole) => 
 			const branchName =
 				process.env.GITHUB_HEAD_REF ||
 				process.env.GITHUB_REF?.replace("refs/heads/", "") ||
-				(await EntityBranch.getCurrentBranch()) ||
+				(await branchInstance.getCurrentBranch()) ||
 				"";
 
-			const branchValidation = EntityBranch.validate(branchName);
-			if (!branchValidation.isValid) {
+			const branchValidation = branchInstance.validate(branchName);
+			if (typeof branchValidation === "string") {
 				if (isCI) {
 					console.log(colorify.yellow("⚠️  Skipping branch name check in CI environment"));
 					console.log(colorify.gray(`Branch name detected: ${branchName}`));
 				} else {
-					throw new Error(branchValidation.errors.join("\n"));
+					throw new Error(branchValidation);
 				}
 			}
 
