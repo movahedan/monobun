@@ -1,11 +1,14 @@
 import { $ } from "bun";
 import { EntityBranch, type ParsedBranch } from "../branch";
-import type { PRCategory, PRStats } from "./pr.types";
-import type { ParsedCommitData } from "./types";
+import type { IConfig, PRCategory } from "../config/types";
+import type { ParsedCommitData, PRStats } from "./types";
 
-const defaultBranchName = EntityBranch.getConfig().defaultBranch;
+export class EntityPr {
+	private readonly defaultBranch: string | undefined;
+	constructor(readonly config: IConfig) {
+		this.defaultBranch = config.branch?.defaultBranch;
+	}
 
-export const EntityPr = {
 	async getPRInfo(
 		parseByHash: (hash: string) => Promise<ParsedCommitData>,
 		hash: string,
@@ -25,14 +28,42 @@ export const EntityPr = {
 				prCategory: categorizePR(prCommits, message),
 				prStats: getPRStats(prCommits),
 				prCommits: prCommits.length > 0 ? prCommits : [],
-				prBranchName: getPrBranch({ message }),
+				prBranchName: this.getPrBranch({ message }),
 			};
 		} catch (error) {
 			console.warn(`Failed to get PR info for commit ${hash}: ${error}`);
 			return undefined;
 		}
-	},
-};
+	}
+
+	private getPrBranch({ message }: ParsedCommitData): ParsedBranch {
+		if (!message.isMerge) {
+			return {
+				name: this.defaultBranch || "",
+				fullName: this.defaultBranch || "",
+			};
+		}
+
+		const mainMessage = message.bodyLines?.join("\n") || "";
+		if (!mainMessage.includes("from ")) {
+			return {
+				name: this.defaultBranch || "",
+				fullName: this.defaultBranch || "",
+			};
+		}
+
+		const fromIndex = mainMessage.indexOf("from ");
+		const afterFrom = mainMessage.substring(fromIndex + 5);
+		let firstLine = afterFrom.split("\n")[0].trim();
+
+		if (firstLine.includes(":")) {
+			firstLine = firstLine.split(":").reverse()[0];
+		}
+
+		const branchInstance = new EntityBranch(this.config.branch);
+		return branchInstance.parseByName(firstLine);
+	}
+}
 
 function extractPRNumber(mergeMessage: ParsedCommitData["message"]): string | undefined {
 	// Try different merge commit patterns
@@ -201,29 +232,4 @@ function getPRStats(prCommits: ParsedCommitData[]): PRStats {
 	return {
 		commitCount: prCommits.length,
 	};
-}
-
-function getPrBranch({ message }: ParsedCommitData): ParsedBranch {
-	if (!message.isMerge) {
-		return {
-			name: defaultBranchName,
-		};
-	}
-
-	const mainMessage = message.bodyLines?.join("\n") || "";
-	if (!mainMessage.includes("from ")) {
-		return {
-			name: defaultBranchName,
-		};
-	}
-
-	const fromIndex = mainMessage.indexOf("from ");
-	const afterFrom = mainMessage.substring(fromIndex + 5);
-	let firstLine = afterFrom.split("\n")[0].trim();
-
-	if (firstLine.includes(":")) {
-		firstLine = firstLine.split(":").reverse()[0];
-	}
-
-	return EntityBranch.parseByName(firstLine);
 }
