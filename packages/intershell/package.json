@@ -15,6 +15,7 @@
 		"src",
 		"README.md"
 	],
+	"packageManager": "bun@1.2.19",
 	"scripts": {
 		"check:types": "tsc --noEmit",
 		"build": "tsc",
@@ -23,6 +24,12 @@
 	"devDependencies": {
 		"@repo/test-preset": "workspace:*",
 		"@repo/typescript-config": "workspace:*"
+	},
+	"peerDependencies": {
+		"biome": "2.1.2",
+		"lefthook": "1.12.3",
+		"turbo": "2.5.6",
+		"typescript": "5.8.3"
 	},
 	"keywords": [
 		"cli",
