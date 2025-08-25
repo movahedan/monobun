@@ -14,16 +14,18 @@ describe("Config", () => {
 
 	describe("default configuration", () => {
 		it("should have default commit configuration", async () => {
-			const { entitiesConfig } = await import("./config");
-			const config = entitiesConfig.getConfig();
+			const { getEntitiesConfig } = await import("./config");
+			const config = getEntitiesConfig().getConfig();
 
-			expect(config.commit.conventional).toEqual([]);
-			expect(config.commit.staged).toEqual([]);
+			expect(config.commit.conventional.type?.list).toBeDefined();
+			expect(config.commit.conventional.type?.list?.length).toBeGreaterThan(0);
+			expect(config.commit.staged).toBeDefined();
+			expect(config.commit.staged?.length).toBeGreaterThan(0);
 		});
 
 		it("should have default branch configuration", async () => {
-			const { entitiesConfig } = await import("./config");
-			const config = entitiesConfig.getConfig();
+			const { getEntitiesConfig } = await import("./config");
+			const config = getEntitiesConfig().getConfig();
 
 			expect(config.branch.defaultBranch).toBe("main");
 			expect(config.branch.protectedBranches).toEqual(["main"]);
@@ -42,15 +44,15 @@ describe("Config", () => {
 		});
 
 		it("should have default tag configuration", async () => {
-			const { entitiesConfig } = await import("./config");
-			const config = entitiesConfig.getConfig();
+			const { getEntitiesConfig } = await import("./config");
+			const config = getEntitiesConfig().getConfig();
 
 			expect(config.tag).toEqual([]);
 		});
 
 		it("should have default branch name validation rules", async () => {
-			const { entitiesConfig } = await import("./config");
-			const config = entitiesConfig.getConfig();
+			const { getEntitiesConfig } = await import("./config");
+			const config = getEntitiesConfig().getConfig();
 
 			expect(config.branch.name.minLength).toBe(1);
 			expect(config.branch.name.maxLength).toBe(100);
@@ -64,8 +66,27 @@ describe("Config", () => {
 		it("should merge custom commit configuration", async () => {
 			const customConfig: CustomConfigJson = {
 				commit: {
-					conventional: ["feat", "fix"],
-					staged: ["*.ts", "*.tsx"],
+					conventional: {
+						type: {
+							list: [
+								{
+									type: "feat",
+									label: "Features",
+									description: "A new feature",
+									category: "features" as const,
+									emoji: "🚀",
+									badgeColor: "00D4AA",
+									breakingAllowed: true,
+								},
+							],
+						},
+					},
+					staged: [
+						{
+							filePattern: [/\.ts$/],
+							description: "TypeScript files",
+						},
+					],
 				},
 			};
 
@@ -74,8 +95,10 @@ describe("Config", () => {
 			const config = new Config(customConfig);
 			const result = config.getConfig();
 
-			expect(result.commit.conventional).toEqual(["feat", "fix"]);
-			expect(result.commit.staged).toEqual(["*.ts", "*.tsx"]);
+			expect(result.commit.conventional.type?.list).toHaveLength(1);
+			expect(result.commit.conventional.type?.list?.[0]?.type).toBe("feat");
+			expect(result.commit.staged).toHaveLength(1);
+			expect(result.commit.staged?.[0]?.description).toBe("TypeScript files");
 		});
 
 		it("should merge custom branch configuration", async () => {
@@ -142,7 +165,7 @@ describe("Config", () => {
 
 			// Should fall back to default config
 			expect(config.branch.defaultBranch).toBe("main");
-			expect(config.commit.conventional).toEqual([]);
+			expect(config.commit.conventional.type?.list).toBeDefined();
 		});
 
 		it("should handle invalid JSON gracefully", async () => {
@@ -169,7 +192,7 @@ describe("Config", () => {
 
 			// Should fall back to default config
 			expect(config.branch.defaultBranch).toBe("main");
-			expect(config.commit.conventional).toEqual([]);
+			expect(config.commit.conventional.type?.list).toBeDefined();
 		});
 	});
 
@@ -212,7 +235,22 @@ describe("Config", () => {
 			const config = new Config();
 			const result = config.getConfig();
 
-			expect(result).toEqual(defaultConfig);
+			// The scopes list will be dynamically populated, so we can't do a direct equality check
+			// Instead, check that the structure is correct
+			expect(result.branch).toEqual(defaultConfig.branch);
+			expect(result.tag).toEqual(defaultConfig.tag);
+			expect(result.commit.conventional.type).toEqual(defaultConfig.commit.conventional.type);
+			expect(result.commit.conventional.description).toEqual(
+				defaultConfig.commit.conventional.description,
+			);
+			expect(result.commit.conventional.bodyLines).toEqual(
+				defaultConfig.commit.conventional.bodyLines,
+			);
+			expect(result.commit.staged).toEqual(defaultConfig.commit.staged);
+			// Check that scopes list exists and has at least one item (root)
+			expect(result.commit.conventional.scopes?.list).toBeDefined();
+			expect(result.commit.conventional.scopes?.list?.length).toBeGreaterThan(0);
+			expect(result.commit.conventional.scopes?.list).toContain("root");
 		});
 
 		it("should merge custom config when provided", async () => {
@@ -221,8 +259,27 @@ describe("Config", () => {
 
 			const customConfig: CustomConfigJson = {
 				commit: {
-					conventional: ["feat", "fix"],
-					staged: ["*.ts", "*.tsx"],
+					conventional: {
+						type: {
+							list: [
+								{
+									type: "feat",
+									label: "Features",
+									description: "A new feature",
+									category: "features" as const,
+									emoji: "🚀",
+									badgeColor: "00D4AA",
+									breakingAllowed: true,
+								},
+							],
+						},
+					},
+					staged: [
+						{
+							filePattern: [/\.ts$/],
+							description: "TypeScript files",
+						},
+					],
 				},
 				branch: {
 					defaultBranch: "develop",
@@ -235,8 +292,9 @@ describe("Config", () => {
 			const result = config.getConfig();
 
 			// Custom values should be applied
-			expect(result.commit.conventional).toEqual(["feat", "fix"]);
-			expect(result.commit.staged).toEqual(["*.ts", "*.tsx"]);
+			expect(result.commit.conventional.type?.list).toHaveLength(1);
+			expect(result.commit.conventional.type?.list?.[0]?.type).toBe("feat");
+			expect(result.commit.staged).toHaveLength(1);
 			expect(result.branch.defaultBranch).toBe("develop");
 			expect(result.branch.protectedBranches).toEqual(["main"]);
 			expect(result.tag).toEqual(["v1.0.0", "v1.0.1"]);

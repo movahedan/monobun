@@ -1,10 +1,84 @@
-import type { BranchConfig } from "../branch/types";
+export type PRCategory =
+	| "features"
+	| "bugfixes"
+	| "dependencies"
+	| "infrastructure"
+	| "documentation"
+	| "refactoring"
+	| "other";
+
+type Validator = (commit: unknown) => true | string;
+
+export interface CommitConfig {
+	conventional: {
+		type?: {
+			list?: CommitTypeDefinition[];
+			validator?: Validator;
+		};
+		scopes?: {
+			list?: string[];
+			validator?: Validator;
+		};
+		description?: {
+			minLength?: number;
+			maxLength?: number;
+			shouldNotEndWithPeriod?: boolean;
+			shouldNotStartWithType?: boolean;
+			validator?: Validator;
+		};
+		bodyLines?: {
+			minLength?: number;
+			maxLength?: number;
+			validator?: Validator;
+		};
+		isBreaking?: {
+			validator?: Validator;
+		};
+		isMerge?: {
+			validator?: Validator;
+		};
+		isDependency?: {
+			validator?: Validator;
+		};
+	};
+	staged?: StagedConfig;
+}
+
+export interface CommitTypeDefinition {
+	readonly type: string;
+	readonly label: string;
+	readonly description: string;
+	readonly category: PRCategory;
+	readonly emoji: string;
+	readonly badgeColor: string;
+	readonly breakingAllowed: boolean;
+}
+
+export type StagedConfig = {
+	filePattern: RegExp[];
+	contentPattern?: RegExp[];
+	description: string;
+	disabled?: boolean;
+	ignore?: {
+		mode: "create" | "update";
+	};
+}[];
+
+interface BranchConfig {
+	readonly defaultBranch: string;
+	readonly protectedBranches: readonly string[];
+	readonly prefixes: readonly string[];
+	readonly name: {
+		readonly minLength: number;
+		readonly maxLength: number;
+		readonly allowedCharacters: RegExp;
+		readonly noConsecutiveSeparators: boolean;
+		readonly noLeadingTrailingSeparators: boolean;
+	};
+}
 
 export interface IConfig {
-	readonly commit: {
-		readonly conventional: readonly string[];
-		readonly staged: readonly string[];
-	};
+	readonly commit: CommitConfig;
 	readonly branch: BranchConfig;
 	readonly tag: readonly string[];
 }
