@@ -1,5 +1,8 @@
 import { $ } from "bun";
-import type { BranchConfig, ParsedBranch } from "./types";
+import type { IConfig } from "../config/types";
+import type { ParsedBranch } from "./types";
+
+type BranchConfig = IConfig["branch"];
 
 export class EntityBranch {
 	private config: BranchConfig;
@@ -8,11 +11,11 @@ export class EntityBranch {
 		this.config = config;
 	}
 
-	static parseByName(branchName: string): ParsedBranch {
+	parseByName(branchName: string): ParsedBranch {
 		const [prefix, ...name] = branchName.split("/");
 		return {
 			prefix,
-			name: name.join("/"),
+			name: prefix ? name.join("/") : branchName,
 			fullName: branchName,
 		};
 	}
@@ -23,7 +26,7 @@ export class EntityBranch {
 	}
 
 	validate(input: string | ParsedBranch): true | string {
-		const branch = typeof input === "string" ? EntityBranch.parseByName(input) : input;
+		const branch = typeof input === "string" ? this.parseByName(input) : input;
 
 		return this.mainValidator(branch);
 	}

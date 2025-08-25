@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import type { BranchConfig, ParsedBranch } from "./types";
+import type { IConfig } from "../config/types";
+import type { ParsedBranch } from "./types";
+
+type BranchConfig = IConfig["branch"];
 
 // Set up default mocks before importing the class
 mock.module("bun", () => ({
@@ -12,7 +15,7 @@ mock.module("bun", () => ({
 }));
 
 // Now import the module after mocking
-const { EntityBranch } = await import("./branch");
+import { EntityBranch } from "./branch";
 
 describe("EntityBranch", () => {
 	let branch: InstanceType<typeof EntityBranch>;
@@ -100,7 +103,8 @@ describe("EntityBranch", () => {
 
 		parseTestCases.forEach(({ name, input, expected }) => {
 			it(name, () => {
-				const result = EntityBranch.parseByName(input);
+				const result = new EntityBranch(mockConfig).parseByName(input);
+				console.log("result", result, expected);
 				expect(result).toEqual(expected);
 			});
 		});
