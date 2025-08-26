@@ -4,12 +4,20 @@ import type {
 	ComposeData,
 	ComposeValidationResult,
 	EntityAffectedService,
+	NetworkDefinition,
 	PortMapping,
+	ServiceDefinition,
 	ServiceDependencyGraph,
 	ServiceHealth,
 	ServiceInfo,
+	VolumeDefinition,
 } from "./types";
-import { parseDockerCompose } from "./yaml-parser";
+
+type TemporaryBunYamlTypeSinceThisIsNotTypedYet = {
+	YAML: {
+		parse: (input: string) => Record<string, unknown>;
+	};
+};
 
 const allPackages = await EntityPackages.getAllPackages();
 
@@ -51,7 +59,7 @@ export class EntityCompose {
 	}
 
 	async read(): Promise<ComposeData> {
-		return parseDockerCompose(await Bun.file(this.composePath).text());
+		return EntityCompose.parseDockerCompose(await Bun.file(this.composePath).text());
 	}
 
 	async getCompose(): Promise<ComposeData> {
@@ -176,6 +184,42 @@ export class EntityCompose {
 		} catch (error) {
 			throw new Error(`Failed to get affected services: ${error}`);
 		}
+	}
+
+	static parseDockerCompose(input: string): ComposeData {
+		const parsed = (Bun as unknown as TemporaryBunYamlTypeSinceThisIsNotTypedYet).YAML.parse(input);
+
+		if (parsed.services) {
+			for (const [, service] of Object.entries(parsed.services)) {
+				if (service.ports && Array.isArray(service.ports)) {
+					(service as Record<string, unknown>).ports = service.ports.map((port: unknown) =>
+						typeof port === "string" ? port : String(port),
+					);
+				}
+
+				if (service.environment && Array.isArray(service.environment)) {
+					const envObj: Record<string, string> = {};
+					for (const env of service.environment) {
+						if (typeof env === "string" && env.includes("=")) {
+							const [key, ...valueParts] = env.split("=");
+							envObj[key] = valueParts.join("=");
+						}
+					}
+					(service as Record<string, unknown>).environment = envObj;
+				}
+			}
+		}
+
+		return {
+			version: (parsed.version as string) || "3.8",
+			services: (parsed.services as Record<string, ServiceDefinition>) || {},
+			networks: (parsed.networks as Record<string, NetworkDefinition>) || {},
+			volumes: (parsed.volumes as Record<string, VolumeDefinition>) || {},
+			validation: {
+				isValid: true,
+				errors: [],
+			},
+		};
 	}
 
 	private static parsePortMappings(ports: string[]): PortMapping[] {

@@ -1,4 +1,5 @@
 import { describe, expect, it, mock } from "bun:test";
+import type { ComposeData, ServiceDefinition } from "./types";
 
 // Mock the EntityPackages module before importing the class
 mock.module("../packages", () => ({
@@ -9,6 +10,13 @@ mock.module("../packages", () => ({
 
 // Import the class to test static methods
 const { EntityCompose } = await import("./compose");
+
+// Helper function to access the private parseDockerCompose function
+function callParseDockerCompose(input: string): ComposeData {
+	return (EntityCompose as unknown as { parseDockerCompose: (input: string) => ComposeData })[
+		"parseDockerCompose"
+	](input);
+}
 
 describe("EntityCompose", () => {
 	describe("static methods", () => {
@@ -186,6 +194,220 @@ describe("EntityCompose", () => {
 				DEBUG: "true",
 				COMPLEX: "key",
 			});
+		});
+	});
+});
+
+describe("Docker Compose Parser", () => {
+	describe("parseDockerCompose", () => {
+		it("should parse docker-compose file with defaults", () => {
+			const input = `
+services:
+  app:
+    image: node:18
+    ports:
+      - "3000:3000"
+`;
+			const result = callParseDockerCompose(input);
+
+			expect(result.version).toBe("3.8");
+			expect(result.services).toBeDefined();
+			expect(result.networks).toBeDefined();
+			expect(result.volumes).toBeDefined();
+			expect(result.validation.isValid).toBe(true);
+		});
+
+		it("should handle custom version", () => {
+			const input = `
+version: '3.9'
+services:
+  app:
+    image: node:18
+`;
+			const result = EntityCompose.parseDockerCompose(input);
+
+			expect(result.version).toBe("3.9");
+		});
+
+		it("should handle environment variables array format", () => {
+			const input = `
+services:
+  app:
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - API_KEY=secret123
+`;
+			const result = EntityCompose.parseDockerCompose(input);
+
+			const service = result.services.app as ServiceDefinition;
+			const environment = service.environment as Record<string, string>;
+
+			expect(environment).toBeDefined();
+			expect(environment.NODE_ENV).toBe("production");
+			expect(environment.PORT).toBe("3000");
+			expect(environment.API_KEY).toBe("secret123");
+		});
+
+		it("should handle environment variables object format", () => {
+			const input = `
+services:
+  app:
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      API_KEY: secret123
+`;
+			const result = EntityCompose.parseDockerCompose(input);
+
+			const service = result.services.app as ServiceDefinition;
+			const environment = service.environment as Record<string, unknown>;
+
+			expect(environment).toBeDefined();
+			expect(environment.NODE_ENV).toBe("production");
+			expect(environment.PORT).toBe(3000);
+			expect(environment.API_KEY).toBe("secret123");
+		});
+
+		it("should handle ports array with string conversion", () => {
+			const input = `
+services:
+  app:
+    ports:
+      - "3000:3000"
+      - "8080:80"
+      - "9000:9000"
+`;
+			const result = EntityCompose.parseDockerCompose(input);
+
+			const service = result.services.app as ServiceDefinition;
+			const ports = service.ports as string[];
+
+			expect(Array.isArray(ports)).toBe(true);
+			expect(ports).toHaveLength(3);
+			expect(ports[0]).toBe("3000:3000");
+			expect(ports[1]).toBe("8080:80");
+			expect(ports[2]).toBe("9000:9000");
+		});
+
+		it("should handle empty services, networks, and volumes", () => {
+			const input = `
+version: '3.8'
+`;
+			const result = EntityCompose.parseDockerCompose(input);
+
+			expect(result.services).toEqual({});
+			expect(result.networks).toEqual({});
+			expect(result.volumes).toEqual({});
+		});
+
+		it("should handle complex service configuration", () => {
+			const input = `
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+    volumes:
+      - "./nginx.conf:/etc/nginx/nginx.conf"
+    depends_on:
+      - app
+    networks:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://localhost:5432/myapp
+    volumes:
+      - "./app:/app"
+      - "/app/node_modules"
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: myapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data"
+    networks:
+      - backend
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+`;
+			const result = EntityCompose.parseDockerCompose(input);
+
+			expect(result.services.web).toBeDefined();
+			expect(result.services.app).toBeDefined();
+			expect(result.services.db).toBeDefined();
+
+			// Test web service
+			const web = result.services.web as ServiceDefinition;
+			expect(web.image).toBe("nginx:alpine");
+			expect(web.ports).toEqual(["80:80", "443:443"]);
+			expect(web.environment).toEqual({
+				NGINX_HOST: "localhost",
+				NGINX_PORT: "80",
+			});
+			expect(web.volumes).toEqual(["./nginx.conf:/etc/nginx/nginx.conf"]);
+			expect(web.depends_on).toEqual(["app"]);
+			expect(web.networks).toEqual(["frontend", "backend"]);
+			expect(web.restart).toBe("unless-stopped");
+
+			// Test app service
+			const app = result.services.app as ServiceDefinition;
+			expect(app.build).toBe(".");
+			expect(app.ports).toEqual(["3000:3000"]);
+			expect(app.environment).toEqual({
+				NODE_ENV: "production",
+				DATABASE_URL: "postgresql://localhost:5432/myapp",
+			});
+
+			// Test networks and volumes
+			expect(result.networks.frontend).toBeDefined();
+			expect(result.networks.backend).toBeDefined();
+			expect(result.volumes.postgres_data).toBeDefined();
+		});
+
+		it("should handle environment variables with equals in value", () => {
+			const input = `
+services:
+  app:
+    environment:
+      - DATABASE_URL=postgresql://user:pass@host:5432/db?sslmode=require
+      - REDIS_URL=redis://localhost:6379/0
+      - API_KEY=key=value=123
+`;
+			const result = EntityCompose.parseDockerCompose(input);
+
+			const service = result.services.app as ServiceDefinition;
+			const environment = service.environment as Record<string, string>;
+
+			expect(environment.DATABASE_URL).toBe("postgresql://user:pass@host:5432/db?sslmode=require");
+			expect(environment.REDIS_URL).toBe("redis://localhost:6379/0");
+			expect(environment.API_KEY).toBe("key=value=123");
 		});
 	});
 });
