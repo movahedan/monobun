@@ -6,7 +6,7 @@
 		"apps/*",
 		"packages/*"
 	],
-	"packageManager": "bun@1.2.19",
+	"packageManager": "bun@1.2.21",
 	"intershell": {
 		"config": "i.config.ts"
 	},
@@ -15,7 +15,7 @@
 		"commit:check": "bun run scripts/commit-check.ts",
 		"ci:act": "bun run scripts/ci-act.ts",
 		"//local": "//////////////////////////////////////////////////////////////////////// local //",
-		"postinstall": "bun run scripts/local-vscode.ts",
+		"postinstall": "bun run scripts/local-vscode.ts --quiet",
 		"local:setup": "bun run scripts/local-setup.ts",
 		"local:vscode": "bun run scripts/local-vscode.ts",
 		"local:cleanup": "bun run scripts/local-cleanup.ts",
