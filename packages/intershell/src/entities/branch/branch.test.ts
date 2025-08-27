@@ -104,7 +104,6 @@ describe("EntityBranch", () => {
 		parseTestCases.forEach(({ name, input, expected }) => {
 			it(name, () => {
 				const result = new EntityBranch(mockConfig).parseByName(input);
-				console.log("result", result, expected);
 				expect(result).toEqual(expected);
 			});
 		});
