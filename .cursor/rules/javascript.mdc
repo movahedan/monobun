@@ -1,0 +1,375 @@
+---
+description: JavaScript and React best practices, naming conventions, and component structure
+globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
+alwaysApply: true
+---
+
+# 📜 JavaScript & React Best Practices
+
+Follow consistent JavaScript and React patterns for maintainable and scalable code.
+
+## 🏷️ Naming Conventions
+
+- Use **kebab-case** for file names: `my-component.ts`, `user-service.js`
+- Use **camelCase** for variables and functions: `myVariable`, `myFunction()`
+- Use **UpperCamelCase (PascalCase)** for classes, types, and interfaces: `MyClass`, `MyInterface`
+- Use **ALL_CAPS** for constants and enum values: `MAX_COUNT`, `Color.RED`
+- Inside generic types, prefix type parameters with `T`: `TKey`, `TValue`
+
+```ts
+// ✅ Good naming examples
+const userAge = 25;                          // camelCase variable
+const MAX_RETRY_COUNT = 3;                   // ALL_CAPS constant
+function calculateTotal() { }                // camelCase function
+class UserRepository { }                     // PascalCase class
+interface ApiResponse { }                    // PascalCase interface
+type RecordOfArrays<TItem> = Record<string, TItem[]>;  // T-prefixed generic
+
+// File names
+// my-component.tsx                          // kebab-case files
+// user-service.ts
+// api-client.js
+```
+
+## 📝 JSDoc Comments
+
+Use JSDoc comments to annotate functions and types. Be concise and only provide JSDoc comments if the function's behavior is not self-evident.
+
+Use the JSDoc inline `@link` tag to link to other functions and types within the same file.
+
+```ts
+/**
+ * Calculates the total price including tax
+ * @param price - The base price
+ * @param taxRate - Tax rate as decimal (e.g., 0.1 for 10%)
+ * @returns The total price including tax
+ */
+const calculateTotal = (price: number, taxRate: number): number => {
+  return price * (1 + taxRate);
+};
+
+/**
+ * Subtracts two numbers
+ */
+const subtract = (a: number, b: number) => a - b;
+
+/**
+ * Does the opposite to {@link subtract}
+ */
+const add = (a: number, b: number) => a + b;
+
+/**
+ * Formats a user's display name
+ * @param user - The user object containing name information
+ * @returns Formatted display name
+ * @example
+ * ```ts
+ * const displayName = formatUserName({ firstName: 'John', lastName: 'Doe' });
+ * // Returns: "John Doe"
+ * ```
+ */
+const formatUserName = (user: { firstName: string; lastName: string }): string => {
+  return `${user.firstName} ${user.lastName}`;
+};
+```
+
+## ⚛️ React Component Structure
+
+Follow consistent React component structure and patterns for maintainable components.
+
+### Functional Components with Hooks
+
+```tsx
+// Use functional components with hooks
+interface UserCardProps {
+  readonly user: User;
+  readonly onEdit: (user: User) => void;
+  readonly onDelete: (userId: number) => void;
+}
+
+export const UserCard: React.FC<UserCardProps> = ({ 
+  user, 
+  onEdit, 
+  onDelete 
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleEdit = async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      await onEdit(user);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="user-card">
+      <h3>{user.name}</h3>
+      <p>{user.email}</p>
+      <div className="actions">
+        <button onClick={handleEdit} disabled={isLoading}>
+          {isLoading ? 'Editing...' : 'Edit'}
+        </button>
+        <button onClick={() => onDelete(user.id)}>
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+};
+```
+
+### Custom Hooks
+
+```tsx
+// Use custom hooks for reusable logic
+interface UseUserOptions {
+  readonly userId: number;
+  readonly enabled?: boolean;
+}
+
+interface UseUserReturn {
+  readonly user: User | null;
+  readonly loading: boolean;
+  readonly error: Error | null;
+  readonly refetch: () => Promise<void>;
+}
+
+export const useUser = ({ userId, enabled = true }: UseUserOptions): UseUserReturn => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchUser = async (): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.getUser(userId);
+      setUser(data);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (enabled) {
+      fetchUser();
+    }
+  }, [userId, enabled]);
+
+  return { user, loading, error, refetch: fetchUser };
+};
+```
+
+### Import Organization
+
+Organize imports in a consistent order:
+
+```tsx
+// 1. React imports first
+import React from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
+// 2. Third-party library imports
+import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
+import { clsx } from 'clsx';
+
+// 3. Local imports - absolute paths first
+import { User, ApiResponse } from '@/types';
+import { useAuth, useLocalStorage } from '@/hooks';
+import { Button, Card, Modal } from '@/components';
+
+// 4. Relative imports last
+import { UserCard } from './UserCard';
+import { UserModal } from './UserModal';
+import { styles } from './styles.module.css';
+```
+
+### Export Organization
+
+Organize exports by type:
+
+```tsx
+// 1. Type exports
+export type { User, UserRole, UserPreferences } from './types';
+
+// 2. Component exports
+export { UserCard } from './UserCard';
+export { UserList } from './UserList';
+export { UserModal } from './UserModal';
+
+// 3. Hook exports
+export { useUser } from './hooks/useUser';
+export { useAuth } from './hooks/useAuth';
+export { useUserPreferences } from './hooks/useUserPreferences';
+
+// 4. Utility function exports
+export { formatUser, validateUser } from './utils/userUtils';
+export { createUserPayload } from './utils/apiUtils';
+```
+
+## 🎯 Component Best Practices
+
+### Props Interface Design
+
+```tsx
+// ✅ Good - clear, typed props
+interface ButtonProps {
+  readonly variant: 'primary' | 'secondary' | 'danger';
+  readonly size: 'small' | 'medium' | 'large';
+  readonly disabled?: boolean;
+  readonly loading?: boolean;
+  readonly children: React.ReactNode;
+  readonly onClick?: () => void;
+}
+
+// ✅ Good - optional callback props
+interface FormProps {
+  readonly initialValues?: Record<string, unknown>;
+  readonly onSubmit?: (values: Record<string, unknown>) => Promise<void>;
+  readonly onCancel?: () => void;
+  readonly onValidationError?: (errors: ValidationError[]) => void;
+}
+```
+
+### Event Handling
+
+```tsx
+// ✅ Good - typed event handlers
+const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  onSubmit(Object.fromEntries(formData));
+};
+
+const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+  const { name, value } = event.target;
+  setFormData(prev => ({
+    ...prev,
+    [name]: value
+  }));
+};
+
+const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
+  if (event.key === 'Enter') {
+    handleSubmit(event as React.FormEvent<HTMLFormElement>);
+  }
+};
+```
+
+### State Management Patterns
+
+```tsx
+// ✅ Good - discriminated union for complex state
+type LoadingState<TData> =
+  | { readonly status: 'idle' }
+  | { readonly status: 'loading' }
+  | { readonly status: 'success'; readonly data: TData }
+  | { readonly status: 'error'; readonly error: string };
+
+const useApiData = <TData,>(url: string) => {
+  const [state, setState] = useState<LoadingState<TData>>({ status: 'idle' });
+
+  const fetchData = useCallback(async (): Promise<void> => {
+    setState({ status: 'loading' });
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      setState({ status: 'success', data });
+    } catch (error) {
+      setState({ status: 'error', error: (error as Error).message });
+    }
+  }, [url]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { state, refetch: fetchData };
+};
+```
+
+### Conditional Rendering
+
+```tsx
+// ✅ Good - clear conditional rendering patterns
+const UserProfile = ({ userId }: { readonly userId: string }) => {
+  const { state } = useApiData<User>(`/api/users/${userId}`);
+
+  // Early returns for loading/error states
+  if (state.status === 'loading') {
+    return <LoadingSpinner />;
+  }
+
+  if (state.status === 'error') {
+    return <ErrorMessage message={state.error} />;
+  }
+
+  if (state.status === 'idle') {
+    return <div>Ready to load user data...</div>;
+  }
+
+  // Main render - TypeScript knows state.data exists
+  return (
+    <div className="user-profile">
+      <h1>{state.data.name}</h1>
+      <p>{state.data.email}</p>
+      {state.data.avatar && (
+        <img src={state.data.avatar} alt={`${state.data.name}'s avatar`} />
+      )}
+    </div>
+  );
+};
+```
+
+## 🔧 Utility Functions
+
+```ts
+// ✅ Good - pure utility functions with clear types
+export const debounce = <TArgs extends unknown[]>(
+  fn: (...args: TArgs) => void,
+  delay: number
+): ((...args: TArgs) => void) => {
+  let timeoutId: NodeJS.Timeout;
+  return (...args: TArgs) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
+};
+
+export const throttle = <TArgs extends unknown[]>(
+  fn: (...args: TArgs) => void,
+  limit: number
+): ((...args: TArgs) => void) => {
+  let inThrottle: boolean;
+  return (...args: TArgs) => {
+    if (!inThrottle) {
+      fn(...args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+};
+
+// ✅ Good - type-safe object utilities
+export const pick = <TObj extends Record<string, unknown>, TKey extends keyof TObj>(
+  obj: TObj,
+  keys: TKey[]
+): Pick<TObj, TKey> => {
+  const result = {} as Pick<TObj, TKey>;
+  keys.forEach(key => {
+    if (key in obj) {
+      result[key] = obj[key];
+    }
+  });
+  return result;
+};
+```
+
+---
+
+**Remember**: Consistency is key in JavaScript and React development. Use clear naming conventions, proper TypeScript types, and follow React best practices for maintainable component architecture.
