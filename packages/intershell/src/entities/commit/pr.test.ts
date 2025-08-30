@@ -165,7 +165,7 @@ describe("EntityPr", () => {
 				isDependency: false,
 			};
 
-			const result = entityPr["getPrBranch"]({ message });
+			const result = entityPr.getPrBranch({ message });
 
 			expect(result.name).toBe("main");
 			expect(result.fullName).toBe("main");
@@ -182,7 +182,7 @@ describe("EntityPr", () => {
 				isDependency: false,
 			};
 
-			const result = entityPr["getPrBranch"]({ message });
+			const result = entityPr.getPrBranch({ message });
 
 			expect(result.name).toBe("main");
 			expect(result.fullName).toBe("main");
@@ -199,7 +199,7 @@ describe("EntityPr", () => {
 				isDependency: false,
 			};
 
-			const result = entityPr["getPrBranch"]({ message });
+			const result = entityPr.getPrBranch({ message });
 
 			expect(result.name).toBe("feature-branch");
 			expect(result.fullName).toBe("origin/feature-branch");
@@ -217,7 +217,7 @@ describe("EntityPr", () => {
 				isDependency: false,
 			};
 
-			const result = entityPrWithoutBranch["getPrBranch"]({ message });
+			const result = entityPrWithoutBranch.getPrBranch({ message });
 
 			expect(result.name).toBe("");
 			expect(result.fullName).toBe("");

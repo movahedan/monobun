@@ -36,7 +36,7 @@ export class EntityPr {
 		}
 	}
 
-	private getPrBranch({ message }: ParsedCommitData): ParsedBranch {
+	public getPrBranch({ message }: ParsedCommitData): ParsedBranch {
 		if (!message.isMerge) {
 			return {
 				name: this.defaultBranch || "",
