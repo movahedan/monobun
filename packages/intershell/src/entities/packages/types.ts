@@ -1,4 +1,7 @@
 export interface PackageJson {
+	intershell?: {
+		config: string;
+	};
 	name: string;
 	version: string;
 	description?: string;

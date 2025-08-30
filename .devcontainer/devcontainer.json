@@ -91,15 +91,15 @@
 				},
 				"conventionalCommits.scopes": [
 					"root",
-					"api",
 					"docs-astro",
-					"admin",
 					"storefront",
-					"@repo/test-preset",
-					"@repo/intershell",
+					"admin",
+					"api",
 					"@repo/ui",
+					"@repo/intershell",
 					"@repo/utils",
-					"@repo/typescript-config"
+					"@repo/typescript-config",
+					"@repo/test-preset"
 				],
 				"typescript.preferences.useAliasesForRenames": false,
 				"typescript.preferences.includePackageJsonAutoImports": "on",

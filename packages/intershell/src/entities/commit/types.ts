@@ -1,4 +1,5 @@
-import type { PRCategory, PRInfo } from "./pr.types";
+import type { ParsedBranch } from "../branch/types";
+import type { PRCategory } from "../config/types";
 
 export type CommitMessageData =
 	| {
@@ -22,6 +23,52 @@ export type CommitMessageData =
 			isDependency: boolean;
 	  };
 
+export interface PRStats {
+	readonly commitCount: number;
+	readonly fileCount?: number;
+	readonly linesAdded?: number;
+	readonly linesDeleted?: number;
+}
+
+export type PRInfo = {
+	prNumber: string;
+	prCategory: PRCategory;
+	prStats: PRStats;
+	prCommits: ParsedCommitData[];
+	prBranchName: ParsedBranch;
+};
+
+export const prCategories: Record<PRCategory, { emoji: string; label: string }> = {
+	features: {
+		emoji: "🚀",
+		label: "Feature Releases",
+	},
+	infrastructure: {
+		emoji: "🛠️",
+		label: "Infrastructure & Tooling",
+	},
+	bugfixes: {
+		emoji: "🐛",
+		label: "Bug Fixes & Improvements",
+	},
+	refactoring: {
+		emoji: "🔄",
+		label: "Code Quality & Refactoring",
+	},
+	documentation: {
+		emoji: "📚",
+		label: "Documentation",
+	},
+	dependencies: {
+		emoji: "📦",
+		label: "Dependency Updates",
+	},
+	other: {
+		emoji: "🔄",
+		label: "Other Changes",
+	},
+};
+
 export interface ParsedCommitData {
 	message: CommitMessageData;
 	info?: {
@@ -31,75 +78,3 @@ export interface ParsedCommitData {
 	};
 	pr?: PRInfo;
 }
-
-type Section = keyof CommitMessageData;
-export type CommitRule = {
-	enabled?: boolean;
-	section: Section;
-	question: string;
-	validator: (message: ParsedCommitData) => true | string;
-	list?: string[];
-};
-export type CommitRules = Record<Section, CommitRule>;
-
-type Validator = (commit: ParsedCommitData) => true | string;
-
-export interface CommitConfig
-	extends Partial<
-		Record<
-			Section,
-			{
-				validator?: Validator;
-			}
-		>
-	> {
-	type?: {
-		list?: CommitTypeDefinition[];
-		validator?: Validator;
-	};
-	scopes?: {
-		list?: string[];
-		validator?: Validator;
-	};
-	description?: {
-		minLength?: number;
-		maxLength?: number;
-		shouldNotEndWithPeriod?: boolean;
-		shouldNotStartWithType?: boolean;
-		validator?: Validator;
-	};
-	bodyLines?: {
-		minLength?: number;
-		maxLength?: number;
-		validator?: Validator;
-	};
-	isBreaking?: {
-		validator?: Validator;
-	};
-	isMerge?: {
-		validator?: Validator;
-	};
-	isDependency?: {
-		validator?: Validator;
-	};
-}
-
-export interface CommitTypeDefinition {
-	readonly type: string;
-	readonly label: string;
-	readonly description: string;
-	readonly category: PRCategory;
-	readonly emoji: string;
-	readonly badgeColor: string;
-	readonly breakingAllowed: boolean;
-}
-
-export type StagedConfig = {
-	filePattern: RegExp[];
-	contentPattern?: RegExp[];
-	description: string;
-	disabled?: boolean;
-	ignore?: {
-		mode: "create" | "update";
-	};
-}[];

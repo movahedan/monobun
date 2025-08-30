@@ -64,7 +64,7 @@ cargo install bun
 **Expected Output:**
 ```bash
 bun --version
-# Should show something like: 1.2.19
+# Should show something like: 1.2.21
 ```
 
 ### **VS Code Extensions**
@@ -135,7 +135,7 @@ bun --help
 **Expected Output:**
 ```bash
 bun --version
-# 1.2.19
+# 1.2.21
 
 bun --help
 # Usage: bun [COMMAND] [OPTIONS] [ARGUMENTS]

@@ -1,10 +1,11 @@
-import { commitRules, type ParsedCommitData, prCategories } from "../commit";
+import { type ParsedCommitData, prCategories } from "../commit";
+import { entitiesConfig } from "../config/config";
 import { EntityTag } from "../tag";
 import { ChangelogTemplate } from "./template";
 
 const DEFAULT_BADGE_COLOR = "6B7280";
 const prefix = EntityTag.getPrefix();
-const validTypes = commitRules.getConfig().type?.list ?? [];
+const validTypes = entitiesConfig.getConfig().commit.conventional.type?.list ?? [];
 
 export class DefaultChangelogTemplate extends ChangelogTemplate {
 	protected generateChangelogHeader(packageName: string): string {

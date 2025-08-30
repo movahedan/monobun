@@ -62,8 +62,6 @@ export interface ServiceHealth {
 export interface ServiceDependencyGraph {
 	readonly services: string[];
 	readonly dependencies: Record<string, string[]>;
-	readonly order: string[];
-	readonly cycles: string[][];
 }
 
 export interface PortConflict {
@@ -72,15 +70,8 @@ export interface PortConflict {
 	readonly severity: "error" | "warning";
 }
 
-export interface EnvironmentImpact {
-	readonly variables: Record<string, string[]>;
-	readonly conflicts: string[];
-	readonly missing: string[];
-}
-
 export interface EntityAffectedService {
 	readonly name: string;
-	readonly environment: "dev" | "prod";
 	readonly port?: number;
 }
 

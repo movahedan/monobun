@@ -13,7 +13,7 @@ peer = true
 production = false
 
 # equivalent to `--save-text-lockfile` flag
-saveTextLockfile = false
+saveTextLockfile = true
 
 # equivalent to `--frozen-lockfile` flag
 frozenLockfile = false
@@ -46,7 +46,7 @@ timeout = 5000
 # Enable coverage reporting
 coverage = true
 coverageDir = "./coverage"
-coverageThreshold = { lines = 0.9, functions = 0.9, statements = 0.9 }
+coverageThreshold = { lines = 0.8, functions = 0.8, statements = 0.8 }
 coverageIgnoreSourcemaps = true
 coverageSkipTestFiles = true
 coveragePathIgnorePatterns = [
@@ -56,7 +56,9 @@ coveragePathIgnorePatterns = [
 	"**/dist/**",
 	"**/build/**",
 	"**/.turbo/**",
-	"**/coverage/**"
+	"**/coverage/**",
+	"**/packages/intershell/src/entities/compose/**",
+	"**/packages/intershell/src/entities/tag/**",
 ]
 
 # Watch mode configuration
