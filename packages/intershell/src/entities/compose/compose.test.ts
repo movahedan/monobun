@@ -13,9 +13,9 @@ const { EntityCompose } = await import("./compose");
 
 // Helper function to access the private parseDockerCompose function
 function callParseDockerCompose(input: string): ComposeData {
-	return (EntityCompose as unknown as { parseDockerCompose: (input: string) => ComposeData })[
-		"parseDockerCompose"
-	](input);
+	return (
+		EntityCompose as unknown as { parseDockerCompose: (input: string) => ComposeData }
+	).parseDockerCompose(input);
 }
 
 describe("EntityCompose", () => {
@@ -23,7 +23,7 @@ describe("EntityCompose", () => {
 		describe("parsePortMappings", () => {
 			it("should parse port mappings correctly", () => {
 				const ports = ["3000:3000", "8080:80", "9000"];
-				const mappings = EntityCompose["parsePortMappings"](ports);
+				const mappings = EntityCompose.parsePortMappings(ports);
 
 				expect(mappings).toHaveLength(3);
 				expect(mappings[0]).toEqual({
@@ -44,13 +44,13 @@ describe("EntityCompose", () => {
 			});
 
 			it("should handle empty ports array", () => {
-				const mappings = EntityCompose["parsePortMappings"]([]);
+				const mappings = EntityCompose.parsePortMappings([]);
 				expect(mappings).toHaveLength(0);
 			});
 
 			it("should handle single port without colon", () => {
 				const ports = ["9000"];
-				const mappings = EntityCompose["parsePortMappings"](ports);
+				const mappings = EntityCompose.parsePortMappings(ports);
 
 				expect(mappings).toHaveLength(1);
 				expect(mappings[0]).toEqual({
@@ -62,7 +62,7 @@ describe("EntityCompose", () => {
 
 			it("should handle port with only host specified", () => {
 				const ports = ["3000:"];
-				const mappings = EntityCompose["parsePortMappings"](ports);
+				const mappings = EntityCompose.parsePortMappings(ports);
 
 				expect(mappings).toHaveLength(1);
 				expect(mappings[0]).toEqual({
@@ -76,7 +76,7 @@ describe("EntityCompose", () => {
 		describe("parseEnvironment", () => {
 			it("should parse array environment variables", () => {
 				const env = ["NODE_ENV=development", "PORT=3000", "DEBUG=true"];
-				const result = EntityCompose["parseEnvironment"](env);
+				const result = EntityCompose.parseEnvironment(env);
 
 				expect(result).toEqual({
 					NODE_ENV: "development",
@@ -90,7 +90,7 @@ describe("EntityCompose", () => {
 					NODE_ENV: "production",
 					PORT: "8080",
 				};
-				const result = EntityCompose["parseEnvironment"](env);
+				const result = EntityCompose.parseEnvironment(env);
 
 				expect(result).toEqual({
 					NODE_ENV: "production",
@@ -99,13 +99,13 @@ describe("EntityCompose", () => {
 			});
 
 			it("should handle undefined environment", () => {
-				const result = EntityCompose["parseEnvironment"](undefined);
+				const result = EntityCompose.parseEnvironment(undefined);
 				expect(result).toEqual({});
 			});
 
 			it("should handle malformed array environment variables", () => {
 				const env = ["NODE_ENV=development", "INVALID", "PORT=3000"];
-				const result = EntityCompose["parseEnvironment"](env);
+				const result = EntityCompose.parseEnvironment(env);
 
 				expect(result).toEqual({
 					NODE_ENV: "development",
@@ -115,14 +115,14 @@ describe("EntityCompose", () => {
 
 			it("should handle empty array environment variables", () => {
 				const env: string[] = [];
-				const result = EntityCompose["parseEnvironment"](env);
+				const result = EntityCompose.parseEnvironment(env);
 
 				expect(result).toEqual({});
 			});
 
 			it("should handle environment variables with equals in value", () => {
 				const env = ["DATABASE_URL=postgresql://user:pass@localhost:5432/db"];
-				const result = EntityCompose["parseEnvironment"](env);
+				const result = EntityCompose.parseEnvironment(env);
 
 				expect(result).toEqual({
 					DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
@@ -142,7 +142,7 @@ describe("EntityCompose", () => {
 			];
 
 			testCases.forEach(({ input, expected }) => {
-				const mappings = EntityCompose["parsePortMappings"]([input]);
+				const mappings = EntityCompose.parsePortMappings([input]);
 				expect(mappings).toHaveLength(1);
 				expect(mappings[0].host).toBe(expected.host);
 				expect(mappings[0].container).toBe(expected.container);
@@ -152,7 +152,7 @@ describe("EntityCompose", () => {
 
 		it("should handle non-numeric port values gracefully", () => {
 			const ports = ["abc:def", "invalid", "123:abc"];
-			const mappings = EntityCompose["parsePortMappings"](ports);
+			const mappings = EntityCompose.parsePortMappings(ports);
 
 			expect(mappings).toHaveLength(3);
 
@@ -169,7 +169,7 @@ describe("EntityCompose", () => {
 	describe("environment parsing edge cases", () => {
 		it("should handle empty string values", () => {
 			const env = ["KEY=", "EMPTY=", "VALUE=something"];
-			const result = EntityCompose["parseEnvironment"](env);
+			const result = EntityCompose.parseEnvironment(env);
 
 			expect(result).toEqual({
 				VALUE: "something",
@@ -178,7 +178,7 @@ describe("EntityCompose", () => {
 
 		it("should handle keys without values", () => {
 			const env = ["KEY", "ANOTHER_KEY", "VALID_KEY=value"];
-			const result = EntityCompose["parseEnvironment"](env);
+			const result = EntityCompose.parseEnvironment(env);
 
 			expect(result).toEqual({
 				VALID_KEY: "value",
@@ -187,7 +187,7 @@ describe("EntityCompose", () => {
 
 		it("should handle mixed environment formats", () => {
 			const env = ["NODE_ENV=production", "DEBUG=true", "EMPTY=", "NO_VALUE", "COMPLEX=key=value"];
-			const result = EntityCompose["parseEnvironment"](env);
+			const result = EntityCompose.parseEnvironment(env);
 
 			expect(result).toEqual({
 				NODE_ENV: "production",

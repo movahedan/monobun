@@ -222,7 +222,7 @@ export class EntityCompose {
 		};
 	}
 
-	private static parsePortMappings(ports: string[]): PortMapping[] {
+	public static parsePortMappings(ports: string[]): PortMapping[] {
 		return ports.map((port) => {
 			const [host, container] = port.split(":").map(Number);
 			return {
@@ -233,7 +233,7 @@ export class EntityCompose {
 		});
 	}
 
-	private static parseEnvironment(env?: Record<string, string> | string[]): Record<string, string> {
+	public static parseEnvironment(env?: Record<string, string> | string[]): Record<string, string> {
 		if (!env) return {};
 
 		if (Array.isArray(env)) {
