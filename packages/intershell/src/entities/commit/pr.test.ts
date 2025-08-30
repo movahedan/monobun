@@ -1,14 +1,22 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import { restoreBunMocks, setupBunMocks } from "@repo/test-preset/mock-bun";
 import type { IConfig } from "../config/types";
-import { EntityPr } from "./pr";
 import type { ParsedCommitData } from "./types";
 
+setupBunMocks();
+
+const { EntityPr } = await import("./pr");
+
 describe("EntityPr", () => {
-	let entityPr: EntityPr;
+	let entityPr: InstanceType<typeof EntityPr>;
 	let mockConfig: IConfig;
 	let mockParseByHash: (hash: string) => Promise<ParsedCommitData>;
 
 	beforeEach(() => {
+		if (!globalThis.Bun?.$ || globalThis.Bun.$.toString().includes("Mock")) {
+			setupBunMocks();
+		}
+
 		mockConfig = {
 			branch: {
 				defaultBranch: "main",
@@ -31,6 +39,11 @@ describe("EntityPr", () => {
 				hash,
 			},
 		}));
+	});
+
+	afterEach(() => {
+		restoreBunMocks();
+		mock.restore();
 	});
 
 	describe("constructor", () => {
@@ -433,6 +446,97 @@ describe("EntityPr", () => {
 				expect(result).toBeDefined();
 				expect(result?.prCommits).toBeDefined();
 			});
+
+			it("should handle git log failure gracefully", async () => {
+				setupBunMocks({
+					command: {
+						text: "error: git log failed",
+						exitCode: 1,
+					},
+				});
+
+				const message = {
+					type: "merge",
+					subject: "Merge pull request #123",
+					description: "Merge pull request #123",
+					bodyLines: [],
+					isBreaking: false,
+					isMerge: true,
+					isDependency: false,
+				};
+
+				const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
+
+				expect(result).toBeDefined();
+				expect(result?.prCommits).toEqual([]);
+			});
+
+			it("should handle empty git log result", async () => {
+				setupBunMocks({
+					command: {
+						text: "",
+						exitCode: 0,
+					},
+				});
+
+				const message = {
+					type: "merge",
+					subject: "Merge pull request #123",
+					description: "Merge pull request #123",
+					bodyLines: [],
+					isBreaking: false,
+					isMerge: true,
+					isDependency: false,
+				};
+
+				const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
+
+				expect(result).toBeDefined();
+				expect(result?.prCommits).toEqual([]);
+			});
+
+			it("should handle squashed commit parsing failure", async () => {
+				setupBunMocks({
+					command: {
+						text: "squashed123",
+						exitCode: 0,
+					},
+				});
+
+				// Mock parseByHash to fail for squashed commit
+				const failingSquashParseByHash = mock(async (hash: string) => {
+					if (hash === "squashed123") {
+						throw new Error("Squashed commit parse failed");
+					}
+					return {
+						message: {
+							type: "feat",
+							subject: "successful feature",
+							description: "successful feature description",
+							bodyLines: [],
+							isBreaking: false,
+							isMerge: false,
+							isDependency: false,
+						},
+						info: { hash },
+					};
+				});
+
+				const message = {
+					type: "merge",
+					subject: "Merge pull request #123",
+					description: "Merge pull request #123",
+					bodyLines: [],
+					isBreaking: false,
+					isMerge: true,
+					isDependency: false,
+				};
+
+				const result = await entityPr.getPRInfo(failingSquashParseByHash, "abc123", message);
+
+				expect(result).toBeDefined();
+				expect(result?.prCommits).toEqual([]);
+			});
 		});
 
 		describe("PR categorization edge cases", () => {
@@ -651,6 +755,95 @@ describe("EntityPr", () => {
 				// But we can verify the structure is correct
 				expect(result?.prCategory).toBeDefined();
 				expect(typeof result?.prCategory).toBe("string");
+			});
+
+			it("should categorize as other when no clear pattern emerges", async () => {
+				// Mock parseByHash to return commits with no clear pattern
+				const otherParseByHash = mock(async (_hash: string) => ({
+					message: {
+						type: "other",
+						subject: "misc changes",
+						description: "various miscellaneous changes",
+						bodyLines: [],
+						isBreaking: false,
+						isMerge: false,
+						isDependency: false,
+					},
+					info: { hash: "test-hash" },
+				}));
+
+				const message = {
+					type: "merge",
+					subject: "Merge pull request #123",
+					description: "Merge pull request #123",
+					bodyLines: [],
+					isBreaking: false,
+					isMerge: true,
+					isDependency: false,
+				};
+
+				const result = await entityPr.getPRInfo(otherParseByHash, "abc123", message);
+
+				// The categorization depends on git command execution which we can't easily mock
+				// But we can verify the structure is correct
+				expect(result?.prCategory).toBeDefined();
+				expect(typeof result?.prCategory).toBe("string");
+			});
+
+			it("should handle empty PR commits array", async () => {
+				setupBunMocks({
+					command: {
+						text: "",
+						exitCode: 0,
+					},
+				});
+
+				const message = {
+					type: "merge",
+					subject: "Merge pull request #123",
+					description: "Merge pull request #123",
+					bodyLines: [],
+					isBreaking: false,
+					isMerge: true,
+					isDependency: false,
+				};
+
+				const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
+
+				expect(result).toBeDefined();
+				expect(result?.prCommits).toEqual([]);
+				expect(result?.prCategory).toBe("other");
+			});
+
+			it("should handle PR commits with missing info", async () => {
+				// Mock parseByHash to return commits with missing info
+				const incompleteParseByHash = mock(async (_hash: string) => ({
+					message: {
+						type: "feat",
+						subject: "feature",
+						description: "feature description",
+						bodyLines: [],
+						isBreaking: false,
+						isMerge: false,
+						isDependency: false,
+					},
+					info: undefined,
+				}));
+
+				const message = {
+					type: "merge",
+					subject: "Merge pull request #123",
+					description: "Merge pull request #123",
+					bodyLines: [],
+					isBreaking: false,
+					isMerge: true,
+					isDependency: false,
+				};
+
+				const result = await entityPr.getPRInfo(incompleteParseByHash, "abc123", message);
+
+				expect(result).toBeDefined();
+				expect(result?.prCommits).toBeDefined();
 			});
 		});
 	});

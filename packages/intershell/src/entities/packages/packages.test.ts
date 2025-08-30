@@ -19,8 +19,6 @@ mock.module("node:fs", () =>
 	}),
 );
 
-setupBunMocks();
-
 const { EntityPackages } = await import("./packages");
 
 describe("EntityPackages", () => {
@@ -28,9 +26,7 @@ describe("EntityPackages", () => {
 	const mockPackageName = "test-package";
 
 	beforeEach(() => {
-		if (!globalThis.Bun?.$ || globalThis.Bun.$.toString().includes("Mock")) {
-			setupBunMocks();
-		}
+		setupBunMocks();
 	});
 
 	afterEach(() => {

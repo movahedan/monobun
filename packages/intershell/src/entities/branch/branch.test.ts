@@ -1,20 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import { restoreBunMocks, setupBunMocks } from "@repo/test-preset/mock-bun";
 import type { IConfig } from "../config/types";
 import type { ParsedBranch } from "./types";
 
 type BranchConfig = IConfig["branch"];
 
-// Set up default mocks before importing the class
-mock.module("bun", () => ({
-	$: mock((_strings: TemplateStringsArray, ..._values: unknown[]) =>
-		Promise.resolve({
-			stdout: { toString: () => "main" },
-			exitCode: 0,
-		}),
-	),
-}));
+setupBunMocks();
 
-// Now import the module after mocking
 import { EntityBranch } from "./branch";
 
 describe("EntityBranch", () => {
@@ -22,15 +14,9 @@ describe("EntityBranch", () => {
 	let mockConfig: BranchConfig;
 
 	beforeEach(() => {
-		mock.restore();
-		mock.module("bun", () => ({
-			$: mock((_strings: TemplateStringsArray, ..._values: unknown[]) =>
-				Promise.resolve({
-					stdout: { toString: () => "main" },
-					exitCode: 0,
-				}),
-			),
-		}));
+		if (!globalThis.Bun?.$ || globalThis.Bun.$.toString().includes("Mock")) {
+			setupBunMocks();
+		}
 
 		mockConfig = {
 			defaultBranch: "main",
@@ -49,6 +35,7 @@ describe("EntityBranch", () => {
 	});
 
 	afterEach(() => {
+		restoreBunMocks();
 		mock.restore();
 	});
 
@@ -134,8 +121,17 @@ describe("EntityBranch", () => {
 
 		getCurrentBranchTests.forEach(({ name, assertions }) => {
 			it(name, async () => {
+				setupBunMocks({
+					command: {
+						text: "test",
+						exitCode: 0,
+					},
+				});
+
 				const result = await branch.getCurrentBranch();
 				assertions(result);
+
+				restoreBunMocks();
 			});
 		});
 	});
