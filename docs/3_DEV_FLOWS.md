@@ -10,6 +10,7 @@
 - [Development Workflows](#-development-workflows)
 - [CI/CD Integration](#-cicd-integration)
 - [Testing & Quality](#-testing--quality)
+- [Documentation System](#-documentation-system)
 - [Troubleshooting](#-troubleshooting)
 
 ## 🎯 Overview
@@ -21,6 +22,7 @@ The Monobun monorepo provides sophisticated development workflows built on:
 - **🔧 Enhanced Scripts**: Type-safe automation with comprehensive error handling
 - **🧪 Automated Testing**: Comprehensive test coverage and quality checks
 - **🚀 CI/CD Integration**: Seamless GitHub Actions integration
+- **📚 Three-Tier Documentation**: Comprehensive documentation ecosystem
 
 ## 🚀 Quick Start
 
@@ -198,7 +200,7 @@ Automatically validates changes and determines affected packages:
 Handles automated versioning and deployment:
 
 ```yaml
-- name: �� Generate changelog and bump versions
+- name: 📝 Generate changelog and bump versions
   id: packages-to-deploy
   run: bun run version:ci
 ```
@@ -371,6 +373,36 @@ bun run prod:build
 # Stop production services
 bun run prod:down
 ```
+
+## 📚 Documentation System
+
+The project now uses a comprehensive three-tier documentation structure:
+
+### **1. CLAUDE.md Files** 📋
+- **Location**: Root directory `CLAUDE.md` and each project/app `(packages|apps)/<package-name>/CLAUDE.md`
+- **Purpose**: Project-level architecture and main description
+- **Audience**: Developers, architects, project stakeholders
+- **Content**: High-level architecture, project structure, key decisions
+
+### **2. Cursor Rules (.cursor/rules/)** ⚙️
+- **Location**: `.cursor/rules/` directory
+- **Purpose**: Generic development best practices, documentation standards, commit workflow
+- **Audience**: AI assistants, development tools, automated processes
+- **Content**: Coding standards, workflow rules, automation guidelines
+
+### **3. Developer Documentation (docs/)** 👨‍💻
+- **Location**: `docs/` directory
+- **Purpose**: Developer guides, setup instructions, technical details
+- **Audience**: Human developers, team members
+- **Content**: Brief, summarized, clear, friendly, and enjoyable to read
+
+### **Documentation Standards**
+
+All documentation follows comprehensive standards including:
+- **File Naming**: Numbered prefixes for ordered developer documentation
+- **Structure**: Consistent headers, table of contents, and cross-references
+- **Content**: Technical accuracy, complete examples, and troubleshooting sections
+- **Maintenance**: Regular updates with each major release
 
 ## 🔧 Troubleshooting
 

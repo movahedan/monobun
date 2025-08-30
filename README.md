@@ -70,7 +70,7 @@ We've curated the ultimate framework stack that just works! Vite, Astro, and Sve
 
 > **Developer-first documentation** with **dedicated docs site** and **AI assistant optimization**
 
-We don't just write docs - we build them! Our dedicated docs-astro site makes learning effortless, while our AI-optimized code structure means Cursor and other AI tools instantly understand your project. It's like having a brilliant pair programming partner who never gets confused. And the automation doesn't stop there - Renovate bot keeps your dependencies fresh and secure, while SonarQube ensures your code quality stays top-notch. Every tool here works in perfect harmony!
+We don't just write docs - we build them! Our dedicated docs-astro site makes learning effortless, while our AI-optimized code structure means Cursor and other AI tools instantly understand your project. It's like having a brilliant pair programming partner who never gets confused. Our new **three-tier documentation system** provides comprehensive coverage: **CLAUDE.md** for architecture, **Cursor Rules** for development standards, and **Developer Docs** for practical guidance. And the automation doesn't stop there - Renovate bot keeps your dependencies fresh and secure, while SonarQube ensures your code quality stays top-notch. Every tool here works in perfect harmony!
 
 </div>
 
@@ -113,15 +113,14 @@ Everything you need to build rock-solid applications is right here! We've kept i
 [![Auto Versioning](https://img.shields.io/badge/🏷️%20Auto%20Versioning-495057?style=for-the-badge)](./docs/7_AUTO_VERSIONING.md)
 
 ### **🤖 AI & Automation**
-[![AI Prompt](https://img.shields.io/badge/🤖%20AI%20Prompt-495057?style=for-the-badge)](./docs/AI_Prompt.md)
 [![Renovate Configuration](https://img.shields.io/badge/🔄%20Renovate-495057?style=for-the-badge)](./docs/6_RENOVATE.md)
-[![Quality Checklist](https://img.shields.io/badge/✅%20Quality%20Checklist-495057?style=for-the-badge)](./docs/0_QUALITY_CHECKLIST.md)
+[![MCP Integration](https://img.shields.io/badge/🔌%20MCP%20Integration-495057?style=for-the-badge)](./.mcp.json)
 
 ### **📋 Development Rules**
-[![TypeScript Rules](https://img.shields.io/badge/🔷%20TypeScript%20Rules-495057?style=for-the-badge)](./.cursor/rules/typescript-strict-usage.mdc)
-[![Component Structure](https://img.shields.io/badge/⚛️%20Component%20Structure-495057?style=for-the-badge)](./.cursor/rules/component-structure.mdc)
-[![Testing Conventions](https://img.shields.io/badge/🧪%20Testing%20Conventions-495057?style=for-the-badge)](./.cursor/rules/testing-conventions.mdc)
-[![Security Guidelines](https://img.shields.io/badge/🔒%20Security%20Guidelines-495057?style=for-the-badge)](./.cursor/rules/security-guidelines.mdc)
+[![TypeScript Rules](https://img.shields.io/badge/🔷%20TypeScript%20Rules-495057?style=for-the-badge)](./.cursor/rules/typescript.mdc)
+[![JavaScript Rules](https://img.shields.io/badge/🟨%20JavaScript%20Rules-495057?style=for-the-badge)](./.cursor/rules/javascript.mdc)
+[![Security Guidelines](https://img.shields.io/badge/🔒%20Security%20Guidelines-495057?style=for-the-badge)](./.cursor/rules/security.mdc)
+[![Package Management](https://img.shields.io/badge/📦%20Package%20Management-495057?style=for-the-badge)](./.cursor/rules/packages.mdc)
 
 ## � **What's Inside**
 
@@ -132,6 +131,8 @@ Everything you need to build rock-solid applications is right here! We've kept i
 **🔌 API** <a href="https://expressjs.com/"><img src="https://img.shields.io/badge/Express-4.18-000000?style=flat&logo=express&logoColor=white" alt="Express" style="vertical-align: middle;" /></a> + <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.0-007ACC?style=flat&logo=typescript&logoColor=white" alt="TypeScript" style="vertical-align: middle;" /></a> - **Port 3003** - Backend API server
 
 **🎨 UI Package** <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=white" alt="React" style="vertical-align: middle;" /></a> + <a href="https://storybook.js.org/"><img src="https://img.shields.io/badge/Storybook-7.0-FF4785?style=flat&logo=storybook&logoColor=white" alt="Storybook" style="vertical-align: middle;" /></a> - **Port 3004** - Shared components
+
+**🧪 Test Package** <a href="https://bun.sh/"><img src="https://img.shields.io/badge/Bun-1.0-000000?style=flat&logo=bun&logoColor=white" alt="Bun" style="vertical-align: middle;" /></a> - **Testing utilities** - Development and testing tools
 
 </div>
 
