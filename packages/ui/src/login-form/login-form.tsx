@@ -1,6 +1,7 @@
 import { cn } from "@repo/utils/cn";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import * as React from "react";
+import { useId } from "react";
 import { Button } from "../button/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../card/card";
 import { Input } from "../input/input";
@@ -43,6 +44,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 	title = "Welcome back",
 	description = "Enter your credentials to access your account",
 }) => {
+	const emailId = useId();
+	const passwordId = useId();
+	const emailErrorId = useId();
+	const passwordErrorId = useId();
+
 	const [formData, setFormData] = React.useState<LoginFormData>({
 		email: "",
 		password: "",
@@ -119,19 +125,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 				<form onSubmit={handleSubmit} className="space-y-4">
 					{/* Email Field */}
 					<div className="space-y-2">
-						<Label htmlFor="email">Email</Label>
+						<Label htmlFor={emailId}>Email</Label>
 						<Input
-							id="email"
+							id={emailId}
 							type="email"
 							placeholder="Enter your email"
 							value={formData.email}
 							onChange={handleInputChange("email")}
 							disabled={loading}
-							aria-describedby={validationErrors.email ? "email-error" : undefined}
+							aria-describedby={validationErrors.email ? emailErrorId : undefined}
 							aria-invalid={!!validationErrors.email}
 						/>
 						{validationErrors.email && (
-							<p id="email-error" className="text-sm text-destructive">
+							<p id={emailErrorId} className="text-sm text-destructive">
 								{validationErrors.email}
 							</p>
 						)}
@@ -139,16 +145,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
 					{/* Password Field */}
 					<div className="space-y-2">
-						<Label htmlFor="password">Password</Label>
+						<Label htmlFor={passwordId}>Password</Label>
 						<div className="relative">
 							<Input
-								id="password"
+								id={passwordId}
 								type={showPassword ? "text" : "password"}
 								placeholder="Enter your password"
 								value={formData.password}
 								onChange={handleInputChange("password")}
 								disabled={loading}
-								aria-describedby={validationErrors.password ? "password-error" : undefined}
+								aria-describedby={validationErrors.password ? passwordErrorId : undefined}
 								aria-invalid={!!validationErrors.password}
 							/>
 							{showPasswordToggle && (
@@ -166,7 +172,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 							)}
 						</div>
 						{validationErrors.password && (
-							<p id="password-error" className="text-sm text-destructive">
+							<p id={passwordErrorId} className="text-sm text-destructive">
 								{validationErrors.password}
 							</p>
 						)}

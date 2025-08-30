@@ -125,8 +125,8 @@ export const EntityTag = {
 		const prefix = EntityTag.getPrefix();
 		const allTags = await EntityTag.listTags(prefix);
 
-		const fromIndex = allTags.findIndex((tag) => tag === from);
-		const toIndex = allTags.findIndex((tag) => tag === to);
+		const fromIndex = allTags.indexOf(from);
+		const toIndex = allTags.indexOf(to);
 
 		if (fromIndex === -1 || toIndex === -1) {
 			return [];
@@ -274,7 +274,11 @@ export const EntityTag = {
 		const parseVersion = (tag: string) => {
 			const match = tag.match(new RegExp(`^${EntityTag.getPrefix()}?(\\d+)\\.(\\d+)\\.(\\d+)`));
 			if (!match) return [0, 0, 0];
-			return [Number.parseInt(match[1]), Number.parseInt(match[2]), Number.parseInt(match[3])];
+			return [
+				Number.parseInt(match[1], 10),
+				Number.parseInt(match[2], 10),
+				Number.parseInt(match[3], 10),
+			];
 		};
 
 		const [majorA, minorA, patchA] = parseVersion(tagA);

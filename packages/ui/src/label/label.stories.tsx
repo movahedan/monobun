@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { useId } from "react";
 import { Input } from "../input/input";
 import { Label } from "./label";
 
@@ -35,39 +36,59 @@ export const Default: Story = {
 	},
 };
 
-export const WithInput: Story = {
-	render: () => (
+const WithInputComponent = () => {
+	const emailId = useId();
+
+	return (
 		<div className="grid w-full max-w-sm items-center gap-1.5">
-			<Label htmlFor="email">Email</Label>
-			<Input id="email" type="email" placeholder="Enter your email" />
+			<Label htmlFor={emailId}>Email</Label>
+			<Input id={emailId} type="email" placeholder="Enter your email" />
 		</div>
-	),
+	);
+};
+
+export const WithInput: Story = {
+	render: () => <WithInputComponent />,
+};
+
+const WithCheckboxComponent = () => {
+	const termsId = useId();
+
+	return (
+		<div className="flex items-center space-x-2">
+			<input type="checkbox" id={termsId} />
+			<Label htmlFor={termsId}>I agree to the terms and conditions</Label>
+		</div>
+	);
 };
 
 export const WithCheckbox: Story = {
-	render: () => (
-		<div className="flex items-center space-x-2">
-			<input type="checkbox" id="terms" />
-			<Label htmlFor="terms">I agree to the terms and conditions</Label>
+	render: () => <WithCheckboxComponent />,
+};
+
+const WithRadioComponent = () => {
+	const option1Id = useId();
+	const option2Id = useId();
+	const option3Id = useId();
+
+	return (
+		<div className="space-y-2">
+			<div className="flex items-center space-x-2">
+				<input type="radio" id={option1Id} name="options" />
+				<Label htmlFor={option1Id}>Option 1</Label>
+			</div>
+			<div className="flex items-center space-x-2">
+				<input type="radio" id={option2Id} name="options" />
+				<Label htmlFor={option2Id}>Option 2</Label>
+			</div>
+			<div className="flex items-center space-x-2">
+				<input type="radio" id={option3Id} name="options" />
+				<Label htmlFor={option3Id}>Option 3</Label>
+			</div>
 		</div>
-	),
+	);
 };
 
 export const WithRadio: Story = {
-	render: () => (
-		<div className="space-y-2">
-			<div className="flex items-center space-x-2">
-				<input type="radio" id="option1" name="options" />
-				<Label htmlFor="option1">Option 1</Label>
-			</div>
-			<div className="flex items-center space-x-2">
-				<input type="radio" id="option2" name="options" />
-				<Label htmlFor="option2">Option 2</Label>
-			</div>
-			<div className="flex items-center space-x-2">
-				<input type="radio" id="option3" name="options" />
-				<Label htmlFor="option3">Option 3</Label>
-			</div>
-		</div>
-	),
+	render: () => <WithRadioComponent />,
 };
