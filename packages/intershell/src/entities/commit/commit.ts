@@ -155,9 +155,10 @@ export class EntityCommitClass {
 
 	formatCommitMessage(message: CommitMessageData): string {
 		let formatted = `${message.type}`;
-		if (message.scopes) formatted += `(${message.scopes.join(", ")})`;
+		if (message.scopes && message.scopes.length > 0) formatted += `(${message.scopes.join(", ")})`;
 		formatted += `: ${message.description}`;
-		if (message.bodyLines) formatted += `\n\n${message.bodyLines.join("\n")}`;
+		if (message.bodyLines && message.bodyLines.length > 0)
+			formatted += `\n\n${message.bodyLines.join("\n")}`;
 		if (message.isBreaking) formatted += `\n\nBREAKING CHANGE: ${message.description}`;
 
 		return formatted;
@@ -165,9 +166,11 @@ export class EntityCommitClass {
 
 	async parseByHash(hash: string): Promise<ParsedCommitData> {
 		try {
-			const commitResult = await $`git show --format="%H%n%an%n%ad%n%s%n%B" --no-patch ${hash}`
+			const commitResult = await globalThis.Bun
+				.$`git show --format="%H%n%an%n%ad%n%s%n%B" --no-patch ${hash}`
 				.quiet()
 				.nothrow();
+			console.log("commitResult", commitResult.text());
 			if (commitResult.exitCode !== 0) throw new Error(`Could not find commit ${hash}`);
 
 			const lines = commitResult.text().trim().split("\n");
