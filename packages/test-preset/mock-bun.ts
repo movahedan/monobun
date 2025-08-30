@@ -7,21 +7,21 @@ const defaultMockPackageJson = () => ({
 	description: "Test package",
 });
 
-export const createBunMocks = (
-	options: {
-		file?: {
-			exists?: boolean | ((path: string) => boolean);
-			content?: unknown | ((path: string) => unknown);
-		};
-		write?: {
-			result?: number | ((path: string, content: string) => number);
-		};
-		command?: {
-			text?: string | ((command: string, ...args: unknown[]) => string);
-			exitCode?: number | ((command: string, ...args: unknown[]) => number);
-		};
-	} = {},
-) => {
+export type MockBunOptions = {
+	file?: {
+		exists?: boolean | ((path: string) => boolean);
+		content?: unknown | ((path: string) => unknown);
+	};
+	write?: {
+		result?: number | ((path: string, content: string) => number);
+	};
+	command?: {
+		text?: string | ((command: string, ...args: unknown[]) => string);
+		exitCode?: number | ((command: string, ...args: unknown[]) => number);
+	};
+};
+
+export const createBunMocks = (options: MockBunOptions = {}) => {
 	const {
 		file: { exists: fileExists = true, content: fileContent = defaultMockPackageJson() } = {},
 		write: { result: writeResult = 0 } = {},
@@ -76,14 +76,19 @@ export const createBunMocks = (
 
 		return {
 			text: () => getText(),
-			exitCode: () => getExitCode(),
+			exitCode: getExitCode(),
 			nothrow: () => ({
 				quiet: () => ({
-					exitCode: () => getExitCode(),
+					exitCode: getExitCode(),
 					text: () => getText(),
 				}),
 			}),
-			quiet: () => Promise.resolve(),
+			quiet: () => ({
+				nothrow: () => ({
+					exitCode: getExitCode(),
+					text: () => getText(),
+				}),
+			}),
 		};
 	});
 
@@ -92,34 +97,23 @@ export const createBunMocks = (
 
 let originalBun: Partial<typeof Bun> | undefined;
 
-export const setupBunMocks = (options?: {
-	file?: {
-		exists?: boolean | ((path: string) => boolean);
-		content?: unknown | ((path: string) => unknown);
-	};
-	write?: {
-		result?: number | ((path: string, content: string) => number);
-	};
-	command?: {
-		text?: string | ((command: string, ...args: unknown[]) => string);
-		exitCode?: number | ((command: string, ...args: unknown[]) => number);
-	};
-}) => {
+export const setupBunMocks = async (options?: MockBunOptions) => {
 	const mocks = createBunMocks(options);
 
-	if (typeof globalThis.Bun !== "undefined") {
-		if (!originalBun) {
-			originalBun = {
-				write: globalThis.Bun.write,
-				file: globalThis.Bun.file,
-				$: globalThis.Bun.$,
-			};
-		}
-
-		(globalThis.Bun as typeof Bun).write = mocks.mockWrite as unknown as typeof Bun.write;
-		(globalThis.Bun as typeof Bun).file = mocks.mockFile as unknown as typeof Bun.file;
-		(globalThis.Bun as typeof Bun).$ = mocks.mockCommand as unknown as typeof Bun.$;
+	if (!originalBun && !globalThis.Bun.$.toString().includes("Mock")) {
+		originalBun = {
+			write: globalThis.Bun.write,
+			file: globalThis.Bun.file,
+			$: globalThis.Bun.$,
+		};
 	}
+
+	let { write, file, $ } = await import("bun");
+
+	write = mocks.mockWrite as unknown as typeof write;
+	file = mocks.mockFile as unknown as typeof file;
+	$ = mocks.mockCommand as unknown as typeof $;
+	console.log("mocks", $`git show --format=%H%n%an%n%ad%n%s%n%B --no-patch `.text());
 
 	return mocks;
 };

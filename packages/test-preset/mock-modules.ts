@@ -1,26 +1,4 @@
-const mockBunFile = (content: string | undefined) => ({
-	exists: () => Promise.resolve(content !== undefined),
-	json: () => Promise.resolve(content ? JSON.parse(content) : {}),
-	text: () => content,
-	write: () => Promise.resolve(0),
-});
-
-const mockBunCommand = (
-	options: { text?: string; exitCode?: number; quietResolves?: boolean } = {},
-) => ({
-	text: () => options.text || "mocked output",
-	stdout: {
-		toString: () => options.text || "mocked output",
-	},
-	exitCode: () => options.exitCode || 0,
-	nothrow: () => ({
-		quiet: () => ({
-			exitCode: () => options.exitCode || 0,
-			text: () => options.text || "mocked output",
-		}),
-	}),
-	quiet: () => (options.quietResolves ? Promise.resolve() : Promise.resolve()),
-});
+import { createBunMocks, type MockBunOptions } from "./mock-bun";
 
 export const mockFsModule = (content?: string | ((path: string) => string)) => ({
 	readFileSync: (_path: string, _encoding: string) =>
@@ -56,35 +34,6 @@ export const mockFsPromisesModule = (content?: string | ((path: string) => strin
 	},
 });
 
-export const mockBunModule = (
-	options: {
-		file?: string | ((path: string) => string);
-		write?:
-			| Promise<number>
-			| ((path: string, content: string, options?: { createPath?: boolean }) => Promise<number>);
-		commandOptions?:
-			| {
-					text?: string;
-					exitCode?: number;
-					quietResolves?: boolean;
-			  }
-			| ((strings: TemplateStringsArray, ...values: unknown[]) => string);
-	} = {},
-) => {
-	const file = options.file;
-	const write = options.write;
-	const commandOptions = options.commandOptions || {};
-
-	return {
-		file: (_path: string | URL) =>
-			mockBunFile(typeof file === "function" ? file(_path.toString()) : file),
-		write: (_path: string | URL, _content: string | Buffer, _options?: { createPath?: boolean }) =>
-			typeof write === "function"
-				? write(_path.toString(), _content.toString(), _options)
-				: Promise.resolve(0),
-		$: (_strings: TemplateStringsArray, ..._values: unknown[]) =>
-			typeof commandOptions === "function"
-				? commandOptions(_strings, ..._values)
-				: mockBunCommand(commandOptions),
-	};
+export const mockBunModule = (options: MockBunOptions = {}) => {
+	return { $: createBunMocks(options).mockCommand };
 };
