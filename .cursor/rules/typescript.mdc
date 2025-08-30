@@ -1,0 +1,381 @@
+---
+description: TypeScript best practices and strict typing guidelines
+globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
+alwaysApply: true
+---
+
+# 📘 TypeScript Best Practices
+
+Use strict TypeScript practices for maximum type safety and code quality.
+
+## 🔧 Type Safety & Strict Usage
+
+```ts
+// ✅ Good - explicit types
+const user: User = {
+  id: 1,
+  name: "John Doe",
+  email: "john@example.com"
+};
+
+// ❌ Bad - avoid any type
+const data: any = fetchData();
+
+// ✅ Good - proper typing
+const data: ApiResponse = fetchData();
+```
+
+### Interface Definitions
+
+```ts
+// Define clear interfaces
+interface User {
+  readonly id: number;
+  readonly name: string;
+  readonly email: string;
+  readonly createdAt: Date;
+}
+
+// Use generics for reusable components
+interface ApiResponse<T> {
+  readonly data: T;
+  readonly status: number;
+  readonly message: string;
+}
+```
+
+### Type Guards
+
+```ts
+// Use type guards for runtime type checking
+function isUser(obj: unknown): obj is User {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'name' in obj &&
+    'email' in obj
+  );
+}
+
+// Use type guards in practice
+const processData = (data: unknown) => {
+  if (isUser(data)) {
+    // TypeScript knows data is User here
+    console.log(data.name);
+  }
+};
+```
+
+## 🎯 Explicit Return Types
+
+```ts
+// ✅ Good - explicit return type for top-level functions
+function getUser(id: number): Promise<User | null> {
+  return fetchUser(id);
+}
+
+// ✅ Good - explicit async return type
+async function createUser(data: CreateUserData): Promise<User> {
+  const response = await api.post('/users', data);
+  return response.data;
+}
+
+// Exception: Components don't need explicit return types
+const MyComponent = () => {
+  return <div>Hello</div>;
+};
+```
+
+## 🏗️ Interface Inheritance
+
+ALWAYS prefer interfaces when modeling inheritance. The `&` operator has terrible performance in TypeScript.
+
+```ts
+// ❌ Bad - intersection types
+type A = {
+  a: string;
+};
+
+type B = {
+  b: string;
+};
+
+type C = A & B;
+```
+
+```ts
+// ✅ Good - interface extends
+interface A {
+  readonly a: string;
+}
+
+interface B {
+  readonly b: string;
+}
+
+interface C extends A, B {
+  readonly c: string;
+}
+```
+
+## 🔐 Readonly Properties
+
+Use `readonly` properties for object types by default to prevent accidental mutation.
+
+```ts
+// ❌ Bad - mutable properties
+type User = {
+  id: string;
+  name: string;
+};
+
+const user: User = {
+  id: "1",
+  name: "John"
+};
+
+user.id = "2"; // This shouldn't be allowed
+
+// ✅ Good - readonly properties
+type User = {
+  readonly id: string;
+  readonly name: string;
+};
+
+const user: User = {
+  id: "1",
+  name: "John"
+};
+
+user.id = "2"; // Error - cannot mutate readonly property
+```
+
+## 🎭 Discriminated Unions
+
+Proactively use discriminated unions to model data that can be in different shapes.
+
+```ts
+// ✅ Good - discriminated union for events
+type UserCreatedEvent = {
+  readonly type: "user.created";
+  readonly data: { readonly id: string; readonly email: string };
+};
+
+type UserDeletedEvent = {
+  readonly type: "user.deleted";
+  readonly data: { readonly id: string };
+};
+
+type Event = UserCreatedEvent | UserDeletedEvent;
+
+// Use switch statements to handle discriminated unions
+const handleEvent = (event: Event) => {
+  switch (event.type) {
+    case "user.created":
+      console.log(event.data.email);
+      break;
+    case "user.deleted":
+      console.log(event.data.id);
+      break;
+  }
+};
+```
+
+### Prevent 'Bag of Optionals' Problem
+
+```ts
+// ❌ Bad - allows impossible states
+type FetchingState<TData> = {
+  status: "idle" | "loading" | "success" | "error";
+  data?: TData;
+  error?: Error;
+};
+
+// ✅ Good - prevents impossible states
+type FetchingState<TData> =
+  | { readonly status: "idle" }
+  | { readonly status: "loading" }
+  | { readonly status: "success"; readonly data: TData }
+  | { readonly status: "error"; readonly error: Error };
+```
+
+## 🚫 Enum Alternatives
+
+Do not introduce new enums. Use `as const` objects instead:
+
+```ts
+// ✅ Good - as const object
+const backendToFrontendEnum = {
+  xs: "EXTRA_SMALL",
+  sm: "SMALL",
+  md: "MEDIUM",
+} as const;
+
+type LowerCaseEnum = keyof typeof backendToFrontendEnum; // "xs" | "sm" | "md"
+type UpperCaseEnum = (typeof backendToFrontendEnum)[LowerCaseEnum]; // "EXTRA_SMALL" | "SMALL" | "MEDIUM"
+
+// ❌ Avoid - numeric enums create reverse mappings
+enum Direction {
+  Up,    // 0
+  Down,  // 1
+  Left,  // 2
+  Right, // 3
+}
+
+Object.keys(Direction).length; // 8 (not 4!) due to reverse mapping
+```
+
+## 🎪 Union Types & Utility Types
+
+```ts
+// Use union types for finite options
+type ButtonVariant = 'primary' | 'secondary' | 'danger';
+type ButtonSize = 'small' | 'medium' | 'large';
+
+interface ButtonProps {
+  readonly variant: ButtonVariant;
+  readonly size: ButtonSize;
+  readonly disabled?: boolean;
+}
+
+// Use utility types for type transformations
+type PartialUser = Partial<User>;
+type UserWithoutId = Omit<User, 'id'>;
+type UserKeys = keyof User;
+type UserValues = User[UserKeys];
+```
+
+## 🚨 Error Handling Patterns
+
+### Try-Catch with Custom Error Types
+
+```ts
+// Define custom error types
+class ValidationError extends Error {
+  constructor(message: string, public readonly field: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+class ApiError extends Error {
+  constructor(message: string, public readonly statusCode: number) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+// Use try-catch for async operations
+const handleSubmit = async (data: FormData): Promise<void> => {
+  try {
+    setLoading(true);
+    const result = await api.submit(data);
+    onSuccess(result);
+  } catch (error) {
+    console.error('Submit failed:', error);
+    onError(error as Error);
+  } finally {
+    setLoading(false);
+  }
+};
+```
+
+### Result Types (Alternative to Throwing)
+
+Think carefully before throwing errors. For manual try-catch scenarios, consider result types:
+
+```ts
+type Result<T, E extends Error> =
+  | { readonly ok: true; readonly value: T }
+  | { readonly ok: false; readonly error: E };
+
+const parseJson = (input: string): Result<unknown, Error> => {
+  try {
+    return { ok: true, value: JSON.parse(input) };
+  } catch (error) {
+    return { ok: false, error: error as Error };
+  }
+};
+
+// Handle result in caller
+const result = parseJson('{"name": "John"}');
+
+if (result.ok) {
+  console.log(result.value);
+} else {
+  console.error(result.error);
+}
+```
+
+## 📦 Import/Export Patterns
+
+### Avoid Default Exports
+
+Unless explicitly required by framework, avoid default exports:
+
+```ts
+// ❌ Bad - default export
+export default function myFunction() {
+  return <div>Hello</div>;
+}
+
+// ✅ Good - named export
+export function myFunction() {
+  return <div>Hello</div>;
+}
+
+// Exception: Framework requirements (Next.js pages)
+export default function MyPage() {
+  return <div>Hello</div>;
+}
+```
+
+### Import Organization
+
+```ts
+// 1. React imports
+import React from 'react';
+import { useState, useEffect } from 'react';
+
+// 2. Third-party imports
+import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
+
+// 3. Local imports (absolute paths first)
+import { User } from '@/types';
+import { useAuth } from '@/hooks';
+
+// 4. Relative imports
+import { Button } from './Button';
+import { styles } from './styles.module.css';
+```
+
+## 🧬 Generic Type Parameters
+
+Inside generic types, functions or classes, prefix type parameters with `T`:
+
+```ts
+type RecordOfArrays<TItem> = Record<string, TItem[]>;
+
+interface Repository<TEntity> {
+  findById(id: string): Promise<TEntity | null>;
+  create(entity: Omit<TEntity, 'id'>): Promise<TEntity>;
+}
+
+class UserRepository implements Repository<User> {
+  async findById(id: string): Promise<User | null> {
+    // Implementation
+    return null;
+  }
+  
+  async create(entity: Omit<User, 'id'>): Promise<User> {
+    // Implementation
+    throw new Error('Not implemented');
+  }
+}
+```
+
+---
+
+**Remember**: TypeScript's type system is designed to catch errors at compile-time. Use strict typing, explicit return types, and proper error handling to build robust applications.

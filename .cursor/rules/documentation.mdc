@@ -1,0 +1,238 @@
+---
+description: Comprehensive documentation standards and workflow for the project, emphasizing documentation-first approach and maintaining three-tier documentation structure
+globs: ["**/*.md", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
+alwaysApply: true
+---
+
+## 🎯 Core Principles
+
+**ALWAYS read and understand the project documentation before implementing any changes.**
+**NEVER assume anything not in the repository**
+**ALWAYS verify file paths and scripts exist**
+**ALWAYS update documentation when making changes**
+
+This project maintains a comprehensive documentation ecosystem that must be consulted before any modifications. Documentation is not just a reference—it's the foundation for all development decisions.
+
+### **Quick Search Commands**
+```bash
+grep -r "keyword" docs/ # Search for specific topics
+grep -r "keyword" .cursor/rules/ # Search cursor rules for specific topics
+grep -r "keyword" **/CLAUDE.md # Search CLAUDEs for specific topics
+
+git log --oneline -- docs/ # Check recent documentation updates
+
+find .cursor/rules -type f # Find all general cursor rules files
+find . -name "CLAUDE.md" -type f # Find all CLAUDE docs files
+find docs/ -type f # Find all Developer specific docs files
+```
+
+## 🏗️ Three-Tier Documentation Structure
+
+This project maintains three distinct types of documentation, each serving different purposes:
+
+### **1. CLAUDE.md Files** 📋
+- **Location**: Root directory `CLAUDE.md` and each project/app `(packages|apps)/<package-name>/CLAUDE.md`
+- **Purpose**: Project-level architecture and main description
+- **Audience**: Developers, architects, project stakeholders
+- **Content**: High-level architecture, project structure, key decisions
+
+### **2. Cursor Rules (.cursor/rules/)** ⚙️
+- **Location**: `.cursor/rules/` directory
+- **Purpose**: Generic development best practices, documentation standards, commit workflow
+- **Audience**: AI assistants, development tools, automated processes
+- **Content**: Coding standards, workflow rules, automation guidelines
+
+### **3. Developer Documentation (docs/)** 👨‍💻
+- **Location**: `docs/` directory
+- **Purpose**: Developer guides, setup instructions, technical details
+- **Audience**: Human developers, team members
+- **Content**: Brief, summarized, clear, friendly, and enjoyable to read
+
+## 📝 Documentation Standards
+
+### **File Naming and Organization**
+- Use numbered prefixes for ordered developer documentation (e.g., `1_DOCKER.md`, `2_DEVCONTAINER.md`)
+- Group related documentation in the `docs/` folder
+- Use descriptive, action-oriented names that indicate the content
+
+### **Document Structure**
+Always include these sections in order:
+1. **Title with emoji** - Clear, descriptive title with relevant emoji
+2. **Brief description** - One-line summary of what the document covers
+3. **Table of Contents** - Comprehensive navigation with anchor links
+4. **Overview section** - High-level explanation of the topic
+5. **Detailed sections** - Main content organized logically
+6. **Examples and code blocks** - Practical implementations
+7. **Related links** - Cross-references to other documentation
+
+### **Headers and Navigation**
+- Use emojis in main section headers for visual hierarchy
+- Include a comprehensive table of contents with anchor links
+- Use consistent header levels (H1 for title, H2 for main sections, H3 for subsections)
+- Make headers descriptive and action-oriented
+
+### **Code Examples**
+- Provide complete, runnable code examples
+- Include both simple and complex use cases
+- Show before/after comparisons when demonstrating improvements
+- Use TypeScript for all code examples unless specifically demonstrating other languages
+- Include error handling and edge cases in examples
+
+### **Technical Writing**
+- Write in clear, concise language
+- Use active voice and present tense
+- Include step-by-step instructions for complex processes
+- Provide context for why certain approaches are recommended
+- Include troubleshooting sections for common issues
+
+### **Markdown Structure Template**
+```markdown
+# 🎯 Document Title
+
+> Brief description of what this document covers
+
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Usage Examples](#-usage-examples)
+- [Advanced Topics](#-advanced-topics)
+
+## 🎯 Overview
+
+Clear explanation of the topic with context and purpose.
+
+## 🔧 Key Features
+
+- **Feature 1**: Description with benefits
+- **Feature 2**: Description with benefits
+- **Feature 3**: Description with benefits
+
+## 📝 Usage Examples
+
+### Basic Usage
+```typescript
+// Complete, runnable example
+const example = () => {
+  // Implementation
+};
+```
+
+### Advanced Usage
+```typescript
+// More complex example with error handling
+const advancedExample = async () => {
+  try {
+    // Implementation
+  } catch (error) {
+    // Error handling
+  }
+};
+```
+
+## 🔗 Related Documentation
+
+- [Related Doc 1](./related-doc-1.md)
+- [Related Doc 2](./related-doc-2.md)
+```
+
+### **Visual Elements**
+- Use emojis consistently for section headers
+- Include badges for tools and technologies mentioned
+- Use code blocks with appropriate syntax highlighting
+- Include diagrams or screenshots when helpful
+- Use blockquotes for important notes and warnings
+
+## 🔄 Documentation Update Workflow
+
+### **Before Making Changes**
+1. **Read Relevant Documentation**: Always consult existing docs before implementation
+2. **Understand Current State**: Know what exists and how it works
+3. **Identify Impact**: Determine what documentation needs updates
+4. **Plan Updates**: Decide what needs to be added, modified, or removed
+
+### **During Implementation**
+1. **Keep Documentation Current**: Update docs as you implement features
+2. **Document Decisions**: Record architectural decisions and their rationale
+3. **Update Examples**: Ensure code examples match the actual implementation
+4. **Cross-Reference**: Link related documentation sections
+
+### **After Implementation**
+1. **Verify Accuracy**: Test all documentation examples and procedures
+2. **Update Related Docs**: Ensure consistency across all documentation
+3. **Review Completeness**: Check that all new features are documented
+4. **Validate Links**: Ensure all internal and external links work
+
+### **Documentation Update Guidelines**
+
+#### **Always Assume Latest Version**
+- **NO historical context**: Focus on current functionality, not past versions
+- **Current state only**: Document what exists now, not what used to exist
+- **Forward-looking**: Emphasize current best practices and approaches
+- **Remove outdated information**: Delete references to deprecated features
+
+#### **Content Guidelines**
+- **Technical Accuracy**: Verify all code examples work as written
+- **Version Information**: Include current version numbers for tools and libraries
+- **Complete Examples**: Provide full, runnable code examples
+- **Error Handling**: Include common error messages and their solutions
+- **Troubleshooting**: Add sections for common issues and their resolution
+
+#### **Maintenance Standards**
+- **Regular Reviews**: Update documentation with each major release
+- **Prompt Updates**: Remove outdated information immediately
+- **Feature Coverage**: Document all new features as they're added
+- **API Consistency**: Keep examples current with latest APIs
+
+#### **Cross-References**
+- **Internal Links**: Link to related documentation within the project
+- **External Resources**: Include links to official documentation and resources
+- **Terminology**: Maintain consistent terminology across all documents
+- **Navigation**: Ensure table of contents reflects current structure
+
+## ✅ Quality Checklist
+
+Before publishing or updating documentation, ensure:
+
+### **Content Quality**
+- [ ] All code examples are tested and working
+- [ ] Technical accuracy is verified
+- [ ] Examples cover all major use cases
+- [ ] Troubleshooting section is included
+- [ ] Grammar and spelling are correct
+
+### **Structure and Navigation**
+- [ ] Table of contents is complete and accurate
+- [ ] All links are valid and working
+- [ ] Headers use consistent emoji patterns
+- [ ] Navigation flows logically
+
+### **Maintenance and Updates**
+- [ ] Version information is current
+- [ ] Related documentation is cross-referenced
+- [ ] Outdated information is removed
+- [ ] Security implications are documented where relevant
+
+### **Developer Experience**
+- [ ] Content is brief and summarized
+- [ ] Language is clear and friendly
+- [ ] Reading experience is enjoyable
+- [ ] Information is easily scannable
+
+## 🔗 Related Documentation
+
+- [Development Flows](../docs/3_DEV_FLOWS.md)
+- [Setup Flows](../docs/2_SETUP_FLOWS.md)
+- [Planning Documentation](./planning-documentation.mdc)
+- [Commit Workflow](./commit-and-documentation-workflow.mdc)
+
+---
+
+**Remember**: This project's documentation is comprehensive and must be consulted before any changes. Always read the docs first, then update them to reflect current reality. Focus on the present, not the past, and maintain the three-tier structure that serves different audiences and purposes.
+
+**Key Takeaway**: Each tier has its own purpose and structure - CLAUDE.md for project overview, Cursor Rules for technical standards, and Developer Docs for friendly, practical guidance. Keep it simple, keep it friendly, and keep it useful! 🚀
+
+
+---
+
+**Remember**: This project's documentation is comprehensive and must be consulted before any changes. Always read the docs first, then update them to reflect current reality. Focus on the present, not the past, and maintain the three-tier structure that serves different audiences and purposes.
