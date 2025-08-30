@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { useId } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./card";
 
 const meta: Meta<typeof Card> = {
@@ -75,8 +76,11 @@ export const FooterOnly: Story = {
 	),
 };
 
-export const ComplexLayout: Story = {
-	render: () => (
+const ComplexLayoutComponent = () => {
+	const nameId = useId();
+	const frameworkId = useId();
+
+	return (
 		<Card className="w-[350px]">
 			<CardHeader>
 				<CardTitle>Create project</CardTitle>
@@ -85,16 +89,16 @@ export const ComplexLayout: Story = {
 			<CardContent>
 				<div className="grid w-full items-center gap-4">
 					<div className="flex flex-col space-y-1.5">
-						<label htmlFor="name">Name</label>
+						<label htmlFor={nameId}>Name</label>
 						<input
-							id="name"
+							id={nameId}
 							placeholder="Name of your project"
 							className="border rounded px-3 py-2"
 						/>
 					</div>
 					<div className="flex flex-col space-y-1.5">
-						<label htmlFor="framework">Framework</label>
-						<select id="framework" className="border rounded px-3 py-2">
+						<label htmlFor={frameworkId}>Framework</label>
+						<select id={frameworkId} className="border rounded px-3 py-2">
 							<option value="">Select a framework</option>
 							<option value="next">Next.js</option>
 							<option value="sveltekit">SvelteKit</option>
@@ -113,5 +117,9 @@ export const ComplexLayout: Story = {
 				</button>
 			</CardFooter>
 		</Card>
-	),
+	);
+};
+
+export const ComplexLayout: Story = {
+	render: () => <ComplexLayoutComponent />,
 };

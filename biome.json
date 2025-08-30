@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -12,16 +12,16 @@
 			"**",
 			"!bun.lock",
 			"!renovate.json",
-			"!**/node_modules/**",
-			"!**/dist/**",
-			"!**/build/**",
-			"!**/out/**",
-			"!**/.turbo/**",
-			"!**/.next/**",
-			"!**/.vercel/**",
-			"!**/.act/**",
+			"!**/node_modules",
+			"!**/dist",
+			"!**/build",
+			"!**/out",
+			"!**/.turbo",
+			"!**/.next",
+			"!**/.vercel",
+			"!**/.act",
 			"!.act-event.json",
-			"!packages/intershell/src/interactive/**"
+			"!packages/intershell/src/interactive"
 		]
 	},
 	"formatter": {
@@ -66,7 +66,8 @@
 				"useShorthandFunctionType": "error"
 			},
 			"suspicious": {
-				"noExplicitAny": "error"
+				"noExplicitAny": "error",
+				"noUnknownAtRules": "off"
 			}
 		}
 	},

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { useId } from "react";
 import { Input } from "./input";
 
 const meta: Meta<typeof Input> = {
@@ -78,26 +79,38 @@ export const Disabled: Story = {
 	},
 };
 
-export const WithLabel: Story = {
-	render: () => (
+const WithLabelComponent = () => {
+	const emailId = useId();
+
+	return (
 		<div className="grid w-full max-w-sm items-center gap-1.5">
-			<label htmlFor="email">Email</label>
-			<Input id="email" type="email" placeholder="Enter your email" />
+			<label htmlFor={emailId}>Email</label>
+			<Input id={emailId} type="email" placeholder="Enter your email" />
 		</div>
-	),
+	);
 };
 
-export const WithError: Story = {
-	render: () => (
+export const WithLabel: Story = {
+	render: () => <WithLabelComponent />,
+};
+
+const WithErrorComponent = () => {
+	const emailId = useId();
+
+	return (
 		<div className="grid w-full max-w-sm items-center gap-1.5">
-			<label htmlFor="email">Email</label>
+			<label htmlFor={emailId}>Email</label>
 			<Input
-				id="email"
+				id={emailId}
 				type="email"
 				placeholder="Enter your email"
 				className="border-red-500 focus:border-red-500"
 			/>
 			<p className="text-sm text-red-500">Please enter a valid email address.</p>
 		</div>
-	),
+	);
+};
+
+export const WithError: Story = {
+	render: () => <WithErrorComponent />,
 };

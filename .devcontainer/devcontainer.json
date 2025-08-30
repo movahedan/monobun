@@ -94,6 +94,7 @@
 					"docs-astro",
 					"storefront",
 					"admin",
+					"test-package",
 					"api",
 					"@repo/ui",
 					"@repo/intershell",
