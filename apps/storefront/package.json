@@ -1,8 +1,7 @@
 {
+	"private": false,
 	"name": "storefront",
-	"version": "0.0.3",
 	"type": "module",
-	"private": true,
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",

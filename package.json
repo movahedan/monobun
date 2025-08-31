@@ -1,5 +1,6 @@
 {
 	"root": true,
+	"private": false,
 	"name": "root",
 	"description": "A monorepo for Turbo and Bun",
 	"version": "0.1.2",
@@ -75,10 +76,6 @@
 	},
 	"author": "Soheil Movahedan",
 	"license": "MIT",
-	"private": true,
-	"publishConfig": {
-		"access": "restricted"
-	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/movahedan/monobun"

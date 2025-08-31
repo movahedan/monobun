@@ -1,8 +1,8 @@
 {
+	"private": false,
 	"name": "api",
 	"version": "0.1.0",
 	"type": "module",
-	"private": true,
 	"scripts": {
 		"start": "bun dist/index.js",
 		"dev": "tsup src/index.ts --watch --onSuccess 'bun dist/index.js'",

@@ -1,7 +1,7 @@
 {
+	"private": false,
 	"name": "docs-astro",
 	"type": "module",
-	"version": "0.1.0",
 	"scripts": {
 		"astro": "astro",
 		"dev": "astro dev",
