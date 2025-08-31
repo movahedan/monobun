@@ -170,9 +170,22 @@ export const defaultConfig = {
 			},
 		],
 	},
+	package: {
+		selectiveVersioning: {
+			enabled: true,
+			description: "Enforce selective versioning based on private field",
+		},
+		semanticVersioning: {
+			enabled: true,
+			description: "Ensure versions follow semantic versioning format",
+		},
+		description: {
+			enabled: true,
+			description: "Require descriptions for versioned packages",
+		},
+	},
 	branch: {
 		defaultBranch: "main",
-		protectedBranches: ["main"],
 		name: {
 			minLength: 1,
 			maxLength: 100,

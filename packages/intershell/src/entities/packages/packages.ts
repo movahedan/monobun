@@ -1,8 +1,7 @@
 import { readFileSync } from "node:fs";
 import { $, file, write } from "bun";
-import type { PackageJson, PackageValidationError, PackageValidationResult } from "./types";
-
-const semanticVersionRegex = /^\d+\.\d+\.\d+$/;
+import { getEntitiesConfig } from "../config/config";
+import type { PackageJson } from "./types";
 
 export class EntityPackages {
 	private readonly packageName: string;
@@ -42,7 +41,7 @@ export class EntityPackages {
 		await $`bun biome check --write --no-errors-on-unmatched ${this.getJsonPath()}`.quiet();
 	}
 
-	readVersion(): string {
+	readVersion(): string | undefined {
 		return this.readJson().version;
 	}
 	async writeVersion(version: string): Promise<void> {
@@ -75,31 +74,47 @@ export class EntityPackages {
 		await $`bun biome check --write --no-errors-on-unmatched ${this.getJsonPath()}`.quiet();
 	}
 
-	validatePackage(): PackageValidationResult {
+	validatePackage(): string[] {
 		const packageJson = this.readJson();
+		const config = getEntitiesConfig().getConfig();
+		const errors: string[] = [];
 
-		const errors: PackageValidationError[] = [];
-
-		if (!semanticVersionRegex.test(packageJson.version)) {
-			errors.push({
-				code: "INVALID_VERSION",
-				message: "Version should follow semantic versioning",
-				field: "version",
-			});
+		// Only validate if package validation is enabled
+		if (!config.package) {
+			return errors;
 		}
 
-		if (!packageJson.description) {
-			errors.push({
-				code: "MISSING_DESCRIPTION",
-				message: "Consider adding a description to package.json",
-				field: "description",
-			});
+		const rules = config.package;
+
+		// Selective versioning rules
+		if (rules.selectiveVersioning.enabled) {
+			if (packageJson.private === true && packageJson.version) {
+				errors.push(`${this.packageName}: Private packages should not have version field`);
+			}
+			if (packageJson.private !== true && !packageJson.version) {
+				errors.push(`${this.packageName}: Versioned packages must have a version field`);
+			}
+			if (!packageJson.version && packageJson.private !== true) {
+				errors.push(`${this.packageName}: Unversioned packages must have private: true`);
+			}
+			if (packageJson.version && packageJson.private === true) {
+				errors.push(`${this.packageName}: Versioned packages should not have private: true`);
+			}
 		}
 
-		return {
-			isValid: errors.length === 0,
-			errors,
-		};
+		// Semantic versioning rules
+		if (rules.semanticVersioning.enabled && packageJson.version) {
+			if (!/^\d+\.\d+\.\d+$/.test(packageJson.version)) {
+				errors.push(`${this.packageName}: Version should follow semantic versioning (e.g., 1.0.0)`);
+			}
+		}
+
+		// Description rules
+		if (rules.description.enabled && packageJson.version && !packageJson.description) {
+			errors.push(`${this.packageName}: Consider adding a description to package.json`);
+		}
+
+		return errors;
 	}
 
 	/**
@@ -239,5 +254,44 @@ export class EntityPackages {
 		}
 
 		return unversionedPackages;
+	}
+
+	/**
+	 * Validates all packages in the workspace
+	 * @returns Object containing validation results for all packages
+	 */
+	static async validateAllPackages(): Promise<{
+		readonly isValid: boolean;
+		readonly packages: Array<{
+			readonly name: string;
+			readonly errors: string[];
+		}>;
+		readonly totalErrors: number;
+	}> {
+		const allPackages = await EntityPackages.getAllPackages();
+		const validationResults: Array<{
+			readonly name: string;
+			readonly errors: string[];
+		}> = [];
+
+		let totalErrors = 0;
+
+		for (const packageName of allPackages) {
+			const packageInstance = new EntityPackages(packageName);
+			const errors = packageInstance.validatePackage();
+
+			validationResults.push({
+				name: packageName,
+				errors,
+			});
+
+			totalErrors += errors.length;
+		}
+
+		return {
+			isValid: totalErrors === 0,
+			packages: validationResults,
+			totalErrors,
+		};
 	}
 }

@@ -66,7 +66,6 @@ export type StagedConfig = {
 
 interface BranchConfig {
 	readonly defaultBranch: string;
-	readonly protectedBranches: readonly string[];
 	readonly prefixes: readonly string[];
 	readonly name: {
 		readonly minLength: number;
@@ -77,9 +76,25 @@ interface BranchConfig {
 	};
 }
 
+interface PackageValidationConfig {
+	readonly selectiveVersioning: {
+		readonly enabled: boolean;
+		readonly description: string;
+	};
+	readonly semanticVersioning: {
+		readonly enabled: boolean;
+		readonly description: string;
+	};
+	readonly description: {
+		readonly enabled: boolean;
+		readonly description: string;
+	};
+}
+
 export interface IConfig {
 	readonly commit: CommitConfig;
 	readonly branch: BranchConfig;
+	readonly package: PackageValidationConfig;
 	readonly tag: readonly string[];
 }
 

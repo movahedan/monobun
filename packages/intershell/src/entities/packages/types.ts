@@ -3,7 +3,7 @@ export interface PackageJson {
 		config: string;
 	};
 	name: string;
-	version: string;
+	version?: string; // Make version optional since private packages shouldn't have versions
 	description?: string;
 	main?: string;
 	scripts?: Record<string, string>;
@@ -29,15 +29,4 @@ export interface RepositoryInfo {
 export interface BugsInfo {
 	url: string;
 	email?: string;
-}
-
-export interface PackageValidationResult {
-	readonly isValid: boolean;
-	readonly errors: PackageValidationError[];
-}
-
-export interface PackageValidationError {
-	readonly code: string;
-	readonly message: string;
-	readonly field?: string;
 }
