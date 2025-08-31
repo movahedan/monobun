@@ -135,25 +135,6 @@ async function createTagsForPackages(
 	}
 }
 
-async function createTag(
-	version: string,
-	args: InferArgs<typeof scriptConfig>,
-	xConsole: typeof console,
-): Promise<void> {
-	const tagName = EntityTag.toTag(version);
-	xConsole.info(`🏷️ Creating tag: ${tagName}`);
-
-	try {
-		await EntityTag.createTag(tagName, args.message || `Release version ${version}`);
-
-		xConsole.log(`✅ Created tag: ${tagName}`);
-	} catch (error) {
-		throw new Error(
-			`Failed to create tag ${tagName}: ${error instanceof Error ? error.message : String(error)}`,
-		);
-	}
-}
-
 async function commitVersionChanges(xConsole: typeof console): Promise<void> {
 	const commitMessage = await Bun.file(".git/COMMIT_EDITMSG").text();
 

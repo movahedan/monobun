@@ -6,3 +6,4 @@ export * from "./compose";
 export * from "./config/default";
 export * from "./packages";
 export * from "./tag";
+export * from "./version";
