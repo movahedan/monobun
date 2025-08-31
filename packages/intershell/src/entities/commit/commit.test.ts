@@ -224,18 +224,26 @@ describe("EntityCommit", () => {
 		});
 	});
 
-	describe.skip("parseByHash", () => {
+	describe("parseByHash", () => {
 		beforeEach(() => {
-			setupBunMocks({
-				command: {
-					text: "abc123\nJohn Doe\n2024-01-01\nfeat: add new feature\nThis is the body\nof the commit",
-					exitCode: 0,
+			// Mock the commitShell module
+			mock.module("./commit.shell.ts", () => ({
+				commitShell: {
+					gitShow: mock(() => ({
+						exitCode: 0,
+						text: () =>
+							"abc123\nJohn Doe\n2024-01-01\nfeat: add new feature\nThis is the body\nof the commit",
+					})),
+					gitShowNameOnly: mock(() => ({
+						exitCode: 0,
+						text: () => "package.json",
+					})),
 				},
-			});
+			}));
 		});
 
 		afterEach(() => {
-			restoreBunMocks();
+			mock.restore();
 		});
 
 		it("should parse commit by hash successfully", async () => {
@@ -246,29 +254,44 @@ describe("EntityCommit", () => {
 			expect(result.info?.hash).toBe("abc123");
 			expect(result.info?.author).toBe("John Doe");
 			expect(result.info?.date).toBe("2024-01-01");
+			expect(result.files).toBeDefined();
+			expect(result.files).toEqual(["package.json"]);
 		});
 
 		it("should handle git show failure", async () => {
-			setupBunMocks({
-				command: {
-					text: "error: Could not find commit",
-					exitCode: 1,
+			// Mock the commitShell module for this specific test
+			mock.module("./commit.shell.ts", () => ({
+				commitShell: {
+					gitShow: mock(() => ({
+						exitCode: 1,
+						text: () => "error: Could not find commit",
+					})),
+					gitShowNameOnly: mock(() => ({
+						exitCode: 0,
+						text: () => "",
+					})),
 				},
-			});
+			}));
 
-			expect(EntityCommit.parseByHash("invalid-hash")).rejects.toThrow(
+			await expect(EntityCommit.parseByHash("invalid-hash")).rejects.toThrow(
 				"Failed to parse commit invalid-hash: Could not find commit invalid-hash",
 			);
 		});
 
 		it("should handle missing subject", async () => {
-			// Mock the git show command for this test
-			setupBunMocks({
-				command: {
-					text: "abc123\nJohn Doe\n2024-01-01\n\nThis is the body",
-					exitCode: 0,
+			// Mock the commitShell module for this specific test
+			mock.module("./commit.shell.ts", () => ({
+				commitShell: {
+					gitShow: mock(() => ({
+						exitCode: 0,
+						text: () => "abc123\nJohn Doe\n2024-01-01\n\nThis is the body",
+					})),
+					gitShowNameOnly: mock(() => ({
+						exitCode: 0,
+						text: () => "",
+					})),
 				},
-			});
+			}));
 
 			await expect(EntityCommit.parseByHash("abc123")).rejects.toThrow(
 				"No subject found for commit abc123",
@@ -276,13 +299,19 @@ describe("EntityCommit", () => {
 		});
 
 		it("should handle parseByHash error", async () => {
-			// Mock the git show command for this test
-			setupBunMocks({
-				command: {
-					text: "error: git command failed",
-					exitCode: 1,
+			// Mock the commitShell module for this specific test
+			mock.module("./commit.shell.js", () => ({
+				commitShell: {
+					gitShow: mock(() => ({
+						exitCode: 1,
+						text: () => "error: git command failed",
+					})),
+					gitShowNameOnly: mock(() => ({
+						exitCode: 0,
+						text: () => "",
+					})),
 				},
-			});
+			}));
 
 			await expect(EntityCommit.parseByHash("abc123")).rejects.toThrow(
 				"Could not find commit abc123",
@@ -290,19 +319,111 @@ describe("EntityCommit", () => {
 		});
 
 		it("should handle merge commits with PR info", async () => {
-			// Mock the git show command for this test
-			setupBunMocks({
-				command: {
-					text: "abc123\nJohn Doe\n2024-01-01\nMerge pull request #123 from feature\nMerge body",
-					exitCode: 0,
+			// Mock the commitShell module for this specific test
+			mock.module("./commit.shell.js", () => ({
+				commitShell: {
+					gitShow: mock(() => ({
+						exitCode: 0,
+						text: () =>
+							"abc123\nJohn Doe\n2024-01-01\nMerge pull request #123 from feature\nMerge body",
+					})),
+					gitShowNameOnly: mock(() => ({
+						exitCode: 0,
+						text: () => "",
+					})),
 				},
-			});
+			}));
 
 			const result = await EntityCommit.parseByHash("abc123");
 
 			expect(result.message.isMerge).toBe(true);
 			expect(result.pr).toBeDefined();
 			expect(result.info?.hash).toBe("abc123");
+		});
+
+		it("should extract files changed in commit", async () => {
+			// Mock the commitShell module for this specific test
+			mock.module("./commit.shell.ts", () => ({
+				commitShell: {
+					gitShow: mock(() => ({
+						exitCode: 0,
+						text: () =>
+							"abc123\nJohn Doe\n2024-01-01\nfeat: add new feature\nThis is the body\nof the commit",
+					})),
+					gitShowNameOnly: mock(() => ({
+						exitCode: 0,
+						text: () => "src/app/page.tsx\npackage.json\nREADME.md",
+					})),
+				},
+			}));
+
+			const result = await EntityCommit.parseByHash("abc123");
+
+			expect(result.files).toBeDefined();
+			expect(result.files).toEqual(["src/app/page.tsx", "package.json", "README.md"]);
+		});
+
+		it("should handle commits with no files changed", async () => {
+			// Mock the commitShell module for this specific test
+			mock.module("./commit.shell.ts", () => ({
+				commitShell: {
+					gitShow: mock(() => ({
+						exitCode: 0,
+						text: () => "abc123\nJohn Doe\n2024-01-01\ndocs: update documentation",
+					})),
+					gitShowNameOnly: mock(() => ({
+						exitCode: 0,
+						text: () => "",
+					})),
+				},
+			}));
+
+			const result = await EntityCommit.parseByHash("abc123");
+
+			expect(result.files).toBeDefined();
+			expect(result.files).toEqual([]);
+		});
+
+		it("should handle git show --name-only failure gracefully", async () => {
+			// Mock the commitShell module for this specific test
+			mock.module("./commit.shell.ts", () => ({
+				commitShell: {
+					gitShow: mock(() => ({
+						exitCode: 0,
+						text: () => "abc123\nJohn Doe\n2024-01-01\nfeat: add new feature",
+					})),
+					gitShowNameOnly: mock(() => ({
+						exitCode: 1,
+						text: () => "error: git command failed",
+					})),
+				},
+			}));
+
+			const result = await EntityCommit.parseByHash("abc123");
+
+			expect(result.files).toBeDefined();
+			expect(result.files).toEqual([]);
+		});
+
+		it("should handle commits with single file change", async () => {
+			// Mock the commitShell module for this specific test
+			mock.module("./commit.shell.ts", () => ({
+				commitShell: {
+					gitShow: mock(() => ({
+						exitCode: 0,
+						text: () => "abc123\nJohn Doe\n2024-01-01\nfix: resolve bug in component",
+					})),
+					gitShowNameOnly: mock(() => ({
+						exitCode: 0,
+						text: () => "src/components/Button.tsx",
+					})),
+				},
+			}));
+
+			const result = await EntityCommit.parseByHash("abc123");
+
+			expect(result.files).toBeDefined();
+			expect(result.files).toEqual(["src/components/Button.tsx"]);
 		});
 	});
 

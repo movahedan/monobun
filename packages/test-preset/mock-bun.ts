@@ -108,11 +108,11 @@ export const setupBunMocks = async (options?: MockBunOptions) => {
 		};
 	}
 
-	let { write, file, $ } = await import("bun");
-
-	write = mocks.mockWrite as unknown as typeof write;
-	file = mocks.mockFile as unknown as typeof file;
-	$ = mocks.mockCommand as unknown as typeof $;
+	mock.module("bun", () => ({
+		write: mocks.mockWrite,
+		file: mocks.mockFile,
+		$: mocks.mockCommand,
+	}));
 
 	return mocks;
 };
@@ -121,13 +121,13 @@ export const restoreBunMocks = () => {
 	mock.restore();
 
 	if (typeof globalThis.Bun !== "undefined" && originalBun) {
-		if (originalBun.write) {
+		if (originalBun?.write) {
 			(globalThis.Bun as typeof Bun).write = originalBun.write;
 		}
-		if (originalBun.file) {
+		if (originalBun?.file) {
 			(globalThis.Bun as typeof Bun).file = originalBun.file;
 		}
-		if (originalBun.$) {
+		if (originalBun?.$) {
 			(globalThis.Bun as typeof Bun).$ = originalBun.$;
 		}
 	}
