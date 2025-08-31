@@ -64,7 +64,7 @@ export class DefaultChangelogTemplate extends ChangelogTemplate {
 			// Format: emoji branch-name category-title #PR-number commit-count
 			// Example: 🔄 refactor/test-versioning Code Quality & Refactoring #144 9 commits
 			"",
-			`### ${categoryEmoji} ${prBranchName} ${prCategoryBadge} ${prNumberLink} ${commitCountBadge}`,
+			`### ${categoryEmoji} ${prBranchName?.fullName} ${prCategoryBadge} ${prNumberLink} ${commitCountBadge}`,
 			"",
 			...prMessages,
 			"",
