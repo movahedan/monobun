@@ -8,6 +8,7 @@
 - [Current Implementation Analysis](#-current-implementation-analysis)
 - [Required Changes](#-required-changes)
 - [Implementation Steps](#-implementation-steps)
+- [Current Progress](#-current-progress)
 - [Configuration Changes](#-configuration-changes)
 - [Testing Strategy](#-testing-strategy)
 - [Migration Plan](#-migration-plan)
@@ -108,6 +109,49 @@ static async getAllPackages(): Promise<string[]> {
 - **@repo/utils**: No version, no tag series
 
 ## 🛠️ Implementation Steps
+
+## 📊 Current Progress
+
+### **✅ Completed**
+- **Phase 1: Package Classification System** - ✅ **COMPLETE**
+  - ✅ `EntityPackages.shouldVersion()` method implemented
+  - ✅ `EntityPackages.getTagSeriesName()` method implemented  
+  - ✅ `EntityPackages.getVersionedPackages()` static method implemented
+  - ✅ `EntityPackages.getUnversionedPackages()` static method implemented
+
+- **Phase 2: Create EntityVersion and Reorganize Responsibilities** - 🚧 **IN PROGRESS**
+  - ✅ **EntityVersion class created** with core structure
+  - ✅ **File-based commit level detection implemented**:
+    - ✅ `isWorkspaceLevelCommit()` - Detects workspace-level changes (root config files, etc.)
+    - ✅ `isAppLevelCommit()` - Detects app-level changes (apps/*, src/app/*, etc.)
+  - ✅ **Commit entity extended** with file change information:
+    - ✅ Added `files?: string[]` to `ParsedCommitData` interface
+    - ✅ Modified `parseByHash` to extract changed files using `git show --name-only`
+    - ✅ Created `commitShell` module for better testability
+  - ✅ **All tests passing** for file detection functionality
+  - 🔄 **Placeholder methods** (to be implemented):
+    - `calculateRootBumpType()` - Uses commit level detection for root versioning
+    - `calculatePackageBumpType()` - Package-specific version bump logic
+    - `hasInternalDependencyChanges()` - Dependency change detection
+    - `getVersionHistory()` - Tag series integration
+
+### **🎯 Next Immediate Steps**
+1. **Test EntityVersion methods** - Verify `isWorkspaceLevelCommit` and `isAppLevelCommit` work correctly
+2. **Implement version calculation logic** - Complete the placeholder methods in EntityVersion
+3. **Add EntityVersion tests** - Create comprehensive test suite for the new entity
+4. **Integration testing** - Test EntityVersion with actual commit data
+
+### **🚧 In Progress**
+- **Phase 2 continued**: Implementing version calculation logic in EntityVersion
+- **Testing**: All file detection tests are passing, EntityVersion tests next
+
+### **⏳ Pending**
+- **Phase 3**: Refactor EntityChangelog to use EntityVersion
+- **Phase 4**: Update version preparation scripts
+- **Phase 5**: Update version application scripts
+- **Phase 6**: Package validation and tag series integration
+
+---
 
 ### **Phase 1: Package Classification System**
 
