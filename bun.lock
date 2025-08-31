@@ -13,7 +13,7 @@
     },
     "apps/admin": {
       "name": "admin",
-      "version": "0.1.0",
+      "version": "0.0.0",
       "dependencies": {
         "@repo/ui": "workspace:*",
         "@repo/utils": "workspace:*",
@@ -30,7 +30,7 @@
     },
     "apps/api": {
       "name": "api",
-      "version": "0.1.0",
+      "version": "0.0.0",
       "dependencies": {
         "@repo/utils": "workspace:*",
         "body-parser": "2.2.0",
@@ -52,6 +52,7 @@
     },
     "apps/docs-astro": {
       "name": "docs-astro",
+      "version": "0.0.0",
       "dependencies": {
         "@astrojs/tailwind": "6.0.2",
         "@tailwindcss/typography": "0.5.16",
@@ -69,6 +70,7 @@
     },
     "apps/storefront": {
       "name": "storefront",
+      "version": "0.0.0",
       "dependencies": {
         "@repo/ui": "workspace:*",
         "@repo/utils": "workspace:*",
