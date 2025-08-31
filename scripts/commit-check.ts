@@ -98,8 +98,8 @@ export const commitCheck = createScript(scriptConfig, async (args, xConsole) => 
 			const branchValidation = branchInstance.validate(branchName);
 			if (typeof branchValidation === "string") {
 				if (isCI) {
-					console.log(colorify.yellow("⚠️  Skipping branch name check in CI environment"));
-					console.log(colorify.gray(`Branch name detected: ${branchName}`));
+					xConsole.log(colorify.yellow("⚠️  Skipping branch name check in CI environment"));
+					xConsole.log(colorify.gray(`Branch name detected: ${branchName}`));
 				} else {
 					throw new Error(branchValidation);
 				}
@@ -120,11 +120,11 @@ export const commitCheck = createScript(scriptConfig, async (args, xConsole) => 
 			xConsole.log(colorify.blue("🔍 Running staged files validation..."));
 			const { stagedFiles } = await EntityCommit.getStagedFiles();
 			if (!stagedFiles.length) {
-				console.log(colorify.green("✅ No staged changes"));
+				xConsole.log(colorify.green("✅ No staged changes"));
 			} else {
 				const errors = await EntityCommit.validateStagedFiles(stagedFiles);
 				if (errors.length === 0) {
-					console.log(colorify.green("✅ No policy violations found in staged files"));
+					xConsole.log(colorify.green("✅ No policy violations found in staged files"));
 				} else {
 					throw new Error(errors.join("\n"));
 				}
