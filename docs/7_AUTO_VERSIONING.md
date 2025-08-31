@@ -32,14 +32,12 @@ The Monobun monorepo uses a modern, automated versioning system that provides so
 ### 🚀 Quick Start
 
 ```bash
-# Individual operations (currently available)
-bun run scripts/version-prepare.ts --package root # Prepare version and changelog
-bun run scripts/version-apply.ts --no-push        # Apply changes without pushing
-bun run scripts/version-ci.ts --dry-run           # Preview complete workflow
-
-# Interactive versioning workflow (🚧 In Development)
-# bun run version:commit --dry-run  # Preview changes
-# bun run version:commit            # Execute full flow
+# Prepare version and changelog
+bun run scripts/version-prepare.ts --package root
+# Apply changes without pushing
+bun run scripts/version-apply.ts --no-push
+# Preview complete workflow
+bun run scripts/version-ci.ts --dry-run
 ```
 
 ## 🏗️ System Architecture
@@ -79,40 +77,6 @@ Our versioning system consists of 3 main scripts with an entity-based architectu
 - Merges new changes with existing changelog
 - Formats commits with badges and links
 - Maintains version history
-
-## 🎮 Interactive CLI (🚧 In Development)
-
-> **Note**: The interactive CLI system is currently in development. The features described below are planned but not yet implemented.
-
-### ✨ Planned Features
-
-- **🎯 Step-by-Step Wizard**: Guided versioning workflow with validation
-- **📊 Progress Tracking**: Visual progress bars and completion status
-- **⚡ Quick Actions**: Keyboard shortcuts for common operations
-- **🔄 Smart Navigation**: Go back/forward between steps with arrow keys
-- **🚫 Conditional Skipping**: Automatically skip irrelevant steps
-- **📋 Preview Mode**: See final version changes before confirming
-- **❌ Validation**: Real-time validation with helpful error messages
-
-### 🎮 Planned Usage Examples
-
-```bash
-# Interactive versioning workflow (🚧 In Development)
-# bun run version:commit
-
-# Preview changes without applying (🚧 In Development)
-# bun run version:commit --dry-run
-```
-
-### ⌨️ Planned Keyboard Shortcuts
-
-- **↑/↓**: Navigate between options
-- **←**: Go back to previous step
-- **→**: Go to next step (if validation passes)
-- **Enter**: Confirm selection/input
-- **Space**: Toggle multi-select options
-- **ESC**: Clear input or go back
-- **Ctrl+C**: Exit wizard
 
 ## 🚀 Individual Scripts
 
@@ -371,7 +335,6 @@ bun run scripts/version-prepare.ts --from v1.0.0 --to HEAD
     "version:prepare": "bun run scripts/version-prepare.ts",
     "version:apply": "bun run scripts/version-apply.ts",
     "version:ci": "bun run scripts/version-ci.ts",
-    "version:commit": "bun run scripts/version-prepare.ts && bun run scripts/version-apply.ts"
   }
 }
 ```

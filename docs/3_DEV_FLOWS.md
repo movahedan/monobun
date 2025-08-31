@@ -80,14 +80,10 @@ The new interactive CLI system provides sophisticated user experience:
 #### **Usage Examples**
 
 ```bash
-# Interactive commit creation
-bun run commit
-
-# Interactive versioning workflow
-bun run version:commit
-
-# Guided development setup
 bun run dev:setup
+bun run commit
+bun run version:prepare
+bun run version:apply
 ```
 
 ### **Entity-Based Architecture**
@@ -164,15 +160,12 @@ bun run check:types
 ### **4. Version Management Workflow**
 
 ```bash
-# Interactive versioning
-bun run version:commit
-
+# Prepare changes
+bun run scripts/version-prepare.ts
 # Preview changes
-bun run version:commit --dry-run
-
+bun run scripts/version-prepare.ts --dry-run
 # Manual version preparation
 bun run scripts/version-prepare.ts --package root
-
 # Apply version changes
 bun run scripts/version-apply.ts
 ```
@@ -455,7 +448,7 @@ bun install
 bun run dev:setup --skip-health-check
 
 # Dry run to preview changes
-bun run version:commit --dry-run
+bun run version:prepare --dry-run
 
 # Check affected packages
 bun run scripts/ci-attach-affected.ts --mode turbo
