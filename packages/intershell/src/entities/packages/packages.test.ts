@@ -256,8 +256,7 @@ describe("EntityPackages", () => {
 
 		it("should return valid result for valid package", () => {
 			const result = packages.validatePackage();
-			expect(result.isValid).toBe(true);
-			expect(result.errors).toHaveLength(0);
+			expect(result).toHaveLength(0);
 		});
 
 		it("should return error for invalid version format", () => {
@@ -272,13 +271,10 @@ describe("EntityPackages", () => {
 
 			const invalidPackages = new EntityPackages("invalid-version-package");
 			const result = invalidPackages.validatePackage();
-			expect(result.isValid).toBe(false);
-			expect(result.errors).toHaveLength(1);
-			expect(result.errors[0]).toEqual({
-				code: "INVALID_VERSION",
-				message: "Version should follow semantic versioning",
-				field: "version",
-			});
+			expect(result).toHaveLength(1);
+			expect(result[0]).toContain(
+				"invalid-version-package: Version should follow semantic versioning",
+			);
 		});
 
 		it("should return error for missing description", () => {
@@ -295,13 +291,10 @@ describe("EntityPackages", () => {
 
 			const noDescPackages = new EntityPackages("no-description-package");
 			const result = noDescPackages.validatePackage();
-			expect(result.isValid).toBe(false);
-			expect(result.errors).toHaveLength(1);
-			expect(result.errors[0]).toEqual({
-				code: "MISSING_DESCRIPTION",
-				message: "Consider adding a description to package.json",
-				field: "description",
-			});
+			expect(result).toHaveLength(1);
+			expect(result[0]).toContain(
+				"no-description-package: Consider adding a description to package.json",
+			);
 		});
 
 		it("should return multiple errors for multiple issues", () => {
@@ -318,12 +311,11 @@ describe("EntityPackages", () => {
 
 			const multiIssuePackages = new EntityPackages("multi-issue-package");
 			const result = multiIssuePackages.validatePackage();
-			expect(result.isValid).toBe(false);
-			expect(result.errors).toHaveLength(2);
-			expect(result.errors).toEqual(
+			expect(result).toHaveLength(2);
+			expect(result).toEqual(
 				expect.arrayContaining([
-					expect.objectContaining({ code: "INVALID_VERSION" }),
-					expect.objectContaining({ code: "MISSING_DESCRIPTION" }),
+					expect.stringContaining("Version should follow semantic versioning"),
+					expect.stringContaining("Consider adding a description to package.json"),
 				]),
 			);
 		});
@@ -344,7 +336,7 @@ describe("EntityPackages", () => {
 
 				const validPackages = new EntityPackages(`valid-${version}-package`);
 				const result = validPackages.validatePackage();
-				expect(result.isValid).toBe(true);
+				expect(result).toHaveLength(0);
 			});
 
 			invalidVersions.forEach((version) => {
@@ -359,7 +351,7 @@ describe("EntityPackages", () => {
 
 				const invalidPackages = new EntityPackages(`invalid-${version}-package`);
 				const result = invalidPackages.validatePackage();
-				expect(result.isValid).toBe(false);
+				expect(result.length).toBeGreaterThan(0);
 			});
 		});
 	});
@@ -728,6 +720,37 @@ describe("EntityPackages", () => {
 		it("should handle package names with spaces", () => {
 			const spacedPackages = new EntityPackages("test package");
 			expect(spacedPackages.getPath()).toBe("apps/test package");
+		});
+	});
+
+	describe("getVersionedPackages", () => {
+		it("should return packages that should be versioned", async () => {
+			// This test will use the actual implementation
+			// We'll test the integration with real filesystem mocking
+			const result = await EntityPackages.getVersionedPackages();
+			expect(Array.isArray(result)).toBe(true);
+			// The actual result depends on the current workspace state
+		});
+	});
+
+	describe("getUnversionedPackages", () => {
+		it("should return packages that should not be versioned", async () => {
+			// This test will use the actual implementation
+			const result = await EntityPackages.getUnversionedPackages();
+			expect(Array.isArray(result)).toBe(true);
+			// The actual result depends on the current workspace state
+		});
+	});
+
+	describe("validateAllPackages", () => {
+		it("should validate all packages and return results", async () => {
+			// This test will use the actual implementation
+			const result = await EntityPackages.validateAllPackages();
+			expect(result).toHaveProperty("isValid");
+			expect(result).toHaveProperty("packages");
+			expect(result).toHaveProperty("totalErrors");
+			expect(Array.isArray(result.packages)).toBe(true);
+			// The actual result depends on the current workspace state
 		});
 	});
 });

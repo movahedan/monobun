@@ -20,7 +20,6 @@ describe("EntityBranch", () => {
 
 		mockConfig = {
 			defaultBranch: "main",
-			protectedBranches: ["main", "develop"],
 			prefixes: ["feature", "bugfix", "hotfix"],
 			name: {
 				minLength: 3,

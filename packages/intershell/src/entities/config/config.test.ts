@@ -28,7 +28,6 @@ describe("Config", () => {
 			const config = getEntitiesConfig().getConfig();
 
 			expect(config.branch.defaultBranch).toBe("main");
-			expect(config.branch.protectedBranches).toEqual(["main"]);
 			expect(config.branch.prefixes).toEqual([
 				"feature",
 				"fix",
@@ -105,7 +104,6 @@ describe("Config", () => {
 			const customConfig: CustomConfigJson = {
 				branch: {
 					defaultBranch: "develop",
-					protectedBranches: ["main", "develop", "staging"],
 					prefixes: ["feature", "bugfix"],
 					name: {
 						minLength: 5,
@@ -120,7 +118,6 @@ describe("Config", () => {
 			const result = config.getConfig();
 
 			expect(result.branch.defaultBranch).toBe("develop");
-			expect(result.branch.protectedBranches).toEqual(["main", "develop", "staging"]);
 			expect(result.branch.prefixes).toEqual(["feature", "bugfix"]);
 			expect(result.branch.name.minLength).toBe(5);
 			expect(result.branch.name.maxLength).toBe(50);
@@ -142,7 +139,6 @@ describe("Config", () => {
 			// Custom value should be applied
 			expect(result.branch.defaultBranch).toBe("develop");
 			// Default values should be preserved
-			expect(result.branch.protectedBranches).toEqual(["main"]);
 			expect(result.branch.prefixes).toEqual([
 				"feature",
 				"fix",
@@ -296,7 +292,6 @@ describe("Config", () => {
 			expect(result.commit.conventional.type?.list?.[0]?.type).toBe("feat");
 			expect(result.commit.staged).toHaveLength(1);
 			expect(result.branch.defaultBranch).toBe("develop");
-			expect(result.branch.protectedBranches).toEqual(["main"]);
 			expect(result.tag).toEqual(["v1.0.0", "v1.0.1"]);
 		});
 	});
