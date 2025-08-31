@@ -102,6 +102,28 @@ export class EntityPackages {
 		};
 	}
 
+	/**
+	 * Determines if this package should be versioned based on its private field
+	 * @returns true if the package should be versioned (private !== true)
+	 */
+	shouldVersion(): boolean {
+		const packageJson = this.readJson();
+		// Package should be versioned if private is false or undefined
+		return packageJson.private !== true;
+	}
+
+	/**
+	 * Gets the tag series name for this package
+	 * @returns tag series prefix (e.g., 'v', 'intershell-v') or null if package shouldn't be versioned
+	 */
+	getTagSeriesName(): string | null {
+		if (!this.shouldVersion()) return null;
+
+		// Generate tag series name based on package name
+		if (this.packageName === "root") return "v";
+		return `${this.packageName.replace("@repo/", "")}-v`;
+	}
+
 	static getRepoUrl(): string {
 		const rootPackageJson = new EntityPackages("root").readJson();
 		return typeof rootPackageJson.repository === "string"
@@ -181,5 +203,41 @@ export class EntityPackages {
 		packages.push(...filteredPackages.filter((pkg): pkg is string => pkg !== null));
 
 		return packages;
+	}
+
+	/**
+	 * Gets all packages that should be versioned (private !== true)
+	 * @returns Array of package names that should be versioned
+	 */
+	static async getVersionedPackages(): Promise<string[]> {
+		const allPackages = await EntityPackages.getAllPackages();
+		const versionedPackages: string[] = [];
+
+		for (const packageName of allPackages) {
+			const packageInstance = new EntityPackages(packageName);
+			if (packageInstance.shouldVersion()) {
+				versionedPackages.push(packageName);
+			}
+		}
+
+		return versionedPackages;
+	}
+
+	/**
+	 * Gets all packages that should NOT be versioned (private === true)
+	 * @returns Array of package names that should NOT be versioned
+	 */
+	static async getUnversionedPackages(): Promise<string[]> {
+		const allPackages = await EntityPackages.getAllPackages();
+		const unversionedPackages: string[] = [];
+
+		for (const packageName of allPackages) {
+			const packageInstance = new EntityPackages(packageName);
+			if (!packageInstance.shouldVersion()) {
+				unversionedPackages.push(packageName);
+			}
+		}
+
+		return unversionedPackages;
 	}
 }

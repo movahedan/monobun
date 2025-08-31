@@ -364,6 +364,112 @@ describe("EntityPackages", () => {
 		});
 	});
 
+	describe("selective versioning", () => {
+		describe("shouldVersion", () => {
+			it("should return true for packages with private: false", () => {
+				mock.module("node:fs", () =>
+					mockFsModule((path) => {
+						if (path.includes("package.json")) {
+							return JSON.stringify(mockPackageJson({ private: false }));
+						}
+						return "";
+					}),
+				);
+
+				const publicPackages = new EntityPackages("public-package");
+				expect(publicPackages.shouldVersion()).toBe(true);
+			});
+
+			it("should return true for packages with no private field", () => {
+				mock.module("node:fs", () =>
+					mockFsModule((path) => {
+						if (path.includes("package.json")) {
+							const packageJson = mockPackageJson();
+							delete packageJson.private;
+							return JSON.stringify(packageJson);
+						}
+						return "";
+					}),
+				);
+
+				const defaultPackages = new EntityPackages("default-package");
+				expect(defaultPackages.shouldVersion()).toBe(true);
+			});
+
+			it("should return false for packages with private: true", () => {
+				mock.module("node:fs", () =>
+					mockFsModule((path) => {
+						if (path.includes("package.json")) {
+							return JSON.stringify(mockPackageJson({ private: true }));
+						}
+						return "";
+					}),
+				);
+
+				const privatePackages = new EntityPackages("private-package");
+				expect(privatePackages.shouldVersion()).toBe(false);
+			});
+		});
+
+		describe("getTagSeriesName", () => {
+			it("should return 'v' for root package", () => {
+				mock.module("node:fs", () =>
+					mockFsModule((path) => {
+						if (path.includes("package.json")) {
+							return JSON.stringify(mockPackageJson({ name: "root", private: false }));
+						}
+						return "";
+					}),
+				);
+
+				const rootPackages = new EntityPackages("root");
+				expect(rootPackages.getTagSeriesName()).toBe("v");
+			});
+
+			it("should return 'package-name-v' for @repo packages", () => {
+				mock.module("node:fs", () =>
+					mockFsModule((path) => {
+						if (path.includes("package.json")) {
+							return JSON.stringify(mockPackageJson({ name: "@repo/intershell", private: false }));
+						}
+						return "";
+					}),
+				);
+
+				const intershellPackages = new EntityPackages("@repo/intershell");
+				expect(intershellPackages.getTagSeriesName()).toBe("intershell-v");
+			});
+
+			it("should return 'package-name-v' for regular packages", () => {
+				mock.module("node:fs", () =>
+					mockFsModule((path) => {
+						if (path.includes("package.json")) {
+							return JSON.stringify(mockPackageJson({ name: "my-app", private: false }));
+						}
+						return "";
+					}),
+				);
+
+				const appPackages = new EntityPackages("my-app");
+				expect(appPackages.getTagSeriesName()).toBe("my-app-v");
+			});
+
+			it("should return null for private packages", () => {
+				mock.module("node:fs", () =>
+					mockFsModule((path) => {
+						if (path.includes("package.json")) {
+							return JSON.stringify(mockPackageJson({ private: true }));
+						}
+						return "";
+					}),
+				);
+
+				const privatePackages = new EntityPackages("private-package");
+				expect(privatePackages.getTagSeriesName()).toBe(null);
+			});
+		});
+	});
+
 	describe("static methods", () => {
 		describe("getRepoUrl", () => {
 			it("should return repository URL when repository is a string", () => {

@@ -65,9 +65,12 @@ export const versionPrepare = createScript(scriptConfig, async function main(arg
 		let packagesToProcess: string[] = [];
 
 		if (processAll) {
-			xConsole.info("📦 Processing all packages in workspace...");
-			packagesToProcess = await EntityPackages.getAllPackages();
-			xConsole.info(`Found ${packagesToProcess.length} packages: ${packagesToProcess.join(", ")}`);
+			xConsole.info("📦 Processing versioned packages in workspace...");
+			// CHANGE: Only process packages that should be versioned
+			packagesToProcess = await EntityPackages.getVersionedPackages();
+			xConsole.info(
+				`Found ${packagesToProcess.length} versioned packages: ${packagesToProcess.join(", ")}`,
+			);
 		} else {
 			const packageName = args.package;
 			if (!packageName) {
