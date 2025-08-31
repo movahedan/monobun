@@ -35,16 +35,28 @@ const scriptConfig = {
 } as const satisfies ScriptConfig;
 
 export const versionApply = createScript(scriptConfig, async function main(args, xConsole) {
-	const rootPackage = new EntityPackages("root");
-	const version = rootPackage.readVersion();
+	// Get all versioned packages (same logic as version-prepare.ts)
+	const packagesToProcess = await EntityPackages.getVersionedPackages();
+	xConsole.info(
+		`📦 Processing ${packagesToProcess.length} versioned packages: ${packagesToProcess.join(", ")}`,
+	);
 
 	if (args["dry-run"]) {
 		xConsole.log(colorify.yellow("🔍 Dry run mode - would execute:"));
-		xConsole.log(colorify.gray(`  • Commit version changes for ${version}`));
-		xConsole.log(colorify.gray(`  • Create tag v${version}`));
+		xConsole.log(colorify.gray("  • Commit version changes for all versioned packages"));
+
+		// Show what tags would be created for each package
+		for (const packageName of packagesToProcess) {
+			const packageInstance = new EntityPackages(packageName);
+			const version = packageInstance.readVersion();
+			const tagSeriesName = packageInstance.getTagSeriesName();
+			const tagName = tagSeriesName ? `${tagSeriesName}${version}` : `v${version}`;
+			xConsole.log(colorify.gray(`  • Create tag ${tagName} for ${packageName}`));
+		}
+
 		if (!args["no-push"]) {
 			xConsole.log(colorify.gray("  • Push commit changes to remote"));
-			xConsole.log(colorify.gray("  • Push tag to remote"));
+			xConsole.log(colorify.gray("  • Push tags to remote"));
 		}
 		return;
 	}
@@ -61,8 +73,8 @@ export const versionApply = createScript(scriptConfig, async function main(args,
 		return;
 	}
 
-	await commitVersionChanges(version, xConsole);
-	await createTag(version, args, xConsole);
+	await commitVersionChanges(xConsole);
+	await createTagsForPackages(packagesToProcess, args, xConsole);
 	await pushChanges(args, xConsole);
 
 	xConsole.log(colorify.green("✅ Version apply operation completed successfully!"));
@@ -93,6 +105,36 @@ async function pushChanges(
 	}
 }
 
+async function createTagsForPackages(
+	packagesToProcess: string[],
+	args: InferArgs<typeof scriptConfig>,
+	xConsole: typeof console,
+): Promise<void> {
+	for (const packageName of packagesToProcess) {
+		const packageInstance = new EntityPackages(packageName);
+		const version = packageInstance.readVersion();
+		const tagSeriesName = packageInstance.getTagSeriesName();
+
+		// Create package-specific tag name
+		const tagName = tagSeriesName ? `${tagSeriesName}${version}` : `v${version}`;
+
+		xConsole.info(`🏷️ Creating tag for ${packageName}: ${tagName}`);
+
+		try {
+			await EntityTag.createTag(
+				tagName,
+				args.message || `Release ${packageName} version ${version}`,
+			);
+
+			xConsole.log(`✅ Created tag: ${tagName}`);
+		} catch (error) {
+			throw new Error(
+				`Failed to create tag ${tagName} for ${packageName}: ${error instanceof Error ? error.message : String(error)}`,
+			);
+		}
+	}
+}
+
 async function createTag(
 	version: string,
 	args: InferArgs<typeof scriptConfig>,
@@ -112,7 +154,7 @@ async function createTag(
 	}
 }
 
-async function commitVersionChanges(version: string, xConsole: typeof console): Promise<void> {
+async function commitVersionChanges(xConsole: typeof console): Promise<void> {
 	const commitMessage = await Bun.file(".git/COMMIT_EDITMSG").text();
 
 	xConsole.log("📝 Commit message:");
@@ -120,7 +162,7 @@ async function commitVersionChanges(version: string, xConsole: typeof console): 
 
 	await $`git commit -m "${commitMessage}"`;
 
-	xConsole.log(colorify.green(`✅ Successfully committed version ${version} changes`));
+	xConsole.log(colorify.green("✅ Successfully committed version changes"));
 	const commitHash = await $`git rev-parse --short HEAD`.text();
 	xConsole.log(`🏷️ Commit hash: ${commitHash.trim()}`);
 }

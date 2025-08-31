@@ -80,6 +80,27 @@ export const versionPrepare = createScript(scriptConfig, async function main(arg
 			xConsole.info(`📦 Processing single package: ${colorify.blue(packageName)}`);
 		}
 
+		// Validate all packages before processing
+		xConsole.info("🔍 Validating package configurations...");
+		const validationResult = await EntityPackages.validateAllPackages();
+
+		if (!validationResult.isValid) {
+			xConsole.error(colorify.red("❌ Package validation failed!"));
+			xConsole.error(colorify.red(`Found ${validationResult.totalErrors} validation errors:`));
+
+			for (const packageResult of validationResult.packages) {
+				if (packageResult.errors.length > 0) {
+					for (const error of packageResult.errors) {
+						xConsole.error(colorify.red(`  📦 ${error}`));
+					}
+				}
+			}
+
+			throw new Error(`Package validation failed with ${validationResult.totalErrors} errors`);
+		}
+
+		xConsole.info(colorify.green("✅ All packages passed validation"));
+
 		const results: Array<
 			{
 				packageName: string;
