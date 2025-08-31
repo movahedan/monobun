@@ -23,15 +23,14 @@ const allPackages = await EntityPackages.getAllPackages();
 
 export class EntityCompose {
 	private readonly composePath: string;
-	private compose: Promise<ComposeData>;
+	private compose: ComposeData | undefined;
 
 	constructor(composePath: string) {
 		this.composePath = composePath;
-		this.compose = this.read();
 	}
 
 	async validate(): Promise<ComposeValidationResult> {
-		const compose = await this.compose;
+		const compose = await this.getCompose();
 		const errors = [];
 
 		if (!compose.services || Object.keys(compose.services).length === 0) {
@@ -58,16 +57,14 @@ export class EntityCompose {
 		};
 	}
 
-	async read(): Promise<ComposeData> {
-		return EntityCompose.parseDockerCompose(await Bun.file(this.composePath).text());
-	}
-
 	async getCompose(): Promise<ComposeData> {
-		return await this.compose;
+		this.compose =
+			this.compose || EntityCompose.parseDockerCompose(await Bun.file(this.composePath).text());
+		return this.compose;
 	}
 
 	async getServices(): Promise<ServiceInfo[]> {
-		const compose = await this.compose;
+		const compose = await this.getCompose();
 		const services: ServiceInfo[] = [];
 
 		for (const [name, service] of Object.entries(compose.services)) {
@@ -94,7 +91,7 @@ export class EntityCompose {
 	}
 
 	async getServiceHealth(): Promise<ServiceHealth[]> {
-		const compose = await this.compose;
+		const compose = await this.getCompose();
 		return Object.keys(compose.services).map((name) => ({
 			name,
 			status: "healthy" as const,
@@ -105,7 +102,7 @@ export class EntityCompose {
 	}
 
 	async getServiceDependencies(): Promise<ServiceDependencyGraph> {
-		const compose = await this.compose;
+		const compose = await this.getCompose();
 		const services = Object.keys(compose.services);
 		const dependencies: Record<string, string[]> = {};
 
@@ -125,7 +122,7 @@ export class EntityCompose {
 	}
 
 	async getPortMappings(): Promise<PortMapping[]> {
-		const compose = await this.compose;
+		const compose = await this.getCompose();
 		const mappings: PortMapping[] = [];
 
 		for (const service of Object.values(compose.services)) {
