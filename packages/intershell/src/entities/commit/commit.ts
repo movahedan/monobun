@@ -2,6 +2,7 @@
 import { $ } from "bun";
 import { getEntitiesConfig } from "../config/config";
 import type { IConfig } from "../config/types";
+import { commitShell } from "./commit.shell";
 import { EntityPr } from "./pr";
 import type { CommitMessageData, ParsedCommitData } from "./types";
 
@@ -166,15 +167,21 @@ export class EntityCommitClass {
 
 	async parseByHash(hash: string): Promise<ParsedCommitData> {
 		try {
-			const commitResult = await globalThis.Bun
-				.$`git show --format="%H%n%an%n%ad%n%s%n%B" --no-patch ${hash}`
-				.quiet()
-				.nothrow();
-			if (commitResult.exitCode !== 0) throw new Error(`Could not find commit ${hash}`);
+			const commitResult = await commitShell.gitShow(hash);
+			if (commitResult.exitCode !== 0)
+				throw new Error(
+					`Could not find commit ${hash}, exit code: ${commitResult.exitCode}, text: ${commitResult.text()}`,
+				);
 
 			const lines = commitResult.text().trim().split("\n");
 			const [commitHash, author, date, subject, ...bodyLines] = lines;
 			if (!subject) throw new Error(`No subject found for commit ${hash}`);
+
+			// Get files changed in this commit
+			const filesResult = await commitShell.gitShowNameOnly(hash);
+
+			const files =
+				filesResult.exitCode === 0 ? filesResult.text().trim().split("\n").filter(Boolean) : [];
 
 			const message = EntityCommitClass.parseByMessage(`${subject}\n${bodyLines.join("\n")}`);
 			return {
@@ -187,6 +194,7 @@ export class EntityCommitClass {
 				pr: message.isMerge
 					? await new EntityPr(this.config).getPRInfo(this.parseByHash, hash, message)
 					: undefined,
+				files,
 			};
 		} catch (error) {
 			throw new Error(

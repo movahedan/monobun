@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/noUnusedPrivateClassMembers: wip */
 import type { VersionBumpType } from "../changelog/types";
 import type { ParsedCommitData } from "../commit/types";
 import { EntityPackages } from "../packages/packages";
@@ -76,18 +77,54 @@ export class EntityVersion {
 		throw new Error("Package bump logic not implemented yet");
 	}
 
-	// private isWorkspaceLevelCommit(_commit: ParsedCommitData): boolean {
-	// 	// TODO: Implement workspace level detection
-	// 	return false;
-	// }
+	// @ts-expect-error wip
+	private isWorkspaceLevelCommit(commit: ParsedCommitData): boolean {
+		// Workspace-level commits affect the entire monorepo
+		return (
+			commit.files?.some(
+				(file) =>
+					file.startsWith(".") || // Hidden files (e.g., .gitignore, .env)
+					file.includes("turbo.json") || // Turborepo configuration
+					file.includes("package.json") || // Root package.json
+					file.includes("docker-compose") || // Docker configuration
+					file.includes("lefthook.yml") || // Git hooks
+					file.includes("renovate.json") || // Dependency updates
+					file.includes("i.config.ts") || // Intershell configuration
+					file.includes("biome.json") || // Linting configuration
+					file.includes("tsconfig.json") || // TypeScript configuration
+					file.includes("README.md") || // Documentation
+					file.includes("CHANGELOG.md") || // Changelog files
+					file.includes("CLAUDE.md"), // Project documentation
+			) ?? false
+		);
+	}
 
-	// private isAppLevelCommit(_commit: ParsedCommitData): boolean {
-	// 	// TODO: Implement app level detection
-	// 	return false;
-	// }
+	// @ts-expect-error wip
+	private isAppLevelCommit(commit: ParsedCommitData): boolean {
+		// App-level commits affect specific applications
+		return (
+			commit.files?.some(
+				(file) =>
+					file.startsWith("apps/") || // Application directories
+					file.includes("src/app/") || // Next.js app directory structure
+					file.includes("src/pages/") || // Page-based routing
+					file.includes("src/components/") || // App-specific components
+					file.includes("src/styles/") || // App-specific styles
+					file.includes("public/") || // Public assets
+					file.includes("Dockerfile") || // App-specific Dockerfile
+					file.includes("nginx.conf") || // App-specific nginx config
+					file.includes("vite.config") || // Vite configuration
+					file.includes("next.config") || // Next.js configuration
+					file.includes("astro.config") || // Astro configuration
+					file.includes("tailwind.config"), // Tailwind configuration
+			) ?? false
+		);
+	}
 
-	// private async hasInternalDependencyChanges(): Promise<boolean> {
-	// 	// TODO: Implement internal dependency change detection
-	// 	return false;
-	// }
+	// @ts-expect-error wip
+	private async hasInternalDependencyChanges(): Promise<boolean> {
+		// For now, assume internal changes require root bump
+		// This will be enhanced later with actual dependency analysis
+		return true;
+	}
 }
