@@ -137,7 +137,7 @@ export const versionPrepare = createScript(scriptConfig, async function main(arg
 				const changelogContent = changelog.generateMergedChangelog();
 				if (args["dry-run"]) {
 					xConsole.log(
-						`🚧 Dry run mode! would write to ${packageJson.getChangelogPath()} file with ${changelogContent.length} characters`,
+						`🚧 Dry run mode! would write to ${packageJson.getChangelogPath()} file with ${colorify.green(changelogContent.length.toString())} characters`,
 					);
 				} else {
 					await packageJson.writeChangelog(changelogContent);

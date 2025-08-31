@@ -6,7 +6,6 @@
 
 - [Overview](#-overview)
 - [Script Architecture](#-script-architecture)
-- [Enhanced Interactive CLI](#-enhanced-interactive-cli)
 - [Entity System](#-entity-system)
 - [Available Scripts](#-available-scripts)
 - [Development](#-development)
@@ -16,7 +15,6 @@
 
 This workspace contains all automation scripts and utilities for the repository, including:
 
-- **🎮 Interactive CLI**: Step-by-step wizards with navigation and validation
 - **🏗️ Entity Architecture**: Modular, reusable components for common operations
 - **🔧 Enhanced Scripts**: Type-safe automation with comprehensive error handling
 - **🧪 Automated Testing**: Comprehensive test coverage and quality checks
@@ -52,52 +50,6 @@ This workspace contains all automation scripts and utilities for the repository,
 3. **Testability**: Comprehensive test coverage with mocking
 4. **Consistency**: Shared utilities and patterns across scripts
 5. **Documentation**: Self-documenting code with JSDoc comments
-
-## 🎮 Enhanced Interactive CLI
-
-The new interactive CLI system provides sophisticated user experience:
-
-### ✨ Features
-
-- **🎯 Step-by-Step Wizard**: Guided workflows with validation
-- **📊 Progress Tracking**: Visual progress bars and completion status
-- **⚡ Quick Actions**: Keyboard shortcuts for common operations
-- **🔄 Smart Navigation**: Go back/forward between steps with arrow keys
-- **🚫 Conditional Skipping**: Automatically skip irrelevant steps
-- **📋 Preview Mode**: See final results before confirming
-- **❌ Validation**: Real-time validation with helpful error messages
-
-### 🎮 Usage Examples
-
-```bash
-# Interactive commit creation
-bun run commit
-
-# Interactive versioning workflow
-bun run version:commit
-
-# Guided development setup
-bun run dev:setup
-```
-
-### ⌨️ Keyboard Shortcuts
-
-- **↑/↓**: Navigate between options
-- **←**: Go back to previous step
-- **→**: Go to next step (if validation passes)
-- **Enter**: Confirm selection/input
-- **Space**: Toggle multi-select options
-- **ESC**: Clear input or go back
-- **Ctrl+C**: Exit wizard
-
-### ⚡ Quick Actions
-
-Each step shows available quick actions:
-
-- **h**: Show help for current step
-- **s**: Skip current step (if allowed)
-- **p**: Preview final result
-- **←**: Go back to previous step
 
 ## 🏛️ Entity System
 

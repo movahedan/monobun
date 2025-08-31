@@ -38,22 +38,22 @@ const ciActConfig = {
 	],
 } as const satisfies ScriptConfig;
 
-export const ciAct = createScript(ciActConfig, async function main(args) {
-	console.log(`📋 on: ${args.event} at: ${args.workflow} \n`);
+export const ciAct = createScript(ciActConfig, async function main(args, xConsole) {
+	xConsole.log(`📋 on: ${args.event} at: ${args.workflow} \n`);
 
 	try {
 		await $`act ${args.event} -W ${args.workflow} -P ubuntu-latest=catthehacker/ubuntu:act-latest --quiet`;
 		if (args.verbose) {
-			console.log("✅ Success with catthehacker/ubuntu:act-latest image!");
+			xConsole.log("✅ Success with catthehacker/ubuntu:act-latest image!");
 		}
 	} catch (error) {
-		console.error("❌ Act test failed:", error);
+		xConsole.error("❌ Act test failed:", error);
 		throw error;
 	} finally {
-		await cleanupActContainers();
+		await cleanupActContainers(xConsole);
 	}
 
-	console.log("✅ GitHub Actions test completed!");
+	xConsole.log("✅ GitHub Actions test completed!");
 });
 
 if (import.meta.main) {
@@ -61,16 +61,16 @@ if (import.meta.main) {
 }
 
 // Cleanup function to stop and remove act containers
-async function cleanupActContainers() {
+async function cleanupActContainers(xConsole: typeof console) {
 	try {
-		console.log("\n🧹 Cleaning up act containers...");
+		xConsole.log("\n🧹 Cleaning up act containers...");
 
 		try {
 			// Check if any act containers exist before trying to stop them
 			const runningContainers = await $`docker ps -q --filter "label=com.act.container"`.text();
 			if (runningContainers.trim()) {
 				await $`docker ps -q --filter "label=com.act.container" | xargs -r docker stop`;
-				console.log("✅ Stopped running act containers");
+				xConsole.log("✅ Stopped running act containers");
 			}
 		} catch (error) {
 			console.warn("⚠️  Warning: act containers do not exist:", error);
@@ -81,7 +81,7 @@ async function cleanupActContainers() {
 			const allContainers = await $`docker ps -aq --filter "label=com.act.container"`.text();
 			if (allContainers.trim()) {
 				await $`docker ps -aq --filter "label=com.act.container" | xargs -r docker rm`;
-				console.log("✅ Removed act containers");
+				xConsole.log("✅ Removed act containers");
 			}
 		} catch (error) {
 			console.warn("⚠️  Warning: act containers may not have been cleaned up:", error);
@@ -92,13 +92,13 @@ async function cleanupActContainers() {
 			const networks = await $`docker network ls -q --filter "label=com.act.network"`.text();
 			if (networks.trim()) {
 				await $`docker network ls -q --filter "label=com.act.network" | xargs -r docker network rm`;
-				console.log("✅ Removed act networks");
+				xConsole.log("✅ Removed act networks");
 			}
 		} catch (error) {
 			console.warn("⚠️  Warning: act networks do not exist:", error);
 		}
 
-		console.log("✅ Act containers cleaned up successfully!");
+		xConsole.log("✅ Act containers cleaned up successfully!");
 	} catch (error) {
 		console.warn("⚠️  Warning: Some containers may not have been cleaned up:", error);
 	}

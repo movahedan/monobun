@@ -113,7 +113,6 @@ export const setupBunMocks = async (options?: MockBunOptions) => {
 	write = mocks.mockWrite as unknown as typeof write;
 	file = mocks.mockFile as unknown as typeof file;
 	$ = mocks.mockCommand as unknown as typeof $;
-	console.log("mocks", $`git show --format=%H%n%an%n%ad%n%s%n%B --no-patch `.text());
 
 	return mocks;
 };

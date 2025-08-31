@@ -24,7 +24,7 @@
 		"dev:storybook": "bunx --bun storybook dev --no-open",
 		"prebuild": "bun run ../../scripts/update-package-json.ts",
 		"build:storybook": "bunx --bun storybook build -o dist-storybook",
-		"start": "bunx --bun serve dist-storybook"
+		"start": "bun run build:storybook && bunx --bun serve dist-storybook"
 	},
 	"dependencies": {
 		"@radix-ui/react-label": "2.1.7",

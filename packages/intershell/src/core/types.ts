@@ -135,29 +135,6 @@ export type InferArgs<TConfig extends ScriptConfig> = {
 	debug?: boolean;
 };
 
-// Progress tracking types
-export interface ProgressTracker {
-	current: number;
-	total: number;
-	message?: string;
-	update(current: number, message?: string): void;
-	complete(): void;
-}
-
-export interface Spinner {
-	text: string;
-	start(): void;
-	stop(): void;
-	succeed(text?: string): void;
-	fail(text?: string): void;
-	warn(text?: string): void;
-	info(text?: string): void;
-}
-
-export interface ProgressBar extends ProgressTracker {
-	render(): void;
-}
-
 // Hook system types
 export interface HookContext<TConfig extends ScriptConfig> {
 	script: ScriptInstance<TConfig>;

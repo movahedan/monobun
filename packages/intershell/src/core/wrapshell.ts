@@ -5,12 +5,9 @@ import type {
 	HookContext,
 	HookSystem,
 	InferArgs,
-	ProgressBar,
-	ProgressTracker,
 	ScriptConfig,
 	ScriptHandler,
 	ScriptInstance,
-	Spinner,
 } from "./types";
 
 const validators = {
@@ -163,86 +160,6 @@ const defaultConfig = {
 	],
 } as const satisfies ScriptConfig;
 
-class SimpleProgressTracker implements ProgressTracker {
-	current = 0;
-	total: number;
-	message?: string;
-
-	constructor(total: number, message?: string) {
-		this.total = total;
-		this.message = message;
-	}
-
-	update(current: number, message?: string): void {
-		this.current = current;
-		if (message) this.message = message;
-		this.render();
-	}
-
-	complete(): void {
-		this.current = this.total;
-		this.render();
-		console.log();
-	}
-
-	render(): void {
-		const percent = Math.round((this.current / this.total) * 100);
-		const barLength = 30;
-		const filled = Math.round((this.current / this.total) * barLength);
-		const bar = "█".repeat(filled) + "░".repeat(barLength - filled);
-
-		process.stdout.write(
-			`\r${colorify.cyan("Progress:")} [${bar}] ${percent}% ${this.message || ""}`,
-		);
-	}
-}
-
-class SimpleSpinner implements Spinner {
-	private interval?: NodeJS.Timeout;
-	private frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
-	private frameIndex = 0;
-	text: string;
-
-	constructor(text: string) {
-		this.text = text;
-	}
-
-	start(): void {
-		this.interval = setInterval(() => {
-			process.stdout.write(`\r${this.frames[this.frameIndex]} ${this.text}`);
-			this.frameIndex = (this.frameIndex + 1) % this.frames.length;
-		}, 100);
-	}
-
-	stop(): void {
-		if (this.interval) {
-			clearInterval(this.interval);
-			this.interval = undefined;
-		}
-		process.stdout.write(`\r${" ".repeat(this.text.length + 2)}\r`);
-	}
-
-	succeed(text?: string): void {
-		this.stop();
-		console.log(colorify.green("✓"), text || this.text);
-	}
-
-	fail(text?: string): void {
-		this.stop();
-		console.log(colorify.red("✗"), text || this.text);
-	}
-
-	warn(text?: string): void {
-		this.stop();
-		console.log(colorify.yellow("⚠"), text || this.text);
-	}
-
-	info(text?: string): void {
-		this.stop();
-		console.log(colorify.blue("ℹ"), text || this.text);
-	}
-}
-
 class WrapShell<TConfig extends ScriptConfig> {
 	private config: TConfig;
 	private hooks: Partial<HookSystem<TConfig>> = {};
@@ -266,7 +183,7 @@ class WrapShell<TConfig extends ScriptConfig> {
 					args:
 						passedArgs ||
 						(await wrapShell.parseArgs().catch((e) => {
-							wrapShell.showHelp();
+							wrapShell.showHelp(null);
 							console.error(e);
 							process.exit(1);
 						})),
@@ -328,7 +245,7 @@ class WrapShell<TConfig extends ScriptConfig> {
 			const nextArg = args[i + 1];
 
 			if (arg === "-h" || arg === "--help") {
-				this.showHelp();
+				this.showHelp(result as InferArgs<TConfig>);
 				process.exit(0);
 			}
 
@@ -413,46 +330,36 @@ class WrapShell<TConfig extends ScriptConfig> {
 		});
 	}
 
-	private showHelp(): void {
-		console.log(colorify.blue(this.config.name));
-		console.log(this.config.description);
-		console.log();
+	private showHelp(args: InferArgs<TConfig> | null): void {
+		const xConsole = this.createEnhancedConsole(args || ({} as InferArgs<TConfig>));
+		xConsole.log(colorify.blue(this.config.name));
+		xConsole.log(this.config.description);
+		xConsole.log();
 
 		if (this.config.usage) {
-			console.log("Usage:");
-			console.log(`  ${this.config.usage}`);
-			console.log();
+			xConsole.log("Usage:");
+			xConsole.log(`  ${this.config.usage}\n`);
 		}
 
 		const allOptions = [...defaultConfig.options, ...this.config.options];
 		if (allOptions.length > 0) {
-			console.log("Options:");
+			xConsole.log("Options:");
 			allOptions.forEach((option) => {
 				const shortFlag = option.short ? `${option.short}, ` : "    ";
 				const required = option.required ? colorify.red(" (required)") : "";
-				console.log(`  ${shortFlag}${option.long}${required}`);
-				console.log(`      ${option.description}`);
+				xConsole.log(`  ${shortFlag}${option.long}${required}`);
+				xConsole.log(`      ${option.description}`);
 			});
-			console.log();
+			xConsole.log();
 		}
 
 		if (this.config.examples && this.config.examples.length > 0) {
-			console.log("Examples:");
+			xConsole.log("Examples:");
 			this.config.examples.forEach((example) => {
-				console.log(`  ${colorify.gray(example)}`);
+				xConsole.log(`  ${colorify.gray(example)}`);
 			});
 		}
 	}
-
-	static progress = {
-		create: (total: number, message?: string): ProgressTracker =>
-			new SimpleProgressTracker(total, message),
-
-		spinner: (message: string): Spinner => new SimpleSpinner(message),
-
-		bar: (total: number, message?: string): ProgressBar =>
-			new SimpleProgressTracker(total, message),
-	};
 
 	static hooks = {
 		beforeRun: <TConfig extends ScriptConfig>(

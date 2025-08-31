@@ -2,7 +2,7 @@
 
 import { setTimeout } from "node:timers/promises";
 import { colorify, createScript, type ScriptConfig } from "@repo/intershell/core";
-import { EntityCompose, type ServiceHealth, type ServiceInfo } from "@repo/intershell/entities";
+import { EntityCompose, type ServiceHealth } from "@repo/intershell/entities";
 import { $ } from "bun";
 
 const devCheckConfig = {
@@ -13,8 +13,8 @@ const devCheckConfig = {
 	options: [
 		{
 			short: "-s",
-			long: "--shutdown",
-			description: "Shutdown services after checks complete",
+			long: "--keep-alive",
+			description: "Keep services alive after checks complete",
 			required: false,
 			type: "boolean",
 			validator: createScript.validators.boolean,
@@ -27,23 +27,20 @@ const devCheck = createScript(devCheckConfig, async function main(args, xConsole
 
 	await $`bun run dev:up --build`;
 	const compose = new EntityCompose("./docker-compose.dev.yml");
-	await monitorServiceHealth(compose.getServiceHealth, compose.getServices, xConsole);
+	await monitorServiceHealth(compose, xConsole);
 
 	xConsole.log(colorify.blue("\n📊 Services are available at:"));
 	const devUrls = await compose.getServiceUrls();
 	for (const [name, url] of Object.entries(devUrls)) {
 		xConsole.log(colorify.cyan(`   • ${name}: ${url}`));
 	}
-
 	xConsole.log(colorify.green("✅ DevContainer health check completed successfully!"));
 
-	if (args.shutdown) {
+	if (args["keep-alive"]) {
+		xConsole.log(colorify.yellow("💡 Use 'bun run dev:check --keep-alive' to keep services alive"));
+	} else {
 		xConsole.log(colorify.yellow("🧹 Cleaning up services..."));
 		await $`bun run dev:down`;
-	} else {
-		xConsole.log(
-			colorify.yellow("💡 Use 'bun run dev:check --shutdown' to stop services when done"),
-		);
 	}
 });
 
@@ -63,18 +60,14 @@ const colors: Record<ServiceHealth["status"], (text: string) => string> = {
 	unhealthy: colorify.red,
 	unknown: colorify.gray,
 };
-async function monitorServiceHealth(
-	serviceHealth: () => Promise<ServiceHealth[]>,
-	services: () => Promise<ServiceInfo[]>,
-	xConsole: typeof console,
-) {
+async function monitorServiceHealth(compose: EntityCompose, xConsole: typeof console) {
+	const services = await compose.getServices();
 	xConsole.log(colorify.yellow("⏳ Waiting for services to become healthy..."));
 
 	const retryInterval = 5_000;
 	const maxRetries = 6; // 6 * retryInterval = 30 seconds total
 	let retryCount = 0;
 	let allHealthy = false;
-	const serviceList = await services();
 
 	let healthResult: ServiceHealth[] | null = null;
 	while (retryCount < maxRetries && !allHealthy) {
@@ -87,11 +80,11 @@ async function monitorServiceHealth(
 			await setTimeout(retryInterval);
 		}
 
-		healthResult = await serviceHealth();
+		healthResult = await compose.getServiceHealth();
 
 		if (
 			healthResult.every((s) => s.status === "healthy") &&
-			healthResult.length === serviceList.length
+			healthResult.length === services.length
 		) {
 			allHealthy = true;
 		} else {
@@ -109,7 +102,7 @@ async function monitorServiceHealth(
 	for (const service of healthResult) {
 		const icon = icons[service.status];
 		const color = colors[service.status];
-		const port = serviceList.find((s) => s.name === service.name)?.ports[0];
+		const port = services.find((s) => s.name === service.name)?.ports[0];
 		xConsole.log(`${icon} ${color(service.name)}: ${service.status} ${port ? `(${port})` : ""}`);
 	}
 

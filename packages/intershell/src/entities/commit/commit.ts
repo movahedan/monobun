@@ -170,7 +170,6 @@ export class EntityCommitClass {
 				.$`git show --format="%H%n%an%n%ad%n%s%n%B" --no-patch ${hash}`
 				.quiet()
 				.nothrow();
-			console.log("commitResult", commitResult.text());
 			if (commitResult.exitCode !== 0) throw new Error(`Could not find commit ${hash}`);
 
 			const lines = commitResult.text().trim().split("\n");

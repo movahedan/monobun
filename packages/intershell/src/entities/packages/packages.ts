@@ -57,16 +57,21 @@ export class EntityPackages {
 	}
 	readChangelog(): string {
 		const changelogPath = this.getChangelogPath();
-		const changelog = readFileSync(changelogPath, "utf8");
-		return changelog || "";
+		try {
+			const changelog = readFileSync(changelogPath, "utf8");
+			return changelog || "";
+		} catch {
+			return "";
+		}
 	}
 	async writeChangelog(content: string): Promise<void> {
-		const isExists = await file(this.getChangelogPath()).exists();
-		if (isExists) {
-			await write(this.getChangelogPath(), content);
-		} else {
-			await write(this.getChangelogPath(), content, { createPath: true });
+		try {
+			await file(this.getChangelogPath()).exists();
+		} catch {
+			await $`touch ${this.getChangelogPath()}`.quiet();
 		}
+
+		await write(this.getChangelogPath(), content);
 		await $`bun biome check --write --no-errors-on-unmatched ${this.getJsonPath()}`.quiet();
 	}
 
