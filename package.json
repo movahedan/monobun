@@ -10,7 +10,7 @@
 	],
 	"packageManager": "bun@1.2.21",
 	"intershell": {
-		"config": "i.config.ts"
+		"config": "intershell.config.ts"
 	},
 	"scripts": {
 		"//local": "//////////////////////////////////////////////////////////////////////// local //",
