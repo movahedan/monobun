@@ -1,12 +1,13 @@
 #!/usr/bin/env bun
 
-import { colorify, createScript, type ScriptConfig } from "@repo/intershell/core";
+import { colorify, createScript, type InferArgs, type ScriptConfig } from "@repo/intershell/core";
 import {
 	DefaultChangelogTemplate,
 	EntityChangelog,
 	EntityCompose,
 	EntityPackages,
 	EntityTag,
+	EntityVersion,
 	type VersionData,
 } from "@repo/intershell/entities";
 import { $ } from "bun";
@@ -19,6 +20,8 @@ const scriptConfig = {
 		"bun run version-prepare.ts",
 		"bun run version-prepare.ts --package root",
 		"bun run version-prepare.ts --from v1.0.0 --to HEAD",
+		"bun run version-prepare.ts --from-version 1.0.0 --to-version 1.2.0",
+		"bun run version-prepare.ts --package @repo/intershell --from-version 1.0.0",
 	],
 	options: [
 		{
@@ -27,6 +30,7 @@ const scriptConfig = {
 			description: "Package name to process (default: all packages)",
 			required: false,
 			type: "string",
+			defaultValue: "root",
 			validator: createScript.validators.nonEmpty,
 		},
 		{
@@ -45,12 +49,77 @@ const scriptConfig = {
 			type: "string",
 			validator: createScript.validators.nonEmpty,
 		},
+		{
+			short: "-fv",
+			long: "--from-version",
+			description:
+				"Start version for changelog generation (converts to appropriate tag based on package)",
+			required: false,
+			type: "string",
+			validator: createScript.validators.nonEmpty,
+		},
+		{
+			short: "-tv",
+			long: "--to-version",
+			description:
+				"End version for changelog generation (converts to appropriate tag based on package)",
+			required: false,
+			type: "string",
+			validator: createScript.validators.nonEmpty,
+		},
 	],
 } as const satisfies ScriptConfig;
 
+/**
+ * Converts a version to the appropriate tag based on package context
+ * @param version - The version number (e.g., "1.2.3")
+ * @param packageName - The package name to determine tag prefix
+ * @returns The full tag name (e.g., "v1.2.3" or "intershell-v1.2.3")
+ */
+async function versionToTag(version: string, packageName?: string): Promise<string> {
+	if (!packageName) {
+		// Default to root package prefix when no specific package
+		return `v${version}`;
+	}
+
+	const versionEntity = new EntityVersion(packageName);
+	const prefix = await versionEntity.getTagPrefix();
+	return `${prefix}${version}`;
+}
+
+/**
+ * Resolves from/to commits, handling version-to-tag conversion when needed
+ */
+async function resolveCommitRange(
+	args: InferArgs<typeof scriptConfig>,
+	xConsole: typeof console,
+): Promise<{ fromCommit: string; toCommit: string }> {
+	let fromCommit: string;
+	let toCommit: string;
+
+	// Handle --from-version conversion
+	if (args["from-version"]) {
+		const fromTag = await versionToTag(args["from-version"], args.package);
+		xConsole.info(`📝 Converting --from-version ${args["from-version"]} to tag: ${fromTag}`);
+		fromCommit = await EntityTag.getBaseCommitSha(fromTag);
+	} else {
+		fromCommit = await EntityTag.getBaseCommitSha(args.from);
+	}
+
+	// Handle --to-version conversion
+	if (args["to-version"]) {
+		const toTag = await versionToTag(args["to-version"], args.package);
+		xConsole.info(`📝 Converting --to-version ${args["to-version"]} to tag: ${toTag}`);
+		toCommit = await EntityTag.getBaseCommitSha(toTag);
+	} else {
+		toCommit = args.to || "HEAD";
+	}
+
+	return { fromCommit, toCommit };
+}
+
 export const versionPrepare = createScript(scriptConfig, async function main(args, xConsole) {
-	const fromCommit = await EntityTag.getBaseTagSha(args.from);
-	const toCommit = args.to || "HEAD";
+	const { fromCommit, toCommit } = await resolveCommitRange(args, xConsole);
 	const processAll = !args.package;
 
 	xConsole.info("🚀 Starting version preparation");
@@ -114,7 +183,9 @@ export const versionPrepare = createScript(scriptConfig, async function main(arg
 		for (const packageName of packagesToProcess) {
 			try {
 				const packageJson = new EntityPackages(packageName);
-				const template = new DefaultChangelogTemplate(packageName);
+				const versionEntity = new EntityVersion(packageName);
+				const prefix = await versionEntity.getTagPrefix();
+				const template = new DefaultChangelogTemplate(packageName, prefix);
 				const changelog = new EntityChangelog(packageName, template);
 				await changelog.calculateRange(fromCommit, toCommit);
 				const commitCount = changelog.getCommitCount();
@@ -144,7 +215,7 @@ export const versionPrepare = createScript(scriptConfig, async function main(arg
 					}
 
 					if (packageName === "root") {
-						versionCommitMessage += `release: ${EntityTag.toTag(versionData.targetVersion)}\n\n`;
+						versionCommitMessage += `release: v${versionData.targetVersion}\n\n`;
 					}
 
 					const log = `📦 (${versionData.currentVersion} => ${versionData.targetVersion}) ${packageName}: ${versionData.bumpType} (${packageJson.getChangelogPath()})`;
