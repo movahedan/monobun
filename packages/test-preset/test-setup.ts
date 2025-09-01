@@ -2,7 +2,7 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: just a test preset */
 // This file is preloaded before running tests across all packages
 
-import { afterEach, expect } from "bun:test";
+import { afterEach, expect, mock } from "bun:test";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup } from "@testing-library/react";
@@ -18,6 +18,8 @@ expect.extend(matchers);
 // Clean up after each test
 afterEach(() => {
 	cleanup();
+	mock.clearAllMocks();
+	mock.restore();
 });
 
 // Global test utilities

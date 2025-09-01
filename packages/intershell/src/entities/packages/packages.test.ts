@@ -1,37 +1,96 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import { restoreBunMocks, setupBunMocks } from "@repo/test-preset/mock-bun";
-import { mockFsModule } from "@repo/test-preset/mock-modules";
+import { beforeEach, describe, expect, it, type Mock, mock } from "bun:test";
+import { EntityPackages } from "./packages";
 import type { PackageJson } from "./types";
 
-const mockPackageJson = (overrides: Partial<PackageJson> = {}): PackageJson => ({
-	name: "test-package",
-	version: "1.0.0",
-	description: "Test package",
-	...overrides,
-});
+export type EntityPackagesMock = Mock<
+	() => Partial<{
+		getPath: ReturnType<typeof mock>;
+		getJsonPath: ReturnType<typeof mock>;
+		readJson: ReturnType<typeof mock>;
+		writeJson: ReturnType<typeof mock>;
+		readVersion: ReturnType<typeof mock>;
+		writeVersion: ReturnType<typeof mock>;
+		getChangelogPath: ReturnType<typeof mock>;
+		readChangelog: ReturnType<typeof mock>;
+		writeChangelog: ReturnType<typeof mock>;
+		validatePackage: ReturnType<typeof mock>;
+		shouldVersion: ReturnType<typeof mock>;
+		getTagSeriesName: ReturnType<typeof mock>;
+		getRepoUrl: ReturnType<typeof mock>;
+		getAllPackages: ReturnType<typeof mock>;
+		getVersionedPackages: ReturnType<typeof mock>;
+		getUnversionedPackages: ReturnType<typeof mock>;
+		validateAllPackages: ReturnType<typeof mock>;
+	}>
+>;
 
-mock.module("node:fs", () =>
-	mockFsModule((path) => {
-		if (path.includes("package.json")) {
-			return JSON.stringify(mockPackageJson());
-		}
-		return "";
-	}),
-);
-
-const { EntityPackages } = await import("./packages");
+export function mockEntityPackages(entityPackages: EntityPackagesMock) {
+	return mock.module("./packages", () => ({
+		EntityPackages: entityPackages,
+	}));
+}
 
 describe("EntityPackages", () => {
 	let packages: InstanceType<typeof EntityPackages>;
 	const mockPackageName = "test-package";
 
-	beforeEach(() => {
-		setupBunMocks();
+	const mockPackageJson = (overrides: Partial<PackageJson> = {}): PackageJson => ({
+		name: "test-package",
+		version: "1.0.0",
+		description: "Test package",
+		...overrides,
 	});
 
-	afterEach(() => {
-		restoreBunMocks();
-		mock.restore();
+	let mockPackagesShell: {
+		readJsonFile: ReturnType<typeof mock>;
+		writeJsonFile: ReturnType<typeof mock>;
+		readChangelogFile: ReturnType<typeof mock>;
+		writeChangelogFile: ReturnType<typeof mock>;
+		runBiomeCheck: ReturnType<typeof mock>;
+		fileExists: ReturnType<typeof mock>;
+		readDirectory: ReturnType<typeof mock>;
+		canAccessFile: ReturnType<typeof mock>;
+		readFileAsText: ReturnType<typeof mock>;
+		getWorkspaceRoot: ReturnType<typeof mock>;
+	};
+
+	beforeEach(() => {
+		// Mock packagesShell
+		mockPackagesShell = {
+			readJsonFile: mock((path: string) => {
+				if (path.includes("package.json")) {
+					return mockPackageJson();
+				}
+				throw new Error(`File not found: ${path}`);
+			}),
+			writeJsonFile: mock(() => Promise.resolve()),
+			readChangelogFile: mock((path: string) => {
+				if (path.includes("CHANGELOG.md")) {
+					return "# Test Changelog\n\n## 1.0.0\n- Initial release";
+				}
+				return "";
+			}),
+			writeChangelogFile: mock(() => Promise.resolve()),
+			runBiomeCheck: mock(() => Promise.resolve()),
+			fileExists: mock(() => Promise.resolve(true)),
+			readDirectory: mock(() => Promise.resolve([])),
+			canAccessFile: mock(() => Promise.resolve(true)),
+			readFileAsText: mock((path: string) => {
+				if (path.includes("package.json")) {
+					return Promise.resolve(JSON.stringify(mockPackageJson()));
+				}
+				return Promise.resolve("");
+			}),
+			getWorkspaceRoot: mock(() => Promise.resolve("/workspace")),
+		};
+
+		// Mock the packagesShell module
+		mock.module("./packages.shell", () => ({
+			packagesShell: mockPackagesShell,
+		}));
+
+		// Create instance after mocking
+		packages = new EntityPackages(mockPackageName);
 	});
 
 	describe("constructor", () => {
@@ -105,15 +164,29 @@ describe("EntityPackages", () => {
 		});
 
 		it("should throw error when file read fails", () => {
+			// Mock packagesShell to throw an error for this test
+			mockPackagesShell.readJsonFile.mockImplementationOnce(() => {
+				throw new Error("File read failed");
+			});
+
 			expect(() => {
 				new EntityPackages("error-package");
-			}).not.toThrow();
+			}).toThrow(
+				"Package not found error-package at apps/error-package/package.json: Error: File read failed",
+			);
 		});
 
 		it("should throw error when JSON parsing fails", () => {
+			// Mock packagesShell to return invalid JSON for this test
+			mockPackagesShell.readJsonFile.mockImplementationOnce(() => {
+				throw new Error("Invalid JSON");
+			});
+
 			expect(() => {
 				new EntityPackages("invalid-json-package");
-			}).not.toThrow();
+			}).toThrow(
+				"Package not found invalid-json-package at apps/invalid-json-package/package.json: Error: Invalid JSON",
+			);
 		});
 	});
 
@@ -123,15 +196,12 @@ describe("EntityPackages", () => {
 		});
 
 		it("should write package.json and run biome check", async () => {
-			setupBunMocks({
-				command: {
-					text: "biome check completed",
-					exitCode: 0,
+			mock.module("./packages.shell", () => ({
+				packagesShell: {
+					runBiomeCheck: mock(() => Promise.resolve()),
+					writeJsonFile: mock(() => Promise.resolve()),
 				},
-				write: {
-					result: 42,
-				},
-			});
+			}));
 
 			const newData = { ...mockPackageJson(), version: "2.0.0" };
 			await packages.writeJson(newData);
@@ -190,19 +260,13 @@ describe("EntityPackages", () => {
 		});
 
 		it("should read changelog content", () => {
-			mock.module("node:fs", () => ({
-				readFileSync: (path: string, _encoding: string) => {
-					if (path.includes("package.json")) {
-						return JSON.stringify(mockPackageJson());
-					}
-					if (path.includes("CHANGELOG.md")) {
-						return "# Test Changelog\n\n## 1.0.0\n- Initial release";
-					}
-					return "";
-				},
-				writeFileSync: () => {},
-				existsSync: () => true,
-			}));
+			// Update the mock for this specific test
+			mockPackagesShell.readChangelogFile.mockImplementationOnce((path: string) => {
+				if (path.includes("CHANGELOG.md")) {
+					return "# Test Changelog\n\n## 1.0.0\n- Initial release";
+				}
+				return "";
+			});
 
 			const changelogPackages = new EntityPackages("test-package");
 			const result = changelogPackages.readChangelog();
@@ -210,23 +274,16 @@ describe("EntityPackages", () => {
 		});
 
 		it("should return empty string when changelog is empty", () => {
-			mock.module("node:fs", () =>
-				mockFsModule((path) => {
-					if (path.includes("package.json")) {
-						return JSON.stringify(mockPackageJson());
-					}
-					if (path.includes("CHANGELOG.md")) {
-						return "";
-					}
-					return "";
-				}),
-			);
+			// Update the mock for this specific test
+			mockPackagesShell.readChangelogFile.mockImplementationOnce(() => "");
+
 			const emptyChangelogPackages = new EntityPackages("test-package");
 			const result = emptyChangelogPackages.readChangelog();
 			expect(result).toBe("");
 		});
 
-		it("should throw error when changelog read fails", () => {
+		it("should not throw error when changelog read fails", () => {
+			// The readChangelog method should handle errors gracefully
 			expect(() => packages.readChangelog()).not.toThrow();
 		});
 	});
@@ -260,13 +317,9 @@ describe("EntityPackages", () => {
 		});
 
 		it("should return error for invalid version format", () => {
-			mock.module("node:fs", () =>
-				mockFsModule((path) => {
-					if (path.includes("package.json")) {
-						return JSON.stringify(mockPackageJson({ version: "invalid-version" }));
-					}
-					return "";
-				}),
+			// Mock packagesShell to return invalid version for this test
+			mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+				mockPackageJson({ version: "invalid-version" }),
 			);
 
 			const invalidPackages = new EntityPackages("invalid-version-package");
@@ -280,14 +333,9 @@ describe("EntityPackages", () => {
 		it("should return error for missing description", () => {
 			const packageJson = mockPackageJson();
 			delete packageJson.description;
-			mock.module("node:fs", () =>
-				mockFsModule((path) => {
-					if (path.includes("package.json")) {
-						return JSON.stringify(packageJson);
-					}
-					return "";
-				}),
-			);
+
+			// Mock packagesShell to return package without description for this test
+			mockPackagesShell.readJsonFile.mockImplementationOnce(() => packageJson);
 
 			const noDescPackages = new EntityPackages("no-description-package");
 			const result = noDescPackages.validatePackage();
@@ -300,14 +348,9 @@ describe("EntityPackages", () => {
 		it("should return multiple errors for multiple issues", () => {
 			const packageJson = mockPackageJson({ version: "invalid" });
 			delete packageJson.description;
-			mock.module("node:fs", () =>
-				mockFsModule((path) => {
-					if (path.includes("package.json")) {
-						return JSON.stringify(packageJson);
-					}
-					return "";
-				}),
-			);
+
+			// Mock packagesShell to return package with multiple issues for this test
+			mockPackagesShell.readJsonFile.mockImplementationOnce(() => packageJson);
 
 			const multiIssuePackages = new EntityPackages("multi-issue-package");
 			const result = multiIssuePackages.validatePackage();
@@ -325,14 +368,8 @@ describe("EntityPackages", () => {
 			const invalidVersions = ["1.0", "1.0.0.0", "1.0.0-beta", "v1.0.0"];
 
 			validVersions.forEach((version) => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(mockPackageJson({ version }));
-						}
-						return "";
-					}),
-				);
+				// Mock packagesShell to return valid version for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() => mockPackageJson({ version }));
 
 				const validPackages = new EntityPackages(`valid-${version}-package`);
 				const result = validPackages.validatePackage();
@@ -340,14 +377,8 @@ describe("EntityPackages", () => {
 			});
 
 			invalidVersions.forEach((version) => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(mockPackageJson({ version }));
-						}
-						return "";
-					}),
-				);
+				// Mock packagesShell to return invalid version for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() => mockPackageJson({ version }));
 
 				const invalidPackages = new EntityPackages(`invalid-${version}-package`);
 				const result = invalidPackages.validatePackage();
@@ -359,13 +390,9 @@ describe("EntityPackages", () => {
 	describe("selective versioning", () => {
 		describe("shouldVersion", () => {
 			it("should return true for packages with private: false", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(mockPackageJson({ private: false }));
-						}
-						return "";
-					}),
+				// Mock packagesShell to return package with private: false for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+					mockPackageJson({ private: false }),
 				);
 
 				const publicPackages = new EntityPackages("public-package");
@@ -373,29 +400,20 @@ describe("EntityPackages", () => {
 			});
 
 			it("should return true for packages with no private field", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							const packageJson = mockPackageJson();
-							delete packageJson.private;
-							return JSON.stringify(packageJson);
-						}
-						return "";
-					}),
-				);
+				const packageJson = mockPackageJson();
+				delete packageJson.private;
+
+				// Mock packagesShell to return package without private field for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() => packageJson);
 
 				const defaultPackages = new EntityPackages("default-package");
 				expect(defaultPackages.shouldVersion()).toBe(true);
 			});
 
 			it("should return false for packages with private: true", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(mockPackageJson({ private: true }));
-						}
-						return "";
-					}),
+				// Mock packagesShell to return package with private: true for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+					mockPackageJson({ private: true }),
 				);
 
 				const privatePackages = new EntityPackages("private-package");
@@ -405,13 +423,9 @@ describe("EntityPackages", () => {
 
 		describe("getTagSeriesName", () => {
 			it("should return 'v' for root package", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(mockPackageJson({ name: "root", private: false }));
-						}
-						return "";
-					}),
+				// Mock packagesShell to return root package for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+					mockPackageJson({ name: "root", private: false }),
 				);
 
 				const rootPackages = new EntityPackages("root");
@@ -419,13 +433,9 @@ describe("EntityPackages", () => {
 			});
 
 			it("should return 'package-name-v' for @repo packages", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(mockPackageJson({ name: "@repo/intershell", private: false }));
-						}
-						return "";
-					}),
+				// Mock packagesShell to return @repo package for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+					mockPackageJson({ name: "@repo/intershell", private: false }),
 				);
 
 				const intershellPackages = new EntityPackages("@repo/intershell");
@@ -433,13 +443,9 @@ describe("EntityPackages", () => {
 			});
 
 			it("should return 'package-name-v' for regular packages", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(mockPackageJson({ name: "my-app", private: false }));
-						}
-						return "";
-					}),
+				// Mock packagesShell to return regular package for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+					mockPackageJson({ name: "my-app", private: false }),
 				);
 
 				const appPackages = new EntityPackages("my-app");
@@ -447,13 +453,9 @@ describe("EntityPackages", () => {
 			});
 
 			it("should return null for private packages", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(mockPackageJson({ private: true }));
-						}
-						return "";
-					}),
+				// Mock packagesShell to return private package for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+					mockPackageJson({ private: true }),
 				);
 
 				const privatePackages = new EntityPackages("private-package");
@@ -465,17 +467,11 @@ describe("EntityPackages", () => {
 	describe("static methods", () => {
 		describe("getRepoUrl", () => {
 			it("should return repository URL when repository is a string", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(
-								mockPackageJson({
-									name: "root",
-									repository: "https://github.com/user/repo.git",
-								}),
-							);
-						}
-						return "";
+				// Mock packagesShell to return root package with string repository for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+					mockPackageJson({
+						name: "root",
+						repository: "https://github.com/user/repo.git",
 					}),
 				);
 
@@ -484,20 +480,14 @@ describe("EntityPackages", () => {
 			});
 
 			it("should return repository URL when repository is an object", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(
-								mockPackageJson({
-									name: "root",
-									repository: {
-										type: "git",
-										url: "https://github.com/user/repo.git",
-									},
-								}),
-							);
-						}
-						return "";
+				// Mock packagesShell to return root package with object repository for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+					mockPackageJson({
+						name: "root",
+						repository: {
+							type: "git",
+							url: "https://github.com/user/repo.git",
+						},
 					}),
 				);
 
@@ -508,34 +498,23 @@ describe("EntityPackages", () => {
 			it("should return empty string when repository is missing", () => {
 				const packageJson = mockPackageJson({ name: "root" });
 				delete packageJson.repository;
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(packageJson);
-						}
-						return "";
-					}),
-				);
+
+				// Mock packagesShell to return root package without repository for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() => packageJson);
 
 				const result = EntityPackages.getRepoUrl();
 				expect(result).toBe("");
 			});
 
 			it("should return empty string when repository object has no url", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(
-								mockPackageJson({
-									name: "root",
-									repository: {
-										type: "git",
-										url: "",
-									},
-								}),
-							);
-						}
-						return "";
+				// Mock packagesShell to return root package with repository object without url for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+					mockPackageJson({
+						name: "root",
+						repository: {
+							type: "git",
+							url: "",
+						},
 					}),
 				);
 
@@ -544,20 +523,14 @@ describe("EntityPackages", () => {
 			});
 
 			it("should return empty string when repository object has no url property", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(
-								mockPackageJson({
-									name: "root",
-									repository: {
-										type: "git",
-										url: "",
-									},
-								}),
-							);
-						}
-						return "";
+				// Mock packagesShell to return root package with repository object without url property for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+					mockPackageJson({
+						name: "root",
+						repository: {
+							type: "git",
+							url: "", // Provide empty url to satisfy type requirements
+						},
 					}),
 				);
 
@@ -566,17 +539,11 @@ describe("EntityPackages", () => {
 			});
 
 			it("should return empty string when repository is undefined", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(
-								mockPackageJson({
-									name: "root",
-									repository: undefined,
-								}),
-							);
-						}
-						return "";
+				// Mock packagesShell to return root package with undefined repository for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+					mockPackageJson({
+						name: "root",
+						repository: undefined,
 					}),
 				);
 
@@ -585,17 +552,11 @@ describe("EntityPackages", () => {
 			});
 
 			it("should return repository URL when repository is a string", () => {
-				mock.module("node:fs", () =>
-					mockFsModule((path) => {
-						if (path.includes("package.json")) {
-							return JSON.stringify(
-								mockPackageJson({
-									name: "root",
-									repository: "https://github.com/example/repo",
-								}),
-							);
-						}
-						return "";
+				// Mock packagesShell to return root package with string repository for this test
+				mockPackagesShell.readJsonFile.mockImplementationOnce(() =>
+					mockPackageJson({
+						name: "root",
+						repository: "https://github.com/example/repo",
 					}),
 				);
 
@@ -606,27 +567,21 @@ describe("EntityPackages", () => {
 
 		describe("getAllPackages", () => {
 			it("should return list of packages including root", async () => {
-				const mockFsContent = (path: string) => {
-					if (path.includes("apps/test-app/package.json")) {
-						return JSON.stringify({ name: "test-app", version: "1.0.0" });
-					}
-					if (path.includes("apps/another-app/package.json")) {
-						return JSON.stringify({ name: "another-app", version: "1.0.0" });
-					}
-					if (path.includes("packages/ui/package.json")) {
-						return JSON.stringify({ name: "@repo/ui", version: "1.0.0" });
-					}
-					if (path.includes("packages/utils/package.json")) {
-						return JSON.stringify({ name: "@repo/utils", version: "1.0.0" });
-					}
-					if (path.includes("package.json")) {
-						return JSON.stringify({ name: "root", version: "1.0.0" });
-					}
-					return "";
-				};
-
-				const { mockFsPromisesModule } = await import("@repo/test-preset/mock-modules");
-				mock.module("node:fs/promises", () => mockFsPromisesModule(mockFsContent));
+				// Mock packagesShell methods for this test
+				mockPackagesShell.getWorkspaceRoot.mockResolvedValueOnce("/workspace");
+				mockPackagesShell.readDirectory
+					.mockResolvedValueOnce(["test-app", "another-app"]) // apps
+					.mockResolvedValueOnce(["ui", "utils"]); // packages
+				mockPackagesShell.canAccessFile
+					.mockResolvedValueOnce(true) // apps/test-app/package.json
+					.mockResolvedValueOnce(true) // apps/another-app/package.json
+					.mockResolvedValueOnce(true) // packages/ui/package.json
+					.mockResolvedValueOnce(true); // packages/utils/package.json
+				mockPackagesShell.readFileAsText
+					.mockResolvedValueOnce('{"name": "test-app", "version": "1.0.0"}')
+					.mockResolvedValueOnce('{"name": "another-app", "version": "1.0.0"}')
+					.mockResolvedValueOnce('{"name": "@repo/ui", "version": "1.0.0"}')
+					.mockResolvedValueOnce('{"name": "@repo/utils", "version": "1.0.0"}');
 
 				const result = await EntityPackages.getAllPackages();
 
@@ -638,61 +593,25 @@ describe("EntityPackages", () => {
 			});
 
 			it("should handle empty directories gracefully", async () => {
-				mock.module("node:fs/promises", () => ({
-					readdir: async () => [],
-					access: async (path: string) => {
-						if (
-							path.includes("package.json") &&
-							!path.includes("/apps") &&
-							!path.includes("/packages")
-						) {
-							return Promise.resolve();
-						}
-						return Promise.reject(new Error("ENOENT: no such file or directory"));
-					},
-					readFile: async (path: string) => {
-						if (
-							path.includes("package.json") &&
-							!path.includes("/apps") &&
-							!path.includes("/packages")
-						) {
-							return JSON.stringify({ name: "root", version: "1.0.0" });
-						}
-						return "";
-					},
-				}));
+				// Mock packagesShell methods for this test
+				mockPackagesShell.getWorkspaceRoot.mockResolvedValueOnce("/workspace");
+				mockPackagesShell.readDirectory
+					.mockResolvedValueOnce([]) // apps
+					.mockResolvedValueOnce([]); // packages
 
 				const result = await EntityPackages.getAllPackages();
 				expect(result).toEqual(["root"]);
 			});
 
 			it("should filter out packages without valid package.json", async () => {
-				mock.module("node:fs/promises", () => ({
-					readdir: async (path: string) => {
-						if (path.includes("/apps")) {
-							return [{ name: "invalid-app", isDirectory: () => true }];
-						}
-						if (path.includes("/packages")) {
-							return [{ name: "invalid-pkg", isDirectory: () => true }];
-						}
-						return [];
-					},
-					access: async (path: string) => {
-						if (path.includes("package.json")) {
-							return Promise.resolve();
-						}
-						return Promise.reject(new Error("ENOENT: no such file or directory"));
-					},
-					readFile: async (path: string) => {
-						if (path.includes("package.json")) {
-							if (path.includes("/apps") || path.includes("/packages")) {
-								return JSON.stringify({ version: "1.0.0" });
-							}
-							return JSON.stringify({ name: "root", version: "1.0.0" });
-						}
-						return "";
-					},
-				}));
+				// Mock packagesShell methods for this test
+				mockPackagesShell.getWorkspaceRoot.mockResolvedValueOnce("/workspace");
+				mockPackagesShell.readDirectory
+					.mockResolvedValueOnce(["invalid-app"]) // apps
+					.mockResolvedValueOnce(["invalid-pkg"]); // packages
+				mockPackagesShell.canAccessFile
+					.mockResolvedValueOnce(false) // apps/invalid-app/package.json
+					.mockResolvedValueOnce(false); // packages/invalid-pkg/package.json
 
 				const result = await EntityPackages.getAllPackages();
 				expect(result).toEqual(["root"]);
@@ -725,32 +644,77 @@ describe("EntityPackages", () => {
 
 	describe("getVersionedPackages", () => {
 		it("should return packages that should be versioned", async () => {
-			// This test will use the actual implementation
-			// We'll test the integration with real filesystem mocking
+			// Mock packagesShell methods for this test
+			mockPackagesShell.getWorkspaceRoot.mockResolvedValueOnce("/workspace");
+			mockPackagesShell.readDirectory
+				.mockResolvedValueOnce(["test-app"]) // apps
+				.mockResolvedValueOnce(["ui"]); // packages
+			mockPackagesShell.canAccessFile
+				.mockResolvedValueOnce(true) // apps/test-app/package.json
+				.mockResolvedValueOnce(true); // packages/ui/package.json
+			mockPackagesShell.readFileAsText
+				.mockResolvedValueOnce('{"name": "test-app", "version": "1.0.0", "private": false}')
+				.mockResolvedValueOnce('{"name": "@repo/ui", "version": "1.0.0", "private": false}');
+
 			const result = await EntityPackages.getVersionedPackages();
 			expect(Array.isArray(result)).toBe(true);
-			// The actual result depends on the current workspace state
+			expect(result).toContain("test-app");
+			expect(result).toContain("@repo/ui");
 		});
 	});
 
 	describe("getUnversionedPackages", () => {
 		it("should return packages that should not be versioned", async () => {
-			// This test will use the actual implementation
+			// Override the readJsonFile mock for this specific test to return private packages
+			mockPackagesShell.readJsonFile.mockImplementation((path: string) => {
+				if (path.includes("test-app")) {
+					return { name: "test-app", version: "1.0.0", private: true };
+				}
+				if (path.includes("ui")) {
+					return { name: "@repo/ui", version: "1.0.0", private: true };
+				}
+				// Default fallback
+				return mockPackageJson();
+			});
+
+			// Mock packagesShell methods for this test
+			mockPackagesShell.getWorkspaceRoot.mockResolvedValueOnce("/workspace");
+			mockPackagesShell.readDirectory
+				.mockResolvedValueOnce(["test-app"]) // apps
+				.mockResolvedValueOnce(["ui"]); // packages
+			mockPackagesShell.canAccessFile
+				.mockResolvedValueOnce(true) // apps/test-app/package.json
+				.mockResolvedValueOnce(true); // packages/ui/package.json
+			mockPackagesShell.readFileAsText
+				.mockResolvedValueOnce('{"name": "test-app", "version": "1.0.0", "private": true}')
+				.mockResolvedValueOnce('{"name": "@repo/ui", "version": "1.0.0", "private": true}');
+
 			const result = await EntityPackages.getUnversionedPackages();
 			expect(Array.isArray(result)).toBe(true);
-			// The actual result depends on the current workspace state
+			expect(result).toContain("test-app");
+			expect(result).toContain("@repo/ui");
 		});
 	});
 
 	describe("validateAllPackages", () => {
 		it("should validate all packages and return results", async () => {
-			// This test will use the actual implementation
+			// Mock packagesShell methods for this test
+			mockPackagesShell.getWorkspaceRoot.mockResolvedValueOnce("/workspace");
+			mockPackagesShell.readDirectory
+				.mockResolvedValueOnce(["test-app"]) // apps
+				.mockResolvedValueOnce(["ui"]); // packages
+			mockPackagesShell.canAccessFile
+				.mockResolvedValueOnce(true) // apps/test-app/package.json
+				.mockResolvedValueOnce(true); // packages/ui/package.json
+			mockPackagesShell.readFileAsText
+				.mockResolvedValueOnce('{"name": "test-app", "version": "1.0.0", "private": false}')
+				.mockResolvedValueOnce('{"name": "@repo/ui", "version": "1.0.0", "private": false}');
+
 			const result = await EntityPackages.validateAllPackages();
 			expect(result).toHaveProperty("isValid");
 			expect(result).toHaveProperty("packages");
 			expect(result).toHaveProperty("totalErrors");
 			expect(Array.isArray(result.packages)).toBe(true);
-			// The actual result depends on the current workspace state
 		});
 	});
 });

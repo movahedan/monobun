@@ -1,9 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import { restoreBunMocks, setupBunMocks } from "@repo/test-preset/mock-bun";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 import type { IConfig } from "../config/types";
-import type { ParsedCommitData } from "./types";
-
-setupBunMocks();
+import { mockEntitiesShell } from "../entities.shell.test";
+import { createMockCommit } from "./commit.test";
+import type { ParsedCommitData, PRInfo } from "./types";
 
 const { EntityPr } = await import("./pr");
 
@@ -13,10 +12,6 @@ describe("EntityPr", () => {
 	let mockParseByHash: (hash: string) => Promise<ParsedCommitData>;
 
 	beforeEach(() => {
-		if (!globalThis.Bun?.$ || globalThis.Bun.$.toString().includes("Mock")) {
-			setupBunMocks();
-		}
-
 		mockConfig = {
 			branch: {
 				defaultBranch: "main",
@@ -25,25 +20,9 @@ describe("EntityPr", () => {
 
 		entityPr = new EntityPr(mockConfig);
 
-		mockParseByHash = mock(async (hash: string) => ({
-			message: {
-				type: "feat",
-				subject: "test feature",
-				description: "test feature description",
-				bodyLines: [],
-				isBreaking: false,
-				isMerge: false,
-				isDependency: false,
-			},
-			info: {
-				hash,
-			},
-		}));
-	});
-
-	afterEach(() => {
-		restoreBunMocks();
-		mock.restore();
+		mockParseByHash = mock(async (hash: string) =>
+			createMockCommit({ message: { type: "feat" }, info: { hash } }),
+		);
 	});
 
 	describe("constructor", () => {
@@ -59,128 +38,135 @@ describe("EntityPr", () => {
 	});
 
 	describe("getPRInfo", () => {
-		it("should return undefined for non-PR commits", async () => {
-			const message = {
-				type: "feat",
-				subject: "add new feature",
-				description: "add new feature description",
-				bodyLines: [],
-				isBreaking: false,
-				isMerge: false,
-				isDependency: false,
-			};
+		it("should handle various PR scenarios and edge cases", async () => {
+			const testCases = [
+				{
+					name: "return undefined for non-PR commits",
+					message: createMockCommit().message,
+					parseByHash: mockParseByHash,
+					expectedResult: undefined,
+					expectedAssertions: (result: PRInfo) => {
+						expect(result).toBeUndefined();
+					},
+				},
+				{
+					name: "return undefined for messages without PR numbers",
+					message: createMockCommit({
+						message: {
+							type: "feat",
+							subject: "add new feature",
+							description: "add new feature description",
+						},
+					}).message,
+					parseByHash: mockParseByHash,
+					expectedResult: undefined,
+					expectedAssertions: (result: PRInfo) => {
+						expect(result).toBeUndefined();
+					},
+				},
+				{
+					name: "extract PR number from merge pull request message",
+					message: createMockCommit({
+						message: {
+							isMerge: true,
+							type: "merge",
+							subject: "Merge pull request #123 from feature-branch",
+							description: "Merge pull request #123 from feature-branch",
+						},
+					}).message,
+					parseByHash: mockParseByHash,
+					expectedResult: "123",
+					expectedAssertions: (result: PRInfo) => {
+						expect(result?.prNumber).toBe("123");
+						expect(result?.prCategory).toBeDefined();
+						expect(result?.prStats).toBeDefined();
+						expect(result?.prCommits).toBeDefined();
+						expect(result?.prBranchName).toBeDefined();
+					},
+				},
+				{
+					name: "extract PR number from merge PR message",
+					message: createMockCommit({
+						message: {
+							isMerge: true,
+							type: "merge",
+							subject: "Merge pull request #456 from feature-branch",
+							description: "Merge pull request #456 from feature-branch",
+						},
+					}).message,
+					parseByHash: mockParseByHash,
+					expectedResult: "456",
+					expectedAssertions: (result: PRInfo) => {
+						expect(result?.prNumber).toBe("456");
+					},
+				},
+				{
+					name: "extract PR number from merge with hash message",
+					message: createMockCommit({
+						message: {
+							isMerge: true,
+							type: "merge",
+							subject: "Merge pull request #789 from feature-branch",
+							description: "Merge pull request #789 from feature-branch",
+						},
+					}).message,
+					parseByHash: mockParseByHash,
+					expectedResult: "789",
+					expectedAssertions: (result: PRInfo) => {
+						expect(result?.prNumber).toBe("789");
+					},
+				},
+				{
+					name: "handle errors gracefully",
+					message: createMockCommit({
+						message: {
+							isMerge: true,
+							type: "merge",
+							subject: "Merge pull request #123 from feature-branch",
+							description: "Merge pull request #123 from feature-branch",
+						},
+					}).message,
+					parseByHash: mock(async () => {
+						throw new Error("Parse failed");
+					}),
+					expectedResult: "123",
+					expectedAssertions: (result: PRInfo) => {
+						// The function handles errors gracefully and still returns PR info
+						// but with empty commits array
+						expect(result).toBeDefined();
+						expect(result?.prNumber).toBe("123");
+						expect(result?.prCommits).toEqual([]);
+					},
+				},
+			];
 
-			const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
-
-			expect(result).toBeUndefined();
-		});
-
-		it("should extract PR number from merge pull request message", async () => {
-			const message = {
-				type: "merge",
-				subject: "Merge pull request #123 from feature-branch",
-				description: "Merge pull request #123 from feature-branch",
-				bodyLines: [],
-				isBreaking: false,
-				isMerge: true,
-				isDependency: false,
-			};
-
-			const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
-
-			expect(result?.prNumber).toBe("123");
-			expect(result?.prCategory).toBeDefined();
-			expect(result?.prStats).toBeDefined();
-			expect(result?.prCommits).toBeDefined();
-			expect(result?.prBranchName).toBeDefined();
-		});
-
-		it("should extract PR number from merge PR message", async () => {
-			const message = {
-				type: "merge",
-				subject: "Merge PR #456 into main",
-				description: "Merge PR #456 into main",
-				bodyLines: [],
-				isBreaking: false,
-				isMerge: true,
-				isDependency: false,
-			};
-
-			const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
-
-			expect(result?.prNumber).toBe("456");
-		});
-
-		it("should extract PR number from merge with hash message", async () => {
-			const message = {
-				type: "merge",
-				subject: "Merge branch 'feature' into main #789",
-				description: "Merge branch 'feature' into main #789",
-				bodyLines: [],
-				isBreaking: false,
-				isMerge: true,
-				isDependency: false,
-			};
-
-			const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
-
-			expect(result?.prNumber).toBe("789");
-		});
-
-		it("should handle errors gracefully", async () => {
-			const message = {
-				type: "merge",
-				subject: "Merge pull request #123",
-				description: "Merge pull request #123",
-				bodyLines: [],
-				isBreaking: false,
-				isMerge: true,
-				isDependency: false,
-			};
-
-			// Mock a failing parseByHash
-			const failingParseByHash = mock(async () => {
-				throw new Error("Parse failed");
-			});
-
-			const result = await entityPr.getPRInfo(failingParseByHash, "abc123", message);
-
-			// The function handles errors gracefully and still returns PR info
-			// but with empty commits array
-			expect(result).toBeDefined();
-			expect(result?.prNumber).toBe("123");
-			expect(result?.prCommits).toEqual([]);
+			for (const testCase of testCases) {
+				const result = await entityPr.getPRInfo(testCase.parseByHash, "abc123", testCase.message);
+				testCase.expectedAssertions(result as PRInfo);
+			}
 		});
 	});
 
 	describe("getPrBranch", () => {
 		it("should return default branch for non-merge commits", () => {
-			const message = {
-				type: "feat",
-				subject: "add feature",
-				description: "add feature description",
-				bodyLines: [],
-				isBreaking: false,
-				isMerge: false,
-				isDependency: false,
-			};
-
-			const result = entityPr.getPrBranch({ message });
+			const result = entityPr.getPrBranch({ message: createMockCommit().message });
 
 			expect(result.name).toBe("main");
 			expect(result.fullName).toBe("main");
 		});
 
 		it("should return default branch for merge commits without 'from' in body", () => {
-			const message = {
-				type: "merge",
-				subject: "Merge pull request #123",
-				description: "Merge pull request #123",
-				bodyLines: ["Some merge message"],
-				isBreaking: false,
-				isMerge: true,
-				isDependency: false,
-			};
+			const message = createMockCommit({
+				message: {
+					type: "merge",
+					subject: "Merge pull request #123",
+					description: "Merge pull request #123",
+					bodyLines: ["Some merge message"],
+					isBreaking: false,
+					isMerge: true,
+					isDependency: false,
+				},
+			}).message;
 
 			const result = entityPr.getPrBranch({ message });
 
@@ -189,15 +175,17 @@ describe("EntityPr", () => {
 		});
 
 		it("should extract branch name from merge commit with 'from' in body", () => {
-			const message = {
-				type: "merge",
-				subject: "Merge pull request #123",
-				description: "Merge pull request #123",
-				bodyLines: ["Merge branch 'feature-branch' from origin/feature-branch"],
-				isBreaking: false,
-				isMerge: true,
-				isDependency: false,
-			};
+			const message = createMockCommit({
+				message: {
+					type: "merge",
+					subject: "Merge pull request #123",
+					description: "Merge pull request #123",
+					bodyLines: ["Merge branch 'feature-branch' from origin/feature-branch"],
+					isBreaking: false,
+					isMerge: true,
+					isDependency: false,
+				},
+			}).message;
 
 			const result = entityPr.getPrBranch({ message });
 
@@ -207,15 +195,7 @@ describe("EntityPr", () => {
 
 		it("should handle config without defaultBranch", () => {
 			const entityPrWithoutBranch = new EntityPr({} as IConfig);
-			const message = {
-				type: "feat",
-				subject: "add feature",
-				description: "add feature description",
-				bodyLines: [],
-				isBreaking: false,
-				isMerge: false,
-				isDependency: false,
-			};
+			const message = createMockCommit().message;
 
 			const result = entityPrWithoutBranch.getPrBranch({ message });
 
@@ -225,626 +205,474 @@ describe("EntityPr", () => {
 	});
 
 	describe("PR number extraction", () => {
-		it("should extract PR number from merge pull request message", async () => {
-			const message = {
-				type: "merge",
-				subject: "Merge pull request #123 from feature-branch",
-				description: "Merge pull request #123 from feature-branch",
-				bodyLines: [],
-				isBreaking: false,
-				isMerge: true,
-				isDependency: false,
-			};
+		it("should extract PR numbers from various merge message formats", async () => {
+			const testCases = [
+				{
+					message: "Merge pull request #123 from feature-branch",
+					expected: "123",
+				},
+				{
+					message: "Merge PR #456 into main",
+					expected: "456",
+				},
+				{
+					message: "Merge branch 'feature' into main #789",
+					expected: "789",
+				},
+			];
 
-			const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
+			for (const testCase of testCases) {
+				const message = createMockCommit({
+					message: {
+						type: "merge",
+						subject: testCase.message,
+						description: testCase.message,
+						isMerge: true,
+					},
+				}).message;
 
-			expect(result?.prNumber).toBe("123");
+				const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
+				expect(result?.prNumber).toBe(testCase.expected);
+			}
 		});
+	});
 
-		it("should extract PR number from merge PR message", async () => {
-			const message = {
-				type: "merge",
-				subject: "Merge PR #456 into main",
-				description: "Merge PR #456 into main",
-				bodyLines: [],
-				isBreaking: false,
-				isMerge: true,
-				isDependency: false,
-			};
-
-			const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
-
-			expect(result?.prNumber).toBe("456");
-		});
-
-		it("should extract PR number from merge with hash message", async () => {
-			const message = {
-				type: "merge",
-				subject: "Merge branch 'feature' into main #789",
-				description: "Merge branch 'feature' into main #789",
-				bodyLines: [],
-				isBreaking: false,
-				isMerge: true,
-				isDependency: false,
-			};
-
-			const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
-
-			expect(result?.prNumber).toBe("789");
-		});
-
-		it("should return undefined for messages without PR numbers", async () => {
-			const message = {
-				type: "feat",
-				subject: "add new feature",
-				description: "add new feature description",
-				bodyLines: [],
-				isBreaking: false,
-				isMerge: false,
-				isDependency: false,
-			};
-
-			const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
-
-			expect(result).toBeUndefined();
-		});
-
-		describe("PR categorization", () => {
-			it("should categorize as dependencies for renovate/dependabot PRs", async () => {
-				const message = {
+	describe("PR categorization", () => {
+		it("should categorize as dependencies for renovate/dependabot PRs", async () => {
+			const message = createMockCommit({
+				message: {
 					type: "merge",
 					subject: "Merge pull request #123",
 					description: "Merge pull request #123 from renovate/dependencies",
 					bodyLines: ["Update dependencies"],
-					isBreaking: false,
 					isMerge: true,
-					isDependency: false,
-				};
+				},
+			}).message;
 
-				const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
+			const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
 
-				// The categorization depends on git command execution which we can't easily mock
-				// But we can verify the structure is correct
-				expect(result?.prCategory).toBeDefined();
-				expect(typeof result?.prCategory).toBe("string");
-			});
+			// The categorization depends on git command execution which we can't easily mock
+			// But we can verify the structure is correct
+			expect(result?.prCategory).toBeDefined();
+			expect(typeof result?.prCategory).toBe("string");
+		});
 
-			it("should categorize based on commit types", async () => {
-				const message = {
+		it("should categorize based on commit types", async () => {
+			const message = createMockCommit({
+				message: {
 					type: "merge",
 					subject: "Merge pull request #123",
 					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
 					isMerge: true,
-					isDependency: false,
-				};
+				},
+			}).message;
 
-				const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
+			const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
 
-				// The actual categorization depends on git command execution
-				// which we can't easily mock, so we test that categorization exists
-				expect(result?.prCategory).toBeDefined();
-				expect(typeof result?.prCategory).toBe("string");
-			});
+			// The actual categorization depends on git command execution
+			// which we can't easily mock, so we test that categorization exists
+			expect(result?.prCategory).toBeDefined();
+			expect(typeof result?.prCategory).toBe("string");
 		});
+	});
 
-		describe("PR stats", () => {
-			it("should return commit count in stats", async () => {
-				const message = {
+	describe("PR stats", () => {
+		it("should return commit count in stats", async () => {
+			const message = createMockCommit({
+				message: {
 					type: "merge",
 					subject: "Merge pull request #123",
 					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
 					isMerge: true,
-					isDependency: false,
-				};
+				},
+			}).message;
 
-				const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
+			const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
 
-				expect(result?.prStats.commitCount).toBeDefined();
-				expect(typeof result?.prStats.commitCount).toBe("number");
-			});
+			expect(result?.prStats.commitCount).toBeDefined();
+			expect(typeof result?.prStats.commitCount).toBe("number");
 		});
+	});
 
-		describe("PR commits handling", () => {
-			it("should handle multiple commits in regular merge", async () => {
-				// Mock parseByHash to return multiple commits
-				const multiCommitParseByHash = mock(async (hash: string) => ({
+	describe("PR commits handling", () => {
+		it("should handle various commit scenarios and edge cases", async () => {
+			const testCases = [
+				{
+					name: "multiple commits in regular merge",
+					gitLogOutput: "commit1\ncommit2\ncommit3",
+					parseByHash: mock(async (hash: string) =>
+						createMockCommit({
+							message: {
+								type: "feat",
+								subject: `feature ${hash}`,
+								description: `feature description ${hash}`,
+							},
+							info: { hash },
+						}),
+					),
+					expectedCommitCount: 3,
+					expectedDescription: undefined,
+				},
+				{
+					name: "single commit (squash merge)",
+					gitLogOutput: "squashed123",
+					parseByHash: mock(async (hash: string) =>
+						createMockCommit({
+							message: {
+								type: "feat",
+								subject: "squashed feature",
+								description: "squashed feature description",
+							},
+							info: { hash },
+						}),
+					),
+					expectedCommitCount: 1,
+					expectedDescription: "Squashed changes from PR",
+				},
+				{
+					name: "git log range with multiple commits of different types",
+					gitLogOutput: "hash1\nhash2\nhash3",
+					parseByHash: mock(async (hash: string) => {
+						const types = ["feat", "fix", "docs"];
+						const typeIndex = Number.parseInt(hash.slice(-1), 10) - 1;
+						return createMockCommit({
+							message: {
+								type: types[typeIndex] || "feat",
+								subject: `${types[typeIndex] || "feat"} ${hash}`,
+								description: `${types[typeIndex] || "feat"} description ${hash}`,
+							},
+							info: { hash },
+						});
+					}),
+					expectedCommitCount: 3,
+					expectedDescription: undefined,
+				},
+				{
+					name: "parseByHash failures gracefully",
+					gitLogOutput: "commit1\nfail123\ncommit3",
+					parseByHash: mock(async (hash: string) => {
+						if (hash === "fail123") {
+							throw new Error("Parse failed");
+						}
+						return createMockCommit({
+							message: {
+								type: "feat",
+								subject: "successful feature",
+								description: "successful feature description",
+							},
+							info: { hash },
+						});
+					}),
+					expectedCommitCount: undefined, // Just verify it doesn't crash
+					expectedDescription: undefined,
+				},
+				{
+					name: "git log failure gracefully",
+					gitLogOutput: "error: git log failed",
+					gitLogExitCode: 1,
+					parseByHash: mockParseByHash,
+					expectedCommitCount: 0,
+					expectedDescription: undefined,
+				},
+				{
+					name: "empty git log result",
+					gitLogOutput: "",
+					gitLogExitCode: 0,
+					parseByHash: mockParseByHash,
+					expectedCommitCount: 0,
+					expectedDescription: undefined,
+				},
+				{
+					name: "squashed commit parsing failure",
+					gitLogOutput: "squashed123",
+					gitLogExitCode: 0,
+					parseByHash: mock(async (hash: string) => {
+						if (hash === "squashed123") {
+							throw new Error("Squashed commit parse failed");
+						}
+						return createMockCommit({
+							message: {
+								type: "feat",
+								subject: "successful feature",
+								description: "successful feature description",
+							},
+							info: { hash },
+						});
+					}),
+					expectedCommitCount: 0,
+					expectedDescription: undefined,
+				},
+			];
+
+			for (const testCase of testCases) {
+				// Mock gitLogHashes based on test case
+				mockEntitiesShell({
+					gitLogHashes: mock(() => ({
+						exitCode: testCase.gitLogExitCode || 0,
+						text: () => testCase.gitLogOutput,
+					})),
+				});
+
+				const message = createMockCommit({
 					message: {
-						type: "feat",
-						subject: `feature ${hash}`,
-						description: `feature description ${hash}`,
-						bodyLines: [],
-						isBreaking: false,
-						isMerge: false,
-						isDependency: false,
+						type: "merge",
+						subject: "Merge pull request #123",
+						description: "Merge pull request #123",
+						isMerge: true,
 					},
-					info: { hash },
-				}));
+				}).message;
 
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
-
-				const result = await entityPr.getPRInfo(multiCommitParseByHash, "abc123", message);
+				const result = await entityPr.getPRInfo(testCase.parseByHash, "abc123", message);
 
 				expect(result).toBeDefined();
 				expect(result?.prCommits).toBeDefined();
-			});
 
-			it("should handle single commit (squash merge)", async () => {
-				// Mock parseByHash to return a single commit
-				const singleCommitParseByHash = mock(async (hash: string) => ({
-					message: {
-						type: "feat",
-						subject: "squashed feature",
-						description: "squashed feature description",
-						bodyLines: [],
-						isBreaking: false,
-						isMerge: false,
-						isDependency: false,
-					},
-					info: { hash },
-				}));
+				// Verify commit count if specified
+				if (testCase.expectedCommitCount !== undefined) {
+					expect(result?.prCommits.length).toBe(testCase.expectedCommitCount);
+				}
 
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
+				// Verify description content if specified
+				if (testCase.expectedDescription && result?.prCommits && result.prCommits.length > 0) {
+					expect(result.prCommits[0].message.description).toContain(testCase.expectedDescription);
+				}
 
-				const result = await entityPr.getPRInfo(singleCommitParseByHash, "abc123", message);
+				// Verify commit info for multi-commit scenarios
+				if (testCase.expectedCommitCount && testCase.expectedCommitCount > 1 && result?.prCommits) {
+					result.prCommits.forEach((commit) => {
+						expect(commit.info?.hash).toBeDefined();
+						expect(commit.message.description).toBeDefined();
+					});
+				}
+			}
+		});
+	});
 
-				expect(result).toBeDefined();
-				expect(result?.prCommits).toBeDefined();
-			});
-
-			it("should handle parseByHash failures gracefully", async () => {
-				// Mock parseByHash to fail for some commits
-				const failingParseByHash = mock(async (hash: string) => {
-					if (hash === "fail123") {
-						throw new Error("Parse failed");
-					}
-					return {
+	describe("PR categorization edge cases", () => {
+		it("should categorize PRs based on commit types and content", async () => {
+			const testCases = [
+				{
+					name: "dependencies when bodyLines contain dependency",
+					message: createMockCommit({
 						message: {
-							type: "feat",
-							subject: "successful feature",
-							description: "successful feature description",
-							bodyLines: [],
-							isBreaking: false,
-							isMerge: false,
-							isDependency: false,
+							type: "merge",
+							subject: "Merge pull request #123",
+							description: "Merge pull request #123",
+							bodyLines: ["This PR updates dependencies", "Other changes"],
+							isMerge: true,
 						},
-						info: { hash },
-					};
-				});
-
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
-
-				const result = await entityPr.getPRInfo(failingParseByHash, "abc123", message);
-
-				expect(result).toBeDefined();
-				expect(result?.prCommits).toBeDefined();
-			});
-
-			it("should handle git log failure gracefully", async () => {
-				setupBunMocks({
-					command: {
-						text: "error: git log failed",
-						exitCode: 1,
-					},
-				});
-
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
-
-				const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
-
-				expect(result).toBeDefined();
-				expect(result?.prCommits).toEqual([]);
-			});
-
-			it("should handle empty git log result", async () => {
-				setupBunMocks({
-					command: {
-						text: "",
-						exitCode: 0,
-					},
-				});
-
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
-
-				const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
-
-				expect(result).toBeDefined();
-				expect(result?.prCommits).toEqual([]);
-			});
-
-			it("should handle squashed commit parsing failure", async () => {
-				setupBunMocks({
-					command: {
-						text: "squashed123",
-						exitCode: 0,
-					},
-				});
-
-				// Mock parseByHash to fail for squashed commit
-				const failingSquashParseByHash = mock(async (hash: string) => {
-					if (hash === "squashed123") {
-						throw new Error("Squashed commit parse failed");
-					}
-					return {
+					}).message,
+					parseByHash: mockParseByHash,
+				},
+				{
+					name: "infrastructure for CI/build commits",
+					message: createMockCommit({
 						message: {
-							type: "feat",
-							subject: "successful feature",
-							description: "successful feature description",
-							bodyLines: [],
-							isBreaking: false,
-							isMerge: false,
-							isDependency: false,
+							type: "merge",
+							subject: "Merge pull request #123",
+							description: "Merge pull request #123",
+							isMerge: true,
 						},
-						info: { hash },
-					};
-				});
+					}).message,
+					parseByHash: mock(async (hash: string) =>
+						createMockCommit({
+							message: {
+								type: "ci",
+								subject: "update CI",
+								description: "update CI configuration",
+							},
+							info: { hash },
+						}),
+					),
+				},
+				{
+					name: "bugfixes when fix commits dominate",
+					message: createMockCommit({
+						message: {
+							type: "merge",
+							subject: "Merge pull request #123",
+							description: "Merge pull request #123",
+							isMerge: true,
+						},
+					}).message,
+					parseByHash: mock(async (hash: string) =>
+						createMockCommit({
+							message: {
+								type: "fix",
+								subject: "fix bug",
+								description: "fix critical bug",
+							},
+							info: { hash },
+						}),
+					),
+				},
+				{
+					name: "documentation for docs commits",
+					message: createMockCommit({
+						message: {
+							type: "merge",
+							subject: "Merge pull request #123",
+							description: "Merge pull request #123",
+							isMerge: true,
+						},
+					}).message,
+					parseByHash: mock(async (hash: string) =>
+						createMockCommit({
+							message: {
+								type: "docs",
+								subject: "update docs",
+								description: "update documentation",
+							},
+							info: { hash },
+						}),
+					),
+				},
+				{
+					name: "refactoring for refactor/style/perf commits",
+					message: createMockCommit({
+						message: {
+							type: "merge",
+							subject: "Merge pull request #123",
+							description: "Merge pull request #123",
+							isMerge: true,
+						},
+					}).message,
+					parseByHash: mock(async (hash: string) =>
+						createMockCommit({
+							message: {
+								type: "refactor",
+								subject: "refactor code",
+								description: "improve code structure",
+							},
+							info: { hash },
+						}),
+					),
+				},
+				{
+					name: "dependencies for chore commits with dependency keywords",
+					message: createMockCommit({
+						message: {
+							type: "merge",
+							subject: "Merge pull request #123",
+							description: "Merge pull request #123",
+							isMerge: true,
+						},
+					}).message,
+					parseByHash: mock(async (hash: string) =>
+						createMockCommit({
+							message: {
+								type: "chore",
+								subject: "update dependencies",
+								description: "update package dependencies",
+							},
+							info: { hash },
+						}),
+					),
+				},
+				{
+					name: "infrastructure for chore commits with CI keywords",
+					message: createMockCommit({
+						message: {
+							type: "merge",
+							subject: "Merge pull request #123",
+							description: "Merge pull request #123",
+							isMerge: true,
+						},
+					}).message,
+					parseByHash: mock(async (hash: string) =>
+						createMockCommit({
+							message: {
+								type: "chore",
+								subject: "update CI",
+								description: "update CI configuration",
+							},
+							info: { hash },
+						}),
+					),
+				},
+				{
+					name: "other when no clear pattern emerges",
+					message: createMockCommit({
+						message: {
+							type: "merge",
+							subject: "Merge pull request #123",
+							description: "Merge pull request #123",
+							isMerge: true,
+						},
+					}).message,
+					parseByHash: mock(async (_hash: string) =>
+						createMockCommit({
+							message: {
+								type: "other",
+								subject: "misc changes",
+								description: "various miscellaneous changes",
+							},
+							info: { hash: "test-hash" },
+						}),
+					),
+				},
+			];
 
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
+			for (const testCase of testCases) {
+				const result = await entityPr.getPRInfo(testCase.parseByHash, "abc123", testCase.message);
 
-				const result = await entityPr.getPRInfo(failingSquashParseByHash, "abc123", message);
-
-				expect(result).toBeDefined();
-				expect(result?.prCommits).toEqual([]);
-			});
+				// The categorization depends on git command execution which we can't easily mock
+				// But we can verify the structure is correct
+				expect(result?.prCategory).toBeDefined();
+				expect(typeof result?.prCategory).toBe("string");
+			}
 		});
 
-		describe("PR categorization edge cases", () => {
-			it("should categorize as dependencies when bodyLines contain dependency", async () => {
-				const message = {
+		it("should handle empty PR commits array", async () => {
+			mockEntitiesShell({
+				gitLogHashes: mock(() => ({
+					text: () => "",
+					exitCode: 0,
+				})),
+			});
+
+			const message = createMockCommit({
+				message: {
 					type: "merge",
 					subject: "Merge pull request #123",
 					description: "Merge pull request #123",
-					bodyLines: ["This PR updates dependencies", "Other changes"],
-					isBreaking: false,
 					isMerge: true,
-					isDependency: false,
-				};
+				},
+			}).message;
 
-				const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
+			const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
 
-				// The categorization depends on git command execution which we can't easily mock
-				// But we can verify the structure is correct
-				expect(result?.prCategory).toBeDefined();
-				expect(typeof result?.prCategory).toBe("string");
-			});
+			expect(result).toBeDefined();
+			expect(result?.prCommits).toEqual([]);
+			expect(result?.prCategory).toBe("other");
+		});
 
-			it("should categorize as infrastructure for CI/build commits", async () => {
-				// Mock parseByHash to return CI commits
-				const ciParseByHash = mock(async (hash: string) => ({
-					message: {
-						type: "ci",
-						subject: "update CI",
-						description: "update CI configuration",
-						bodyLines: [],
-						isBreaking: false,
-						isMerge: false,
-						isDependency: false,
-					},
-					info: { hash },
-				}));
-
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
-
-				const result = await entityPr.getPRInfo(ciParseByHash, "abc123", message);
-
-				// The categorization depends on git command execution which we can't easily mock
-				// But we can verify the structure is correct
-				expect(result?.prCategory).toBeDefined();
-				expect(typeof result?.prCategory).toBe("string");
-			});
-
-			it("should categorize as bugfixes when fix commits dominate", async () => {
-				// Mock parseByHash to return fix commits
-				const fixParseByHash = mock(async (hash: string) => ({
-					message: {
-						type: "fix",
-						subject: "fix bug",
-						description: "fix critical bug",
-						bodyLines: [],
-						isBreaking: false,
-						isMerge: false,
-						isDependency: false,
-					},
-					info: { hash },
-				}));
-
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
-
-				const result = await entityPr.getPRInfo(fixParseByHash, "abc123", message);
-
-				// The categorization depends on git command execution which we can't easily mock
-				// But we can verify the structure is correct
-				expect(result?.prCategory).toBeDefined();
-				expect(typeof result?.prCategory).toBe("string");
-			});
-
-			it("should categorize as documentation for docs commits", async () => {
-				// Mock parseByHash to return documentation commits
-				const docsParseByHash = mock(async (hash: string) => ({
-					message: {
-						type: "docs",
-						subject: "update docs",
-						description: "update documentation",
-						bodyLines: [],
-						isBreaking: false,
-						isMerge: false,
-						isDependency: false,
-					},
-					info: { hash },
-				}));
-
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
-
-				const result = await entityPr.getPRInfo(docsParseByHash, "abc123", message);
-
-				// The categorization depends on git command execution which we can't easily mock
-				// But we can verify the structure is correct
-				expect(result?.prCategory).toBeDefined();
-				expect(typeof result?.prCategory).toBe("string");
-			});
-
-			it("should categorize as refactoring for refactor/style/perf commits", async () => {
-				// Mock parseByHash to return refactor commits
-				const refactorParseByHash = mock(async (hash: string) => ({
-					message: {
-						type: "refactor",
-						subject: "refactor code",
-						description: "improve code structure",
-						bodyLines: [],
-						isBreaking: false,
-						isMerge: false,
-						isDependency: false,
-					},
-					info: { hash },
-				}));
-
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
-
-				const result = await entityPr.getPRInfo(refactorParseByHash, "abc123", message);
-
-				// The categorization depends on git command execution which we can't easily mock
-				// But we can verify the structure is correct
-				expect(result?.prCategory).toBeDefined();
-				expect(typeof result?.prCategory).toBe("string");
-			});
-
-			it("should categorize as dependencies for chore commits with dependency keywords", async () => {
-				// Mock parseByHash to return chore commits with dependency keywords
-				const depsParseByHash = mock(async (hash: string) => ({
-					message: {
-						type: "chore",
-						subject: "update dependencies",
-						description: "update package dependencies",
-						bodyLines: [],
-						isBreaking: false,
-						isMerge: false,
-						isDependency: false,
-					},
-					info: { hash },
-				}));
-
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
-
-				const result = await entityPr.getPRInfo(depsParseByHash, "abc123", message);
-
-				// The categorization depends on git command execution which we can't easily mock
-				// But we can verify the structure is correct
-				expect(result?.prCategory).toBeDefined();
-				expect(typeof result?.prCategory).toBe("string");
-			});
-
-			it("should categorize as infrastructure for chore commits with CI keywords", async () => {
-				// Mock parseByHash to return chore commits with CI keywords
-				const ciChoreParseByHash = mock(async (hash: string) => ({
-					message: {
-						type: "chore",
-						subject: "update CI",
-						description: "update CI configuration",
-						bodyLines: [],
-						isBreaking: false,
-						isMerge: false,
-						isDependency: false,
-					},
-					info: { hash },
-				}));
-
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
-
-				const result = await entityPr.getPRInfo(ciChoreParseByHash, "abc123", message);
-
-				// The categorization depends on git command execution which we can't easily mock
-				// But we can verify the structure is correct
-				expect(result?.prCategory).toBeDefined();
-				expect(typeof result?.prCategory).toBe("string");
-			});
-
-			it("should categorize as other when no clear pattern emerges", async () => {
-				// Mock parseByHash to return commits with no clear pattern
-				const otherParseByHash = mock(async (_hash: string) => ({
-					message: {
-						type: "other",
-						subject: "misc changes",
-						description: "various miscellaneous changes",
-						bodyLines: [],
-						isBreaking: false,
-						isMerge: false,
-						isDependency: false,
-					},
-					info: { hash: "test-hash" },
-				}));
-
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
-
-				const result = await entityPr.getPRInfo(otherParseByHash, "abc123", message);
-
-				// The categorization depends on git command execution which we can't easily mock
-				// But we can verify the structure is correct
-				expect(result?.prCategory).toBeDefined();
-				expect(typeof result?.prCategory).toBe("string");
-			});
-
-			it("should handle empty PR commits array", async () => {
-				setupBunMocks({
-					command: {
-						text: "",
-						exitCode: 0,
-					},
-				});
-
-				const message = {
-					type: "merge",
-					subject: "Merge pull request #123",
-					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
-					isMerge: true,
-					isDependency: false,
-				};
-
-				const result = await entityPr.getPRInfo(mockParseByHash, "abc123", message);
-
-				expect(result).toBeDefined();
-				expect(result?.prCommits).toEqual([]);
-				expect(result?.prCategory).toBe("other");
-			});
-
-			it("should handle PR commits with missing info", async () => {
-				// Mock parseByHash to return commits with missing info
-				const incompleteParseByHash = mock(async (_hash: string) => ({
+		it("should handle PR commits with missing info", async () => {
+			// Mock parseByHash to return commits with missing info
+			const incompleteParseByHash = mock(async (_hash: string) =>
+				createMockCommit({
 					message: {
 						type: "feat",
 						subject: "feature",
 						description: "feature description",
-						bodyLines: [],
-						isBreaking: false,
-						isMerge: false,
-						isDependency: false,
 					},
 					info: undefined,
-				}));
+				}),
+			);
 
-				const message = {
+			const message = createMockCommit({
+				message: {
 					type: "merge",
 					subject: "Merge pull request #123",
 					description: "Merge pull request #123",
-					bodyLines: [],
-					isBreaking: false,
 					isMerge: true,
-					isDependency: false,
-				};
+				},
+			}).message;
 
-				const result = await entityPr.getPRInfo(incompleteParseByHash, "abc123", message);
+			const result = await entityPr.getPRInfo(incompleteParseByHash, "abc123", message);
 
-				expect(result).toBeDefined();
-				expect(result?.prCommits).toBeDefined();
-			});
+			expect(result).toBeDefined();
+			expect(result?.prCommits).toBeDefined();
 		});
 	});
 });
