@@ -1,5 +1,5 @@
-import { $ } from "bun";
 import { getEntitiesConfig } from "../config/config";
+import { entitiesShell } from "../entities.shell";
 import { EntityPackages } from "../packages";
 import type { ParsedTag, TagValidationResult } from "./types";
 
@@ -63,26 +63,24 @@ export const EntityTag = {
 	},
 
 	// Pure Git tag operations (no prefix knowledge)
-	async listTags(pattern?: string): Promise<string[]> {
-		const patternArg = pattern ? `"${pattern}"` : "";
-		const result = await $`git tag --list ${patternArg} --sort=-version:refname`.nothrow().quiet();
+	async listTags(prefix: string): Promise<string[]> {
+		const result = await entitiesShell.gitTagList(prefix);
 		return result.text().trim().split("\n").filter(Boolean);
 	},
 
-	async getLatestTag(pattern: string): Promise<string | null> {
-		const result = await $`git tag --sort=-version:refname --list "${pattern}" | head -1`
-			.nothrow()
-			.quiet();
+	async getLatestTag(prefix: string): Promise<string | null> {
+		const result = await entitiesShell.gitTagLatest(prefix);
 
-		if (result.exitCode === 0) {
-			const tag = result.text().trim();
-			return tag || null;
+		if (result.exitCode !== 0) {
+			throw new Error(`Could not get latest tag for pattern ${prefix}`);
 		}
-		return null;
+
+		const tag = result.text().trim();
+		return tag || null;
 	},
 
 	async getTagSha(tagName: string): Promise<string> {
-		const result = await $`git rev-parse ${tagName}`.nothrow().quiet();
+		const result = await entitiesShell.gitRevParse(tagName);
 		if (result.exitCode === 0) {
 			return result.text().trim();
 		}
@@ -90,7 +88,7 @@ export const EntityTag = {
 	},
 
 	async tagExists(tagName: string): Promise<boolean> {
-		const result = await $`git tag --list ${tagName}`.nothrow().quiet();
+		const result = await entitiesShell.gitTagExists(tagName);
 		return result.exitCode === 0 && result.text().trim() === tagName;
 	},
 
@@ -134,8 +132,7 @@ export const EntityTag = {
 		}
 
 		try {
-			const forceFlag = force ? "-f" : "";
-			await $`git tag ${forceFlag} -a ${tagName} -m "${message}"`;
+			await entitiesShell.gitTag(tagName, message, { force: force ? "-f" : "" });
 		} catch (error) {
 			throw new Error(
 				`Failed to create tag ${tagName}: ${error instanceof Error ? error.message : String(error)}`,
@@ -144,7 +141,7 @@ export const EntityTag = {
 
 		if (push) {
 			try {
-				await $`git push origin ${tagName}`;
+				await entitiesShell.gitPushTag(tagName);
 			} catch (error) {
 				throw new Error(
 					`Failed to push tag ${tagName}: ${error instanceof Error ? error.message : String(error)}`,
@@ -159,7 +156,7 @@ export const EntityTag = {
 		}
 
 		try {
-			await $`git tag -d ${tagName}`;
+			await entitiesShell.gitDeleteTag(tagName);
 		} catch (error) {
 			throw new Error(
 				`Failed to delete tag ${tagName}: ${error instanceof Error ? error.message : String(error)}`,
@@ -168,7 +165,7 @@ export const EntityTag = {
 
 		if (deleteRemote) {
 			try {
-				await $`git push origin :refs/tags/${tagName}`;
+				await entitiesShell.gitPushTag(`:refs/tags/${tagName}`);
 			} catch (error) {
 				throw new Error(
 					`Failed to delete remote tag ${tagName}: ${error instanceof Error ? error.message : String(error)}`,
@@ -178,10 +175,7 @@ export const EntityTag = {
 	},
 
 	async getTagInfo(tagName: string): Promise<{ date: string; message: string }> {
-		const result =
-			await $`git tag -l --format='%(creatordate:iso8601)%0a%(contents:subject)' ${tagName}`
-				.nothrow()
-				.quiet();
+		const result = await entitiesShell.gitTagInfo(tagName);
 
 		if (result.exitCode === 0) {
 			const lines = result.text?.().trim?.().split("\n").filter(Boolean) ?? [];
@@ -195,27 +189,24 @@ export const EntityTag = {
 		throw new Error(`Could not get info for tag ${tagName}`);
 	},
 
-	async getTagsInRange(from: string, to: string): Promise<string[]> {
-		const result = await $`git tag --merged ${to} --no-merged ${from}`.nothrow().quiet();
-		return result.text().trim().split("\n").filter(Boolean);
-	},
-
 	async getBaseCommitSha(from?: string): Promise<string> {
 		if (from) {
 			// Check if it's a tag, commit hash, or branch
-			const result = await $`git rev-parse ${from}`.nothrow().quiet();
-			if (result.exitCode === 0) {
-				return result.text().trim();
+			const result = await entitiesShell.gitRevParse(from);
+			if (result.exitCode !== 0) {
+				throw new Error(`Invalid reference: ${from}. Not found as tag, branch, or commit.`);
 			}
-			throw new Error(`Invalid reference: ${from}. Not found as tag, branch, or commit.`);
+
+			return result.text().trim();
 		}
 
 		// Return first commit if no reference provided
-		const result = await $`git rev-list --max-parents=0 HEAD`.nothrow().quiet();
-		if (result.exitCode === 0) {
-			return result.text().trim();
+		const result = await entitiesShell.gitFirstCommit();
+		if (result.exitCode !== 0) {
+			throw new Error("Could not find first commit");
 		}
-		throw new Error("Could not find first commit");
+
+		return result.text().trim();
 	},
 
 	// Utility methods
@@ -231,5 +222,10 @@ export const EntityTag = {
 		const firstPart = tagName.split(".")[0].replace(/[0-9]/g, ""); // v1.0.0 -> v
 		if (/^[a-zA-Z-]+/.test(firstPart)) return firstPart; // v1.0.0 -> v, intershell-v1.0.0 -> intershell-v
 		return undefined; // 1.0.0 -> undefined
+	},
+
+	getVersionFromTag(tagName: string): string {
+		const prefix = EntityTag.detectPrefix(tagName) || "";
+		return tagName.replace(prefix, "");
 	},
 };

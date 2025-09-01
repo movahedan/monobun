@@ -1,4 +1,5 @@
 import { getEntitiesConfig } from "../config/config";
+import { entitiesShell } from "../entities.shell";
 import { packagesShell } from "./packages.shell";
 import type { PackageJson } from "./types";
 
@@ -36,7 +37,7 @@ export class EntityPackages {
 	async writeJson(data: PackageJson): Promise<void> {
 		await packagesShell.writeJsonFile(this.getJsonPath(), data);
 		this.packageJson = data;
-		await packagesShell.runBiomeCheck(this.getJsonPath());
+		await entitiesShell.runBiomeCheck(this.getJsonPath());
 	}
 
 	readVersion(): string | undefined {
@@ -58,7 +59,7 @@ export class EntityPackages {
 	}
 	async writeChangelog(content: string): Promise<void> {
 		await packagesShell.writeChangelogFile(this.getChangelogPath(), content);
-		await packagesShell.runBiomeCheck(this.getJsonPath());
+		await entitiesShell.runBiomeCheck(this.getChangelogPath());
 	}
 
 	validatePackage(): string[] {

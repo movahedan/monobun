@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
-import { $, file, write } from "bun";
+import { file, write } from "bun";
+import { entitiesShell } from "../entities.shell";
 import type { PackageJson } from "./types";
 
 export const packagesShell = {
@@ -41,16 +42,9 @@ export const packagesShell = {
 		try {
 			await file(filePath).exists();
 		} catch {
-			await $`touch ${filePath}`.quiet();
+			await entitiesShell.touch(filePath);
 		}
 		await write(filePath, content);
-	},
-
-	/**
-	 * Runs biome check on a file
-	 */
-	runBiomeCheck: async (filePath: string): Promise<void> => {
-		await $`bun biome check --write --no-errors-on-unmatched ${filePath}`.quiet();
 	},
 
 	/**
