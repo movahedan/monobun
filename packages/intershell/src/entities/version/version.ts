@@ -1,7 +1,9 @@
 /** biome-ignore-all lint/correctness/noUnusedPrivateClassMembers: wip */
+
 import type { ParsedCommitData } from "../commit";
 import { entitiesShell } from "../entities.shell";
 import { EntityPackages } from "../packages";
+import { EntityTag } from "../tag";
 import type {
 	EntityGitTagVersion,
 	EntityPackageVersionHistory,
@@ -10,7 +12,10 @@ import type {
 } from "./types";
 
 export class EntityVersion {
-	constructor(private packageName: string) {}
+	packageName: string;
+	constructor(packageName: string) {
+		this.packageName = packageName;
+	}
 
 	// Version calculation and management
 	async getCurrentVersion(): Promise<string> {
@@ -22,16 +27,14 @@ export class EntityVersion {
 		return version;
 	}
 
-	async getNextVersion(bumpType: EntityVersionBumpType): Promise<string> {
-		const currentVersion = await this.getCurrentVersion();
-		return this.calculateNextVersion(currentVersion, bumpType);
-	}
-
 	private calculateNextVersion(currentVersion: string, bumpType: EntityVersionBumpType): string {
-		const [major, minor, patch] = currentVersion.split(".").map(Number);
-		if (Number.isNaN(major) || Number.isNaN(minor) || Number.isNaN(patch)) {
+		const versionParts = currentVersion.split(".").map(Number);
+
+		if (versionParts.length !== 3 || versionParts.some(Number.isNaN)) {
 			throw new Error(`Invalid version: ${currentVersion}`);
 		}
+
+		const [major, minor, patch] = versionParts;
 
 		switch (bumpType) {
 			case "major":
@@ -40,18 +43,103 @@ export class EntityVersion {
 				return `${major}.${minor + 1}.0`;
 			case "patch":
 				return `${major}.${minor}.${patch + 1}`;
+			case "none":
+				return currentVersion;
 			default:
 				throw new Error(`Invalid bump type: ${bumpType}`);
 		}
 	}
 
+	// Package-specific tag operations
+	async getTagPrefix(): Promise<string> {
+		const packageInstance = new EntityPackages(this.packageName);
+		return packageInstance.getTagSeriesName() || "v";
+	}
+
+	async getTagPattern(): Promise<string> {
+		const prefix = await this.getTagPrefix();
+		return `${prefix}*`;
+	}
+
+	async getLatestPackageTag(): Promise<string | null> {
+		const pattern = await this.getTagPattern();
+		return await EntityTag.getLatestTag(pattern);
+	}
+
+	async createPackageTag(version: string, message?: string): Promise<void> {
+		const prefix = await this.getTagPrefix();
+		const tagName = `${prefix}${version}`;
+		const tagMessage = message || `Release ${this.packageName} version ${version}`;
+
+		await EntityTag.createTag(tagName, tagMessage);
+	}
+
+	async listPackageTags(): Promise<string[]> {
+		const pattern = await this.getTagPattern();
+		return await EntityTag.listTags(pattern);
+	}
+
+	async packageTagExists(version: string): Promise<boolean> {
+		const prefix = await this.getTagPrefix();
+		const tagName = `${prefix}${version}`;
+		return await EntityTag.tagExists(tagName);
+	}
+
+	// Convenience methods for changelog and scripts
+	async getBaseTagShaForPackage(from?: string): Promise<string> {
+		if (!from) {
+			const latestTag = await this.getLatestPackageTag();
+			if (latestTag) {
+				return await EntityTag.getTagSha(latestTag);
+			}
+			return await EntityTag.getBaseCommitSha();
+		}
+
+		// Check if it's already a valid reference
+		try {
+			return await EntityTag.getTagSha(from);
+		} catch {
+			// Fall back to generic commit resolution
+			return await EntityTag.getBaseCommitSha(from);
+		}
+	}
+
+	async getTagsInRangeForPackage(
+		from: string,
+		to: string,
+	): Promise<Array<{ tag: string; previousTag?: string }>> {
+		const allTags = await this.listPackageTags();
+
+		// Find tags between from and to commits
+		const tagsInRange: Array<{ tag: string; previousTag?: string }> = [];
+
+		for (let i = 0; i < allTags.length; i++) {
+			const tag = allTags[i];
+			try {
+				const tagSha = await EntityTag.getTagSha(tag);
+
+				// Check if tag is in the commit range using git merge-base
+				const isAfterFrom = await entitiesShell.gitMergeBaseIsAncestor(from, tagSha);
+				const isBeforeTo = await entitiesShell.gitMergeBaseIsAncestor(tagSha, to);
+
+				if (isAfterFrom.exitCode === 0 && isBeforeTo.exitCode === 0) {
+					tagsInRange.push({
+						tag,
+						previousTag: i < allTags.length - 1 ? allTags[i + 1] : undefined,
+					});
+				}
+			} catch (error) {
+				console.warn(`Failed to process tag ${tag}:`, error);
+			}
+		}
+
+		return tagsInRange;
+	}
+
 	// Version history and tracking
 	async getPackageVersionHistory(): Promise<EntityPackageVersionHistory> {
 		try {
-			const packageInstance = new EntityPackages(this.packageName);
-			const prefix = packageInstance.getTagSeriesName() || "v";
-			const tags = await this.listTags(prefix);
-
+			const tags = await this.listPackageTags();
 			const versions: EntityGitTagVersion[] = [];
 
 			for (const tag of tags) {
@@ -91,77 +179,107 @@ export class EntityVersion {
 		return history.versions.some((v) => v.version === version);
 	}
 
-	// Version bump type calculation (moved from EntityChangelog)
+	async getPackageVersionAtTag(
+		tagName: string,
+		packageName: string,
+	): Promise<EntityGitTagVersion | null> {
+		try {
+			const packageInstance = new EntityPackages(packageName);
+			const packageJsonPath = packageInstance.getJsonPath().replace(/^\.\//, "");
+
+			const result = await entitiesShell.gitShowPackageJsonAtTag(tagName, packageJsonPath);
+			if (result.exitCode !== 0) {
+				return null;
+			}
+
+			const packageJson = JSON.parse(result.text());
+			const version = packageJson.version;
+			if (!version) {
+				return null;
+			}
+
+			const tagInfo = await EntityTag.getTagInfo(tagName);
+			const tagSha = await EntityTag.getTagSha(tagName);
+
+			return {
+				tag: tagName,
+				version,
+				commitHash: tagSha,
+				date: new Date(tagInfo.date),
+			};
+		} catch (error) {
+			console.warn(`Failed to get package version at tag ${tagName}:`, error);
+			return null;
+		}
+	}
+
+	// Version bump calculation
 	async calculateBumpType(commits: ParsedCommitData[]): Promise<EntityVersionBumpType> {
+		if (commits.length === 0) {
+			return "none";
+		}
+
+		// Root package has special bump logic
 		if (this.packageName === "root") {
 			return await this.calculateRootBumpType(commits);
 		}
-		return await this.calculatePackageBumpType(commits);
-	}
 
-	private async calculateRootBumpType(commits: ParsedCommitData[]): Promise<EntityVersionBumpType> {
-		// Check for workspace-level breaking changes
-		const hasWorkspaceBreaking = commits.some(
-			(c) => c.message.isBreaking && this.isWorkspaceLevelCommit(c),
-		);
-		if (hasWorkspaceBreaking) return "major";
-
-		// Check for app-level breaking changes
-		const hasAppBreaking = commits.some((c) => c.message.isBreaking && this.isAppLevelCommit(c));
-		if (hasAppBreaking) return "minor";
-
-		// Check for features, fixes, or refactors
-		const hasSignificantChanges = commits.some(
-			(c) => ["feat", "fix", "refactor"].includes(c.message.type) && this.isWorkspaceLevelCommit(c),
-		);
-		if (hasSignificantChanges) return "minor";
-
-		// Check for any internal changes (force patch bump)
-		const hasInternalChanges = await this.hasInternalDependencyChanges();
-		if (hasInternalChanges) return "patch";
-
-		return "none";
-	}
-
-	private async calculatePackageBumpType(
-		commits: ParsedCommitData[],
-	): Promise<EntityVersionBumpType> {
-		// Package-specific bump type calculation
-		let hasBreaking = false;
-		let hasFeature = false;
-
-		for (const commit of commits) {
-			if (commit.message.isBreaking) hasBreaking = true;
-			if (commit.message.type === "feat") hasFeature = true;
+		// Regular package bump logic
+		const hasBreaking = commits.some((commit) => commit.message.isBreaking);
+		if (hasBreaking) {
+			return "major";
 		}
 
-		if (hasBreaking) return "major";
-		if (hasFeature) return "minor";
+		const hasFeature = commits.some((commit) => commit.message.type === "feat");
+		if (hasFeature) {
+			return "minor";
+		}
+
 		return "patch";
 	}
 
-	private isWorkspaceLevelCommit(commit: ParsedCommitData): boolean {
-		return (
-			commit.files?.some(
-				(file) =>
-					file.startsWith(".") ||
-					file.includes("turbo.json") ||
-					file.includes("package.json") ||
-					file.includes("docker-compose"),
-			) ?? false
+	private async calculateRootBumpType(commits: ParsedCommitData[]): Promise<EntityVersionBumpType> {
+		// Check for app-level breaking changes first (should be minor for root)
+		const hasAppBreaking = commits.some(
+			(commit) =>
+				commit.message.isBreaking && commit.files?.some((file) => file.startsWith("apps/")),
 		);
-	}
+		if (hasAppBreaking) {
+			return "minor";
+		}
 
-	private isAppLevelCommit(commit: ParsedCommitData): boolean {
-		return (
-			commit.files?.some((file) => file.startsWith("apps/") || file.includes("src/app/")) ?? false
+		// Check for workspace-level breaking changes
+		const hasWorkspaceBreaking = commits.some(
+			(commit) =>
+				commit.message.isBreaking &&
+				(commit.message.scopes?.includes("root") || commit.message.scopes?.length === 0),
 		);
+		if (hasWorkspaceBreaking) {
+			return "major";
+		}
+
+		// Check for root-level features
+		const hasWorkspaceFeature = commits.some(
+			(commit) =>
+				commit.message.type === "feat" &&
+				(commit.message.scopes?.includes("root") || commit.message.scopes?.length === 0),
+		);
+		if (hasWorkspaceFeature) {
+			return "minor";
+		}
+
+		// Check for internal dependency changes
+		const hasInternalChanges = await this.hasInternalDependencyChanges();
+		if (hasInternalChanges) {
+			return "patch";
+		}
+
+		return "patch";
 	}
 
 	private async hasInternalDependencyChanges(): Promise<boolean> {
-		// Simple check: if any internal packages changed, root should bump
-		// This replaces the complex dependency analyzer
-		return true; // For now, always assume internal changes require root bump
+		// For now, always assume internal changes require root bump
+		return true;
 	}
 
 	// Version data calculation (moved from EntityChangelog)
@@ -230,10 +348,32 @@ export class EntityVersion {
 		};
 	}
 
-	// Git operations (moved from EntityTag)
+	// Utility methods
+	compareVersions(versionA: string, versionB: string): number {
+		const parseVersion = (version: string) =>
+			version.split(".").map((part) => Number.parseInt(part.replace(/[^\d]/g, ""), 10));
+
+		const [majorA, minorA, patchA] = parseVersion(versionA);
+		const [majorB, minorB, patchB] = parseVersion(versionB);
+
+		if (majorA !== majorB) return majorA - majorB;
+		if (minorA !== minorB) return minorA - minorB;
+		return patchA - patchB;
+	}
+
+	extractVersionFromTag(tagName: string): string {
+		const prefix = EntityTag.detectPrefix(tagName) || "";
+		return tagName.replace(prefix, "");
+	}
+
+	// Legacy methods for backward compatibility with tests
+	async getNextVersion(bumpType: EntityVersionBumpType): Promise<string> {
+		const currentVersion = await this.getCurrentVersion();
+		return this.calculateNextVersion(currentVersion, bumpType);
+	}
+
 	async listTags(prefix: string): Promise<string[]> {
 		const result = await entitiesShell.gitTagList(prefix);
-		console.log("result", result.exitCode, result.text());
 		return result.text().trim().split("\n").filter(Boolean);
 	}
 
@@ -260,91 +400,12 @@ export class EntityVersion {
 		throw new Error(`Tag ${tagName} not found`);
 	}
 
-	async getPackageVersionAtTag(
-		tag: string,
-		packageName: string,
-	): Promise<EntityGitTagVersion | null> {
-		try {
-			if (tag === "HEAD") {
-				const version = new EntityPackages(packageName).readVersion();
-				if (!version) {
-					return null;
-				}
-				return {
-					tag,
-					version,
-					commitHash: await this.getTagSha(tag),
-					date: new Date(),
-				};
-			}
-
-			// Get commit hash for the tag
-			const commitHash = await this.getTagSha(tag);
-
-			// Get tag info
-			const tagInfo = await this.getTagInfo(tag);
-			const date = new Date(tagInfo.date);
-
-			// Get package.json content at this tag
-			const packageJsonPath = new EntityPackages(packageName).getJsonPath();
-			const packageJsonResult = await entitiesShell.gitShowPackageJsonAtTag(tag, packageJsonPath);
-
-			if (packageJsonResult.exitCode !== 0) {
-				return null;
-			}
-
-			const packageJsonContent = packageJsonResult.text().trim();
-
-			// Parse version from package.json
-			const versionMatch = packageJsonContent.match(/"version":\s*"([^"]+)"/);
-			if (!versionMatch) {
-				return null;
-			}
-
-			const version = versionMatch[1];
-
-			return {
-				tag,
-				version,
-				commitHash,
-				date,
-			};
-		} catch (error) {
-			console.error(`Failed to get package version at tag ${tag}:`, error);
-			return null;
-		}
-	}
-
 	async tagExists(tagName: string): Promise<boolean> {
 		const result = await entitiesShell.gitTagExists(tagName);
 		return result.exitCode === 0 && result.text().trim() === tagName;
 	}
 
-	// Utility methods
-	compareVersions(versionA: string, versionB: string): number {
-		const parseVersion = (version: string) => {
-			const match = version.match(/^(\d+)\.(\d+)\.(\d+)/);
-			if (!match) return [0, 0, 0];
-			return [
-				Number.parseInt(match[1], 10),
-				Number.parseInt(match[2], 10),
-				Number.parseInt(match[3], 10),
-			];
-		};
-
-		const [majorA, minorA, patchA] = parseVersion(versionA);
-		const [majorB, minorB, patchB] = parseVersion(versionB);
-
-		if (majorA !== majorB) return majorA - majorB;
-		if (minorA !== minorB) return minorA - minorB;
-		return patchA - patchB;
-	}
-
-	getVersionFromTag(tag: string): string {
-		const packageInstance = new EntityPackages(this.packageName);
-		const prefix = packageInstance.getTagSeriesName() || "v";
-		const versionMatch = tag.match(new RegExp(`^${prefix}?(\\d+\\.\\d+\\.\\d+)`));
-		if (!versionMatch) return "";
-		return versionMatch[1];
+	getVersionFromTag(tagName: string): string {
+		return this.extractVersionFromTag(tagName);
 	}
 }
