@@ -26,6 +26,9 @@ export const entitiesShell: EntitiesShell = {
 			.nothrow(),
 	gitTagExists: (tagName: string) => $`git tag --list ${tagName}`.quiet().nothrow(),
 
+	gitMergeBaseIsAncestor: (ancestor: string, descendant: string) =>
+		$`git merge-base --is-ancestor ${ancestor} ${descendant}`.quiet().nothrow(),
+
 	turboRunBuild: (args: string[]) =>
 		$`bunx turbo run build ${args.join(" ")} --dry-run=json`.quiet().nothrow(),
 };

@@ -18,5 +18,7 @@ export type EntitiesShell = {
 	gitTagInfo: (tagName: string) => ReturnType<typeof $>;
 	gitTagExists: (tagName: string) => ReturnType<typeof $>;
 
+	gitMergeBaseIsAncestor: (ancestor: string, descendant: string) => ReturnType<typeof $>;
+
 	turboRunBuild: (args: string[]) => ReturnType<typeof $>;
 };
