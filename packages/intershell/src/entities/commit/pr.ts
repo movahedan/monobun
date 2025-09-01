@@ -1,6 +1,6 @@
-import { $ } from "bun";
 import { EntityBranch, type ParsedBranch } from "../branch";
 import type { IConfig, PRCategory } from "../config/types";
+import { entitiesShell } from "../entities.shell";
 import type { ParsedCommitData, PRStats } from "./types";
 
 export class EntityPr {
@@ -90,9 +90,7 @@ async function getPRCommits(
 ): Promise<ParsedCommitData[]> {
 	try {
 		// First, try the regular merge approach
-		const result = await $`git log --pretty=format:"%H" ${mergeCommitHash}^..${mergeCommitHash}^2`
-			.quiet()
-			.nothrow();
+		const result = await entitiesShell.gitLogHashes([`${mergeCommitHash}^..${mergeCommitHash}^2`]);
 
 		if (result.exitCode === 0) {
 			const commitHashes = result.text().trim().split("\n").filter(Boolean);

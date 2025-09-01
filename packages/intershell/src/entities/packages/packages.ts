@@ -1,6 +1,5 @@
-import { readFileSync } from "node:fs";
-import { $, file, write } from "bun";
 import { getEntitiesConfig } from "../config/config";
+import { packagesShell } from "./packages.shell";
 import type { PackageJson } from "./types";
 
 export class EntityPackages {
@@ -28,17 +27,16 @@ export class EntityPackages {
 
 		const jsonPath = this.getJsonPath();
 		try {
-			const json = readFileSync(jsonPath, "utf8");
-			const packageJson = JSON.parse(json);
+			const packageJson = packagesShell.readJsonFile(jsonPath);
 			return packageJson;
 		} catch (error) {
 			throw new Error(`Package not found ${this.packageName} at ${this.getJsonPath()}: ${error}`);
 		}
 	}
 	async writeJson(data: PackageJson): Promise<void> {
-		await write(this.getJsonPath(), JSON.stringify(data, null, 2));
+		await packagesShell.writeJsonFile(this.getJsonPath(), data);
 		this.packageJson = data;
-		await $`bun biome check --write --no-errors-on-unmatched ${this.getJsonPath()}`.quiet();
+		await packagesShell.runBiomeCheck(this.getJsonPath());
 	}
 
 	readVersion(): string | undefined {
@@ -56,22 +54,11 @@ export class EntityPackages {
 	}
 	readChangelog(): string {
 		const changelogPath = this.getChangelogPath();
-		try {
-			const changelog = readFileSync(changelogPath, "utf8");
-			return changelog || "";
-		} catch {
-			return "";
-		}
+		return packagesShell.readChangelogFile(changelogPath);
 	}
 	async writeChangelog(content: string): Promise<void> {
-		try {
-			await file(this.getChangelogPath()).exists();
-		} catch {
-			await $`touch ${this.getChangelogPath()}`.quiet();
-		}
-
-		await write(this.getChangelogPath(), content);
-		await $`bun biome check --write --no-errors-on-unmatched ${this.getJsonPath()}`.quiet();
+		await packagesShell.writeChangelogFile(this.getChangelogPath(), content);
+		await packagesShell.runBiomeCheck(this.getJsonPath());
 	}
 
 	validatePackage(): string[] {
@@ -148,27 +135,14 @@ export class EntityPackages {
 	static async getAllPackages(): Promise<string[]> {
 		const packages: string[] = ["root"];
 
-		// Use Node.js fs instead of shell commands
-		const fs = await import("node:fs/promises");
-		const path = await import("node:path");
-
-		// Get workspace root by looking for package.json in parent directories
-		let workspaceRoot = process.cwd();
-		while (workspaceRoot !== path.dirname(workspaceRoot)) {
-			try {
-				await fs.access(path.join(workspaceRoot, "package.json"));
-				break; // Found package.json, this is the workspace root
-			} catch {
-				workspaceRoot = path.dirname(workspaceRoot);
-			}
-		}
+		// Get workspace root
+		const workspaceRoot = await packagesShell.getWorkspaceRoot();
 
 		// Read apps directory
 		let apps: string[] = [];
 		try {
-			const appsPath = path.join(workspaceRoot, "apps");
-			const appsEntries = await fs.readdir(appsPath, { withFileTypes: true });
-			apps = appsEntries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+			const appsPath = `${workspaceRoot}/apps`;
+			apps = await packagesShell.readDirectory(appsPath);
 		} catch {
 			// apps directory doesn't exist or can't be read
 		}
@@ -176,11 +150,9 @@ export class EntityPackages {
 		// Read packages directory
 		let pkgs: string[] = [];
 		try {
-			const packagesPath = path.join(workspaceRoot, "packages");
-			const packagesEntries = await fs.readdir(packagesPath, { withFileTypes: true });
-			pkgs = packagesEntries
-				.filter((entry) => entry.isDirectory())
-				.map((entry) => `@repo/${entry.name}`);
+			const packagesPath = `${workspaceRoot}/packages`;
+			const packageNames = await packagesShell.readDirectory(packagesPath);
+			pkgs = packageNames.map((name) => `@repo/${name}`);
 		} catch {
 			// packages directory doesn't exist or can't be read
 		}
@@ -192,13 +164,10 @@ export class EntityPackages {
 				const packageJsonPath = packageInstance.getJsonPath();
 
 				try {
-					const exists = await fs
-						.access(packageJsonPath)
-						.then(() => true)
-						.catch(() => false);
+					const exists = await packagesShell.canAccessFile(packageJsonPath);
 					if (!exists) return null;
 
-					const packageJsonContent = await fs.readFile(packageJsonPath, "utf-8");
+					const packageJsonContent = await packagesShell.readFileAsText(packageJsonPath);
 					const packageJson = JSON.parse(packageJsonContent);
 					const name = packageJson.name;
 

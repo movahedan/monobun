@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 import type { CustomConfigJson } from "./types";
 
 describe("Config", () => {
@@ -6,10 +6,6 @@ describe("Config", () => {
 		mock.module("../packages", () => ({
 			EntityPackages: mock(() => ({ readJson: () => ({}) })),
 		}));
-	});
-
-	afterEach(() => {
-		mock.restore();
 	});
 
 	describe("default configuration", () => {

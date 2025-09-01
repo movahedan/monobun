@@ -1,23 +1,16 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import { restoreBunMocks, setupBunMocks } from "@repo/test-preset/mock-bun";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 import type { IConfig } from "../config/types";
+import { mockEntitiesShell } from "../entities.shell.test";
+import { EntityBranch } from "./branch";
 import type { ParsedBranch } from "./types";
 
 type BranchConfig = IConfig["branch"];
-
-setupBunMocks();
-
-import { EntityBranch } from "./branch";
 
 describe("EntityBranch", () => {
 	let branch: InstanceType<typeof EntityBranch>;
 	let mockConfig: BranchConfig;
 
 	beforeEach(() => {
-		if (!globalThis.Bun?.$ || globalThis.Bun.$.toString().includes("Mock")) {
-			setupBunMocks();
-		}
-
 		mockConfig = {
 			defaultBranch: "main",
 			prefixes: ["feature", "bugfix", "hotfix"],
@@ -31,11 +24,6 @@ describe("EntityBranch", () => {
 		};
 
 		branch = new EntityBranch(mockConfig);
-	});
-
-	afterEach(() => {
-		restoreBunMocks();
-		mock.restore();
 	});
 
 	describe("static parseByName", () => {
@@ -96,42 +84,21 @@ describe("EntityBranch", () => {
 	});
 
 	describe("getCurrentBranch", () => {
-		const getCurrentBranchTests = [
-			{
-				name: "should return current branch name",
-				assertions: (result: string) => {
-					expect(typeof result).toBe("string");
-					expect(result.length).toBeGreaterThan(0);
-				},
-			},
-			{
-				name: "should handle git command and return trimmed output",
-				assertions: (result: string) => {
-					expect(result).toBe(result.trim());
-				},
-			},
-			{
-				name: "should return string from git command",
-				assertions: (result: string) => {
-					expect(typeof result).toBe("string");
-				},
-			},
-		];
+		// keep the trailing space to test the trim() function
+		const mockCurrentBranch = "test-branch ";
 
-		getCurrentBranchTests.forEach(({ name, assertions }) => {
-			it(name, async () => {
-				setupBunMocks({
-					command: {
-						text: "test",
-						exitCode: 0,
-					},
-				});
-
-				const result = await branch.getCurrentBranch();
-				assertions(result);
-
-				restoreBunMocks();
+		beforeEach(() => {
+			mockEntitiesShell({
+				gitBranchShowCurrent: mock(() => ({
+					exitCode: 0,
+					text: () => mockCurrentBranch,
+				})),
 			});
+		});
+
+		it("should handle git command and return trimmed output", async () => {
+			const result = await branch.getCurrentBranch();
+			expect(result).toBe(mockCurrentBranch.trim());
 		});
 	});
 

@@ -1,5 +1,5 @@
-import { $ } from "bun";
 import type { IConfig } from "../config/types";
+import { entitiesShell } from "../entities.shell";
 import type { ParsedBranch } from "./types";
 
 type BranchConfig = IConfig["branch"];
@@ -21,8 +21,8 @@ export class EntityBranch {
 	}
 
 	async getCurrentBranch(): Promise<string> {
-		const result = await $`git branch --show-current`;
-		return result.stdout.toString().trim();
+		const result = await entitiesShell.gitBranchShowCurrent();
+		return result.text().trim();
 	}
 
 	validate(input: string | ParsedBranch): true | string {

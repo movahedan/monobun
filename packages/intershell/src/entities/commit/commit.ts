@@ -1,8 +1,6 @@
-/** biome-ignore-all lint/complexity/noStaticOnlyClass: it's a simple util class */
-import { $ } from "bun";
 import { getEntitiesConfig } from "../config/config";
 import type { IConfig } from "../config/types";
-import { commitShell } from "./commit.shell";
+import { entitiesShell } from "../entities.shell";
 import { EntityPr } from "./pr";
 import type { CommitMessageData, ParsedCommitData } from "./types";
 
@@ -167,7 +165,7 @@ export class EntityCommitClass {
 
 	async parseByHash(hash: string): Promise<ParsedCommitData> {
 		try {
-			const commitResult = await commitShell.gitShow(hash);
+			const commitResult = await entitiesShell.gitShow(hash);
 			if (commitResult.exitCode !== 0)
 				throw new Error(
 					`Could not find commit ${hash}, exit code: ${commitResult.exitCode}, text: ${commitResult.text()}`,
@@ -178,7 +176,7 @@ export class EntityCommitClass {
 			if (!subject) throw new Error(`No subject found for commit ${hash}`);
 
 			// Get files changed in this commit
-			const filesResult = await commitShell.gitShowNameOnly(hash);
+			const filesResult = await entitiesShell.gitShowNameOnly(hash);
 
 			const files =
 				filesResult.exitCode === 0 ? filesResult.text().trim().split("\n").filter(Boolean) : [];
@@ -204,7 +202,7 @@ export class EntityCommitClass {
 	}
 
 	async getStagedFiles(): Promise<{ stagedFiles: string[] }> {
-		const status = await $`git status --porcelain`.text();
+		const status = await entitiesShell.gitStatus().text();
 		const lines = status.split("\n").filter(Boolean);
 
 		return {
@@ -224,7 +222,7 @@ export class EntityCommitClass {
 				const fileNameMatches = pattern.filePattern.some((p) => p.test(file));
 				if (!fileNameMatches) continue;
 
-				const stagedDiff = await $`git diff --cached -- ${file}`.text();
+				const stagedDiff = await entitiesShell.gitDiff(file).text();
 				const contentMatches = pattern.contentPattern?.some((p) => p.test(stagedDiff)) ?? true;
 
 				// Check if this is a new file and should be ignored

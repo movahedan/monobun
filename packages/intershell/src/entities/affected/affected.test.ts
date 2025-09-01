@@ -1,27 +1,28 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { mockEntitiesShell } from "../entities.shell.test";
 
 // Mock EntityTag
 const mockGetBaseTagSha = mock(() => Promise.resolve("abc123"));
-const mockEntityTag = {
-	getBaseTagSha: mockGetBaseTagSha,
-};
 
 // Mock modules before importing
 mock.module("../tag", () => ({
-	EntityTag: mockEntityTag,
+	EntityTag: {
+		getBaseTagSha: mockGetBaseTagSha,
+	},
 }));
 
 // Now import the module after mocking
 const { EntityAffected } = await import("./affected");
 
-describe("EntityAffected", () => {
+describe("EntityAffected", async () => {
 	beforeEach(() => {
-		// Reset all mocks before each test
-		mockGetBaseTagSha.mockClear();
-	});
-
-	afterEach(() => {
-		mock.restore();
+		mockEntitiesShell({
+			turboRunBuild: mock(() => ({
+				exitCode: 0,
+				json: () => Promise.resolve({ packages: ["package1", "package2"] }),
+				text: () => Promise.resolve('{"packages":["package1","package2"]}'),
+			})),
+		});
 	});
 
 	describe("getAffectedPackages", () => {
