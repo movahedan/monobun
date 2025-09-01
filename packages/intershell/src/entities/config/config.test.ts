@@ -42,7 +42,13 @@ describe("Config", () => {
 			const { getEntitiesConfig } = await import("./config");
 			const config = getEntitiesConfig().getConfig();
 
-			expect(config.tag).toEqual([]);
+			expect(config.tag.format.enabled).toBe(true);
+			expect(config.tag.format.list).toEqual(["semver", "calver", "custom"]);
+			expect(config.tag.prefix.enabled).toBe(true);
+			expect(config.tag.prefix.list).toEqual(["v", "intershell-v"]);
+			expect(config.tag.name.enabled).toBe(true);
+			expect(config.tag.name.minLength).toBe(1);
+			expect(config.tag.name.maxLength).toBe(100);
 		});
 
 		it("should have default branch name validation rules", async () => {
@@ -276,7 +282,21 @@ describe("Config", () => {
 				branch: {
 					defaultBranch: "develop",
 				},
-				tag: ["v1.0.0", "v1.0.1"],
+				tag: {
+					format: {
+						enabled: false,
+						list: ["custom"],
+					},
+					prefix: {
+						enabled: true,
+						list: ["custom-v"],
+					},
+					name: {
+						enabled: true,
+						minLength: 5,
+						maxLength: 50,
+					},
+				},
 			};
 
 			// Create a new instance with custom config
@@ -288,7 +308,12 @@ describe("Config", () => {
 			expect(result.commit.conventional.type?.list?.[0]?.type).toBe("feat");
 			expect(result.commit.staged).toHaveLength(1);
 			expect(result.branch.defaultBranch).toBe("develop");
-			expect(result.tag).toEqual(["v1.0.0", "v1.0.1"]);
+			expect(result.tag.format.enabled).toBe(false);
+			expect(result.tag.format.list).toEqual(["custom"]);
+			expect(result.tag.prefix.enabled).toBe(true);
+			expect(result.tag.prefix.list).toEqual(["custom-v"]);
+			expect(result.tag.name.minLength).toBe(5);
+			expect(result.tag.name.maxLength).toBe(50);
 		});
 	});
 });

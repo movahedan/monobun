@@ -63,7 +63,22 @@ export class Config {
 				...defaultConfig.branch,
 				...config.branch,
 			} as IConfig["branch"],
-			tag: [...defaultConfig.tag, ...(config.tag || [])] as IConfig["tag"],
+			tag: {
+				...defaultConfig.tag,
+				...config.tag,
+				format: {
+					...defaultConfig.tag.format,
+					...config.tag?.format,
+				},
+				prefix: {
+					...defaultConfig.tag.prefix,
+					...config.tag?.prefix,
+				},
+				name: {
+					...defaultConfig.tag.name,
+					...config.tag?.name,
+				},
+			} as IConfig["tag"],
 		};
 	}
 

@@ -91,11 +91,36 @@ interface PackageValidationConfig {
 	};
 }
 
+interface TagValidationConfig {
+	readonly format: {
+		readonly enabled: boolean;
+		readonly description: string;
+		readonly list: readonly string[];
+		readonly validator?: Validator;
+	};
+	readonly prefix: {
+		readonly enabled: boolean;
+		readonly description: string;
+		readonly list: readonly string[];
+		readonly validator?: Validator;
+	};
+	readonly name: {
+		readonly enabled: boolean;
+		readonly description: string;
+		readonly minLength: number;
+		readonly maxLength: number;
+		readonly allowedCharacters: RegExp;
+		readonly noSpaces: boolean;
+		readonly noSpecialChars: boolean;
+		readonly validator?: Validator;
+	};
+}
+
 export interface IConfig {
 	readonly commit: CommitConfig;
 	readonly branch: BranchConfig;
 	readonly package: PackageValidationConfig;
-	readonly tag: readonly string[];
+	readonly tag: TagValidationConfig;
 }
 
 type DeepPartial<T> = {

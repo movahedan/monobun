@@ -206,5 +206,25 @@ export const defaultConfig = {
 			"renovate",
 		],
 	},
-	tag: [],
+	tag: {
+		format: {
+			enabled: true,
+			description: "Ensure tags follow valid format patterns",
+			list: ["semver", "calver", "custom"] as const,
+		},
+		prefix: {
+			enabled: true,
+			description: "Validate tag prefixes for different packages",
+			list: ["v", "intershell-v"] as const, // Support multiple prefixes for different packages
+		},
+		name: {
+			enabled: true,
+			description: "Validate tag name structure and content",
+			minLength: 1,
+			maxLength: 100,
+			allowedCharacters: /^[a-zA-Z0-9\-_.]+$/,
+			noSpaces: true,
+			noSpecialChars: true,
+		},
+	},
 } as const satisfies IConfig;
