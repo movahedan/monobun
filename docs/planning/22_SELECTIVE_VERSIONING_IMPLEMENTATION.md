@@ -119,31 +119,40 @@ static async getAllPackages(): Promise<string[]> {
   - ✅ `EntityPackages.getVersionedPackages()` static method implemented
   - ✅ `EntityPackages.getUnversionedPackages()` static method implemented
 
-- **Phase 2: Create EntityVersion and Reorganize Responsibilities** - 🚧 **IN PROGRESS**
-  - ✅ **EntityVersion class created** with core structure
-  - ✅ **File-based commit level detection implemented**:
-    - ✅ `isWorkspaceLevelCommit()` - Detects workspace-level changes (root config files, etc.)
-    - ✅ `isAppLevelCommit()` - Detects app-level changes (apps/*, src/app/*, etc.)
-  - ✅ **Commit entity extended** with file change information:
-    - ✅ Added `files?: string[]` to `ParsedCommitData` interface
-    - ✅ Modified `parseByHash` to extract changed files using `git show --name-only`
-    - ✅ Created `commitShell` module for better testability
-  - ✅ **All tests passing** for file detection functionality
-  - 🔄 **Placeholder methods** (to be implemented):
-    - `calculateRootBumpType()` - Uses commit level detection for root versioning
-    - `calculatePackageBumpType()` - Package-specific version bump logic
-    - `hasInternalDependencyChanges()` - Dependency change detection
-    - `getVersionHistory()` - Tag series integration
+- **Phase 2: Create EntityVersion and Reorganize Responsibilities** - ✅ **COMPLETE**
+  - ✅ **EntityVersion class created** with comprehensive version management:
+    - ✅ Version calculation (current, next, bump types)
+    - ✅ Version history tracking and git tag operations
+    - ✅ Bump type determination logic with commit level detection
+    - ✅ Root vs package versioning rules implemented
+  - ✅ **EntityTag refactored** - All version methods moved to EntityVersion:
+    - ✅ Removed version calculation methods
+    - ✅ Added package-specific prefix support
+    - ✅ Cleaned up to focus only on git operations
+  - ✅ **Shell commands separated** into dedicated modules:
+    - ✅ `packages.shell.ts` - File system and Bun operations
+    - ✅ `entities.shell.ts` - Git command operations
+    - ✅ Better testability and separation of concerns
+  - ✅ **Version calculation logic implemented**:
+    - ✅ `calculateRootBumpType()` - Workspace/app level detection
+    - ✅ `calculatePackageBumpType()` - Package-specific bump logic
+    - ✅ `isWorkspaceLevelCommit()` - Root config file detection
+    - ✅ `isAppLevelCommit()` - App-level change detection
+    - ✅ `hasInternalDependencyChanges()` - Dependency change detection
+  - ✅ **Git operations moved to EntityVersion**:
+    - ✅ Tag listing, info, SHA retrieval
+    - ✅ Package version history tracking
+    - ✅ Version comparison and extraction utilities
 
 ### **🎯 Next Immediate Steps**
-1. **Test EntityVersion methods** - Verify `isWorkspaceLevelCommit` and `isAppLevelCommit` work correctly
-2. **Implement version calculation logic** - Complete the placeholder methods in EntityVersion
-3. **Add EntityVersion tests** - Create comprehensive test suite for the new entity
-4. **Integration testing** - Test EntityVersion with actual commit data
+1. **Move to Phase 3** - Update version preparation script for new architecture
+2. **Update version-prepare.ts** - Use EntityVersion for version calculations
+3. **Update version-apply.ts** - Create tags with package-specific prefixes
+4. **Integration testing** - Test EntityVersion with EntityTag in real scenarios
 
 ### **🚧 In Progress**
-- **Phase 2 continued**: Implementing version calculation logic in EntityVersion
-- **Testing**: All file detection tests are passing, EntityVersion tests next
+- **Test isolation**: Resolving mock interference between test suites
+- **EntityChangelog testing**: Expanding test coverage beyond basic instantiation
 
 ### **⏳ Pending**
 - **Phase 3**: Refactor EntityChangelog to use EntityVersion
@@ -205,7 +214,7 @@ export class EntityPackages {
 }
 ```
 
-### **Phase 2: Create EntityVersion and Reorganize Responsibilities**
+### **Phase 2: Create EntityVersion and Reorganize Responsibilities** ✅ COMPLETED
 
 #### **2.1 Create EntityVersion Entity**
 ```typescript
@@ -999,7 +1008,7 @@ interface VersionCalculationWorkflow {
 - [x] **Changelog Preservation**: Existing changelog system unchanged (time-sorted, PR section)
 - [x] **Tag Series Integration**: Foundation for multiple tag series support
 
-## 🎯 **Phase 2: Create EntityVersion and Reorganize Responsibilities - IN PROGRESS**
+## 🎯 **Phase 2: Create EntityVersion and Reorganize Responsibilities - ✅ COMPLETED**
 
 ### **What Was Accomplished**
 
@@ -1077,12 +1086,12 @@ validateAllPackages() → {
 
 ## 📈 **Implementation Progress Summary**
 
-### 🎯 **Overall Status: 30% Complete**
+### 🎯 **Overall Status: 60% Complete**
 
 | Phase | Status | Progress | Notes |
 |-------|--------|----------|-------|
 | **Phase 1: Package Classification System** | ✅ **COMPLETE** | 100% | Package classification, tag series generation, selective processing |
-| **Phase 2: Create EntityVersion and Reorganize Responsibilities** | 🔄 **IN PROGRESS** | 25% | Package validation foundation completed, EntityVersion entity pending |
+| **Phase 2: Create EntityVersion and Reorganize Responsibilities** | ✅ **COMPLETE** | 100% | EntityVersion created, EntityTag refactored, shell commands separated, version logic implemented |
 | **Phase 3: Update Version Preparation Script** | 🔄 **PENDING** | 0% | Script updates for new architecture |
 | **Phase 4: Package.json Version Management** | 🔄 **PENDING** | 0% | Version field management and cleanup |
 
