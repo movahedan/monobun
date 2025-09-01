@@ -1,5 +1,6 @@
 import { $ } from "bun";
 import { getEntitiesConfig } from "../config/config";
+import { EntityPackages } from "../packages";
 import type { ParsedTag, TagValidationResult } from "./types";
 
 export * from "./types";
@@ -21,32 +22,6 @@ export const EntityTag = {
 		const parsedTag = typeof tag === "string" ? EntityTag.parseByName(tag) : tag;
 		const config = getEntitiesConfig().getConfig();
 		const errors = [];
-
-		// Format validation
-		if (config.tag.format.enabled) {
-			const format = parsedTag.format;
-			if (config.tag.format.list.length > 0) {
-				const exists = format ? config.tag.format.list.includes(format) : true;
-				if (!exists) {
-					errors.push(
-						`invalid format: "${format}". valid formats: ${config.tag.format.list.join(", ")}`,
-					);
-				}
-			}
-		}
-
-		// Prefix validation
-		if (config.tag.prefix.enabled) {
-			const prefix = parsedTag.prefix;
-			if (config.tag.prefix.list.length > 0) {
-				const exists = prefix ? config.tag.prefix.list.includes(prefix) : true;
-				if (!exists) {
-					errors.push(
-						`invalid prefix: "${prefix}". valid prefixes: ${config.tag.prefix.list.join(", ")}`,
-					);
-				}
-			}
-		}
 
 		// Name validation
 		if (config.tag.name.enabled) {
@@ -129,9 +104,33 @@ export const EntityTag = {
 		if (!force && (await EntityTag.tagExists(tagName))) {
 			throw new Error(`Tag ${tagName} already exists, use --force to override`);
 		}
+
+		// Validate tag name structure
 		const validation = EntityTag.validate(tagName);
 		if (!validation.isValid) {
 			throw new Error(`Tag ${tagName} is invalid: ${validation.errors.join(", ")}`);
+		}
+
+		// Validate that tag prefix corresponds to a versioned package
+		const prefix = EntityTag.detectPrefix(tagName);
+		if (prefix) {
+			// Extract package name from prefix and check if it should be versioned
+			let packageName: string;
+			if (prefix === "v") {
+				packageName = "root";
+			} else if (prefix.endsWith("-v")) {
+				packageName = prefix.replace("-v", "");
+			} else {
+				throw new Error(
+					`Invalid tag prefix format: "${prefix}". Expected format: v (root) or package-name-v (e.g., api-v, intershell-v)`,
+				);
+			}
+
+			// Check if this package should be versioned
+			const packageInstance = new EntityPackages(packageName);
+			if (!packageInstance.shouldVersion()) {
+				throw new Error(`Package "${packageName}" should not be versioned (private package)`);
+			}
 		}
 
 		try {
