@@ -11,3 +11,25 @@ export interface TagVersion {
 	readonly date: Date;
 	readonly message: string;
 }
+
+export type EntityVersionBumpType = "major" | "minor" | "patch" | "none";
+
+export interface EntityVersionData {
+	readonly currentVersion: string;
+	readonly bumpType: EntityVersionBumpType;
+	readonly shouldBump: boolean;
+	readonly targetVersion: string;
+	readonly reason: string;
+}
+
+export interface EntityGitTagVersion {
+	readonly tag: string;
+	readonly version: string;
+	readonly commitHash: string;
+	readonly date: Date;
+}
+
+export interface EntityPackageVersionHistory {
+	readonly packageName: string;
+	readonly versions: EntityGitTagVersion[];
+}

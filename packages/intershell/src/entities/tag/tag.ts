@@ -42,6 +42,18 @@ export const EntityTag = {
 		return defaultPrefix;
 	},
 
+	// NEW: Support multiple prefixes per package
+	getPrefixForPackage(packageName: string): string {
+		const packageInstance = new EntityPackages(packageName);
+		return packageInstance.getTagSeriesName() || "v";
+	},
+
+	// NEW: List tags for specific package series
+	async listTagsForPackage(packageName: string): Promise<string[]> {
+		const prefix = this.getPrefixForPackage(packageName);
+		return await this.listTags(prefix);
+	},
+
 	async getBaseTagSha(from?: string): Promise<string> {
 		if (!from) {
 			// No from specified, get the base tag
@@ -69,6 +81,34 @@ export const EntityTag = {
 		// If we get here, the reference wasn't found
 		throw new Error(`Invalid reference: ${from}. Not found as tag, branch, or commit.`);
 	},
+
+	// REFACTOR: Update getBaseTagSha to support package-specific prefixes
+	async getBaseTagShaForPackage(packageName: string, from?: string): Promise<string> {
+		if (!from) {
+			const prefix = this.getPrefixForPackage(packageName);
+			const tag = await this._getBaseTag(prefix);
+			if (tag) return tag;
+			return await this._getFirstCommit();
+		}
+
+		// First check if it's a semver tag
+		const fromIsSemver = EntityTag.parseByName(from).format === "semver";
+		if (fromIsSemver) {
+			const isExistingTag = await EntityTag.tagExists(from);
+			if (isExistingTag) {
+				return from;
+			}
+		}
+
+		// Check if it's a commit hash or branch name
+		const result = await $`git rev-parse ${from}`.nothrow().quiet();
+		const sha = result.text().trim();
+		if (sha) return sha;
+
+		// If we get here, the reference wasn't found
+		throw new Error(`Invalid reference: ${from}. Not found as tag, branch, or commit.`);
+	},
+
 	async _getBaseTag(prefix: string): Promise<string | undefined> {
 		const result = await $`git tag --sort=-version:refname --list "${prefix}*" | head -1`
 			.nothrow()
@@ -80,6 +120,7 @@ export const EntityTag = {
 		}
 		return undefined;
 	},
+
 	async _getTagSha(tagName: string): Promise<string> {
 		const result = await $`git rev-parse ${tagName}`.nothrow().quiet();
 		if (result.exitCode === 0) {
@@ -87,6 +128,7 @@ export const EntityTag = {
 		}
 		throw new Error(`Tag ${tagName} not found`);
 	},
+
 	async _getFirstCommit(): Promise<string> {
 		const result = await $`git rev-list --max-parents=0 HEAD`.nothrow().quiet();
 		if (result.exitCode === 0) {
@@ -142,155 +184,30 @@ export const EntityTag = {
 		}));
 	},
 
-	/**
-	 * Get package version history from git tags
-	 */
-	async getPackageVersionHistory(packageName: string): Promise<{
-		packageName: string;
-		versions: Array<{
-			tag: string;
-			version: string;
-			commitHash: string;
-			date: Date;
-		}>;
-	}> {
-		try {
-			// Get all tags
-			const prefix = EntityTag.getPrefix();
-			const tags = await EntityTag.listTags(prefix);
-
-			const versions: Array<{
-				tag: string;
-				version: string;
-				commitHash: string;
-				date: Date;
-			}> = [];
-
-			for (const tag of tags) {
-				try {
-					const versionData = await EntityTag.getPackageVersionAtTag(tag, packageName);
-					if (versionData) {
-						versions.push(versionData);
-					}
-				} catch (error) {
-					console.warn(`Failed to get version for tag ${tag}:`, error);
-				}
-			}
-
-			// Sort by semantic version (newest first)
-			versions.sort((a, b) =>
-				EntityTag.compareVersions(EntityTag.toTag(b.version), EntityTag.toTag(a.version)),
-			);
-
-			return {
-				packageName,
-				versions,
-			};
-		} catch (error) {
-			console.warn("Failed to get git tags:", error);
-			return {
-				packageName,
-				versions: [],
-			};
-		}
-	},
-
-	/**
-	 * Get the version of each package.json at a specific git tag
-	 */
-	async getPackageVersionAtTag(
-		tag: string,
+	// REFACTOR: Update getTagsInRange to support package-specific prefixes
+	async getTagsInRangeForPackage(
 		packageName: string,
-	): Promise<{
-		tag: string;
-		version: string;
-		commitHash: string;
-		date: Date;
-	} | null> {
-		try {
-			if (tag === "HEAD") {
-				const version = new EntityPackages(packageName).readVersion();
-				if (!version) {
-					return null;
-				}
-				return {
-					tag,
-					version,
-					commitHash: await EntityTag._getTagSha(tag),
-					date: new Date(),
-				};
-			}
+		from: string,
+		to: string,
+	): Promise<Array<{ tag: string; previousTag?: string }>> {
+		const prefix = this.getPrefixForPackage(packageName);
+		const allTags = await this.listTags(prefix);
 
-			// Get commit hash for the tag using EntityTag
-			const commitHash = await EntityTag._getTagSha(tag);
+		const fromIndex = allTags.indexOf(from);
+		const toIndex = allTags.indexOf(to);
 
-			// Get tag info using EntityTag
-			const tagInfo = await EntityTag.getTagInfo(tag);
-			const date = new Date(tagInfo.date);
-
-			// Get package.json content at this tag
-			const packageJsonPath = new EntityPackages(packageName).getJsonPath();
-
-			// Use git show to get file content at specific tag without checking out
-			const packageJsonResult = await $`git show ${tag}:${packageJsonPath}`.nothrow().quiet();
-			const packageJsonContent = packageJsonResult.text().trim();
-
-			// Parse version from package.json
-			const versionMatch = packageJsonContent.match(/"version":\s*"([^"]+)"/);
-			if (!versionMatch) {
-				return null;
-			}
-
-			const version = versionMatch[1];
-
-			return {
-				tag,
-				version,
-				commitHash,
-				date,
-			};
-		} catch (error) {
-			console.error(`Failed to get package version at tag ${tag}:`, error);
-			return {
-				tag,
-				version: EntityTag.getVersionFromTag(tag),
-				commitHash: await EntityTag._getTagSha(tag),
-				date: new Date((await EntityTag.getTagInfo(tag)).date),
-			};
+		if (fromIndex === -1 || toIndex === -1) {
+			return [];
 		}
-	},
-	/**
-	 * Get the latest version for a package
-	 */
-	async getLatestPackageVersionInHistory(packageName: string): Promise<string | null> {
-		const history = await this.getPackageVersionHistory(packageName);
-		return history.versions.length > 0 ? history.versions[0].version : null;
-	},
-	/**
-	 * Check if a version exists for a package
-	 */
-	async packageVersionExistsInHistory(packageName: string, version: string): Promise<boolean> {
-		const history = await this.getPackageVersionHistory(packageName);
-		return history.versions.some((v) => v.version === version);
-	},
 
-	compareVersions(tagA: string, tagB: string): number {
-		const parseVersion = (tag: string) => {
-			const match = tag.match(new RegExp(`^${EntityTag.getPrefix()}?(\\d+)\\.(\\d+)\\.(\\d+)`));
-			if (!match) return [0, 0, 0];
-			return [
-				Number.parseInt(match[1], 10),
-				Number.parseInt(match[2], 10),
-				Number.parseInt(match[3], 10),
-			];
-		};
+		const startIndex = Math.min(fromIndex, toIndex);
+		const endIndex = Math.max(fromIndex, toIndex);
+		const tagsInRange = allTags.slice(startIndex, endIndex + 1);
 
-		const [majorA, minorA, patchA] = parseVersion(tagA);
-		const [majorB, minorB, patchB] = parseVersion(tagB);
-
-		if (majorA !== majorB) return majorA - majorB;
-		if (minorA !== minorB) return minorA - minorB;
-		return patchA - patchB;
+		return tagsInRange.map((tag, index) => ({
+			previousTag: index > 0 ? tagsInRange[index - 1] : undefined,
+			tag,
+		}));
 	},
 
 	async createTag(
@@ -367,13 +284,5 @@ export const EntityTag = {
 		const firstPart = tagName.split(".")[0].replace(/[0-9]/g, ""); // v1.0.0 -> v
 		if (/^[a-zA-Z]+/.test(firstPart)) return firstPart; // v1.0.0 -> v
 		return undefined; // 1.0.0 -> undefined
-	},
-
-	getVersionFromTag(tag: string): string {
-		const versionMatch = tag.match(
-			new RegExp(`^${EntityTag.getPrefix()}?(\\d+)\\.(\\d+)\\.(\\d+)`),
-		);
-		if (!versionMatch) return "";
-		return versionMatch[1];
 	},
 };
