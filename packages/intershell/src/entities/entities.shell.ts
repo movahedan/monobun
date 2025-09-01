@@ -2,9 +2,12 @@ import { $ } from "bun";
 import type { EntitiesShell } from "./entities.shell.type";
 
 export const entitiesShell: EntitiesShell = {
+	touch: (filePath: string) => $`touch ${filePath}`.quiet().nothrow(),
+
 	gitStatus: () => $`git status --porcelain`.quiet().nothrow(),
 
 	gitRevParse: (ref: string) => $`git rev-parse ${ref}`.quiet().nothrow(),
+	gitFirstCommit: () => $`git rev-list --max-parents=0 HEAD`.nothrow().quiet(),
 
 	gitLogHashes: (args: string[]) =>
 		$`git log --pretty=format:"%H" ${args.join(" ")}`.quiet().nothrow(),
@@ -18,17 +21,26 @@ export const entitiesShell: EntitiesShell = {
 	gitDiff: (file: string) => $`git diff --cached -- ${file}`.quiet().nothrow(),
 	gitBranchShowCurrent: () => $`git branch --show-current`.quiet().nothrow(),
 
+	gitTag: (tagName: string, message: string, options: { force?: string }) =>
+		$`git tag ${options.force} -a ${tagName} -m "${message}"`.quiet().nothrow(),
 	gitTagList: (prefix: string) =>
 		$`git tag --list "${prefix}*" --sort=-version:refname`.quiet().nothrow(),
+	gitTagLatest: (prefix: string) =>
+		$`git tag --sort=-version:refname --list "${prefix}*" | head -1`.nothrow().quiet(),
 	gitTagInfo: (tagName: string) =>
 		$`git tag -l --format='%(creatordate:iso8601)%0a%(contents:subject)' ${tagName}`
 			.quiet()
 			.nothrow(),
 	gitTagExists: (tagName: string) => $`git tag --list ${tagName}`.quiet().nothrow(),
+	gitPushTag: (tagName: string) => $`git push origin ${tagName}`.quiet().nothrow(),
+	gitDeleteTag: (tagName: string) => $`git tag -d ${tagName}`.quiet().nothrow(),
 
 	gitMergeBaseIsAncestor: (ancestor: string, descendant: string) =>
 		$`git merge-base --is-ancestor ${ancestor} ${descendant}`.quiet().nothrow(),
 
 	turboRunBuild: (args: string[]) =>
 		$`bunx turbo run build ${args.join(" ")} --dry-run=json`.quiet().nothrow(),
+
+	runBiomeCheck: (filePath: string) =>
+		$`bun biome check --write --no-errors-on-unmatched ${filePath}`.quiet().nothrow(),
 };

@@ -54,6 +54,10 @@ describe("EntityPackages", () => {
 		getWorkspaceRoot: ReturnType<typeof mock>;
 	};
 
+	let mockEntitiesShell: {
+		runBiomeCheck: ReturnType<typeof mock>;
+	};
+
 	beforeEach(() => {
 		// Mock packagesShell
 		mockPackagesShell = {
@@ -87,6 +91,15 @@ describe("EntityPackages", () => {
 		// Mock the packagesShell module
 		mock.module("./packages.shell", () => ({
 			packagesShell: mockPackagesShell,
+		}));
+
+		// Mock the entitiesShell module
+		mockEntitiesShell = {
+			runBiomeCheck: mock(() => Promise.resolve()),
+		};
+
+		mock.module("../entities.shell", () => ({
+			entitiesShell: mockEntitiesShell,
 		}));
 
 		// Create instance after mocking
