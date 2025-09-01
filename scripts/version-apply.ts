@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { colorify, createScript, type InferArgs, type ScriptConfig } from "@repo/intershell/core";
-import { EntityPackages, EntityTag } from "@repo/intershell/entities";
+import { EntityPackages, EntityVersion } from "@repo/intershell/entities";
 import { $ } from "bun";
 
 const scriptConfig = {
@@ -113,23 +113,25 @@ async function createTagsForPackages(
 	for (const packageName of packagesToProcess) {
 		const packageInstance = new EntityPackages(packageName);
 		const version = packageInstance.readVersion();
-		const tagSeriesName = packageInstance.getTagSeriesName();
+		if (!version) {
+			throw new Error(`Version not found for ${packageName}`);
+		}
+		const versionEntity = new EntityVersion(packageName);
 
-		// Create package-specific tag name
-		const tagName = tagSeriesName ? `${tagSeriesName}${version}` : `v${version}`;
-
-		xConsole.info(`🏷️ Creating tag for ${packageName}: ${tagName}`);
+		xConsole.info(`🏷️ Creating tag for ${packageName}: ${version}`);
 
 		try {
-			await EntityTag.createTag(
-				tagName,
+			await versionEntity.createPackageTag(
+				version,
 				args.message || `Release ${packageName} version ${version}`,
 			);
 
+			const prefix = await versionEntity.getTagPrefix();
+			const tagName = `${prefix}${version}`;
 			xConsole.log(`✅ Created tag: ${tagName}`);
 		} catch (error) {
 			throw new Error(
-				`Failed to create tag ${tagName} for ${packageName}: ${error instanceof Error ? error.message : String(error)}`,
+				`Failed to create tag for ${packageName}: ${error instanceof Error ? error.message : String(error)}`,
 			);
 		}
 	}
