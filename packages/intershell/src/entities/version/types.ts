@@ -12,7 +12,7 @@ export interface TagVersion {
 	readonly message: string;
 }
 
-export type EntityVersionBumpType = "major" | "minor" | "patch" | "none";
+export type EntityVersionBumpType = "major" | "minor" | "patch" | "none" | "synced";
 
 export interface EntityVersionData {
 	readonly currentVersion: string;

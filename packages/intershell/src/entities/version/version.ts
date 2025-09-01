@@ -1,6 +1,5 @@
-/** biome-ignore-all lint/correctness/noUnusedPrivateClassMembers: wip */
-
 import type { ParsedCommitData } from "../commit";
+import { EntityCommit } from "../commit";
 import { entitiesShell } from "../entities.shell";
 import { EntityPackages } from "../packages";
 import { EntityTag } from "../tag";
@@ -15,16 +14,6 @@ export class EntityVersion {
 	packageName: string;
 	constructor(packageName: string) {
 		this.packageName = packageName;
-	}
-
-	// Version calculation and management
-	async getCurrentVersion(): Promise<string> {
-		const packageInstance = new EntityPackages(this.packageName);
-		const version = packageInstance.readVersion();
-		if (!version) {
-			throw new Error(`No version found for package ${this.packageName}`);
-		}
-		return version;
 	}
 
 	private calculateNextVersion(currentVersion: string, bumpType: EntityVersionBumpType): string {
@@ -50,20 +39,9 @@ export class EntityVersion {
 		}
 	}
 
-	// Package-specific tag operations
 	async getTagPrefix(): Promise<string> {
 		const packageInstance = new EntityPackages(this.packageName);
 		return packageInstance.getTagSeriesName() || "v";
-	}
-
-	async getTagPattern(): Promise<string> {
-		const prefix = await this.getTagPrefix();
-		return `${prefix}*`;
-	}
-
-	async getLatestPackageTag(): Promise<string | null> {
-		const pattern = await this.getTagPattern();
-		return await EntityTag.getLatestTag(pattern);
 	}
 
 	async createPackageTag(version: string, message?: string): Promise<void> {
@@ -75,8 +53,7 @@ export class EntityVersion {
 	}
 
 	async listPackageTags(): Promise<string[]> {
-		const pattern = await this.getTagPattern();
-		return await EntityTag.listTags(pattern);
+		return await EntityTag.listTags(await this.getTagPrefix());
 	}
 
 	async packageTagExists(version: string): Promise<boolean> {
@@ -88,7 +65,7 @@ export class EntityVersion {
 	// Convenience methods for changelog and scripts
 	async getBaseTagShaForPackage(from?: string): Promise<string> {
 		if (!from) {
-			const latestTag = await this.getLatestPackageTag();
+			const latestTag = await EntityTag.getLatestTag(await this.getTagPrefix());
 			if (latestTag) {
 				return await EntityTag.getTagSha(latestTag);
 			}
@@ -338,6 +315,19 @@ export class EntityVersion {
 			);
 		}
 
+		// Check if version on disk is already synced
+		const packageInstance = new EntityPackages(this.packageName);
+		const versionOnDisk = packageInstance.readVersion();
+		if (versionOnDisk === nextVersion) {
+			return {
+				currentVersion,
+				shouldBump: false,
+				targetVersion: nextVersion,
+				bumpType: "synced",
+				reason: `Package version on disk is already synced to ${nextVersion}`,
+			};
+		}
+
 		// Normal version bump - if we have commits and the next version doesn't exist, we should bump
 		return {
 			currentVersion,
@@ -361,51 +351,69 @@ export class EntityVersion {
 		return patchA - patchB;
 	}
 
-	extractVersionFromTag(tagName: string): string {
-		const prefix = EntityTag.detectPrefix(tagName) || "";
-		return tagName.replace(prefix, "");
-	}
+	// Commit retrieval methods (moved from EntityChangelog)
+	async getCommitsInRange(from: string, to: string): Promise<ParsedCommitData[]> {
+		const gitRange = from === "0.0.0" ? to : `${from}..${to}`;
 
-	// Legacy methods for backward compatibility with tests
-	async getNextVersion(bumpType: EntityVersionBumpType): Promise<string> {
-		const currentVersion = await this.getCurrentVersion();
-		return this.calculateNextVersion(currentVersion, bumpType);
-	}
+		try {
+			let commitHashes: string[];
 
-	async listTags(prefix: string): Promise<string[]> {
-		const result = await entitiesShell.gitTagList(prefix);
-		return result.text().trim().split("\n").filter(Boolean);
-	}
+			if (this.packageName === "root") {
+				const allHashesResult = await entitiesShell.gitLogHashes([gitRange, "--", "."]);
+				const mergeHashesResult = await entitiesShell.gitLogHashes([gitRange, "--merges"]);
 
-	async getTagInfo(tagName: string): Promise<{ date: string; message: string }> {
-		const result = await entitiesShell.gitTagInfo(tagName);
+				const allHashes =
+					allHashesResult.exitCode === 0
+						? allHashesResult.text().trim().split("\n").filter(Boolean)
+						: [];
+				const mergeHashes =
+					mergeHashesResult.exitCode === 0
+						? mergeHashesResult.text().trim().split("\n").filter(Boolean)
+						: [];
 
-		if (result.exitCode === 0) {
-			const lines = result.text?.().trim?.().split("\n").filter(Boolean) ?? [];
-			if (lines.length >= 2) {
-				return {
-					date: lines[0],
-					message: lines[1],
-				};
+				commitHashes = [...new Set([...allHashes, ...mergeHashes])];
+			} else {
+				const packagePath = new EntityPackages(this.packageName).getPath();
+				const packageHashesResult = await entitiesShell.gitLogHashes([gitRange, "--", packagePath]);
+				const mergeHashesResult = await entitiesShell.gitLogHashes([gitRange, "--merges"]);
+
+				const packageHashes =
+					packageHashesResult.exitCode === 0
+						? packageHashesResult.text().trim().split("\n").filter(Boolean)
+						: [];
+				const mergeHashes =
+					mergeHashesResult.exitCode === 0
+						? mergeHashesResult.text().trim().split("\n").filter(Boolean)
+						: [];
+
+				const relevantMergeHashes: string[] = [];
+				for (const hash of mergeHashes) {
+					const prCommitsResult = await entitiesShell.gitLogHashes([
+						`${hash}^..${hash}^2`,
+						"--",
+						packagePath,
+					]);
+					if (prCommitsResult.exitCode === 0) {
+						const prHashes = prCommitsResult.text().trim().split("\n").filter(Boolean);
+						if (prHashes.length > 0) {
+							relevantMergeHashes.push(hash);
+						}
+					}
+				}
+
+				commitHashes = [...new Set([...packageHashes, ...relevantMergeHashes])];
 			}
+
+			const commits: ParsedCommitData[] = [];
+			for (const hash of commitHashes) {
+				const commit = await EntityCommit.parseByHash(hash);
+				commits.push(commit);
+			}
+
+			return commits;
+		} catch (error) {
+			console.warn("Failed to get commits in range:", error);
+			return [];
 		}
-		throw new Error(`Could not get info for tag ${tagName}`);
-	}
-
-	async getTagSha(tagName: string): Promise<string> {
-		const result = await entitiesShell.gitRevParse(tagName);
-		if (result.exitCode === 0) {
-			return result.text().trim();
-		}
-		throw new Error(`Tag ${tagName} not found`);
-	}
-
-	async tagExists(tagName: string): Promise<boolean> {
-		const result = await entitiesShell.gitTagExists(tagName);
-		return result.exitCode === 0 && result.text().trim() === tagName;
-	}
-
-	getVersionFromTag(tagName: string): string {
-		return this.extractVersionFromTag(tagName);
 	}
 }
