@@ -34,6 +34,8 @@ The Monobun monorepo uses a modern, automated versioning system that provides so
 ```bash
 # Prepare version and changelog
 bun run scripts/version-prepare.ts --package root
+# Use version ranges for targeted changelog generation
+bun run scripts/version-prepare.ts --from-version 1.0.0 --to-version 1.2.0
 # Apply changes without pushing
 bun run scripts/version-apply.ts --no-push
 # Preview complete workflow
@@ -93,6 +95,12 @@ bun run scripts/version-prepare.ts --package root
 
 # Custom commit range
 bun run scripts/version-prepare.ts --from v1.0.0 --to HEAD
+
+# Version-based ranges (automatically converts to appropriate tags)
+bun run scripts/version-prepare.ts --from-version 1.0.0 --to-version 1.2.0
+
+# Package-specific version ranges
+bun run scripts/version-prepare.ts --package @repo/intershell --from-version 1.0.0
 ```
 
 **Features:**
@@ -101,6 +109,8 @@ bun run scripts/version-prepare.ts --from v1.0.0 --to HEAD
 - Commit range analysis
 - Package-specific processing
 - Proper handling of squash merges 🆕
+- **Version-to-Tag Conversion** - Use `--from-version`/`--to-version` for intuitive version ranges 🆕
+- **Package-Aware Tag Prefixes** - Automatically uses correct tag series (v*, intershell-v*, etc.) 🆕
 
 ### **version-apply.ts**
 
@@ -280,6 +290,32 @@ bun run scripts/version-prepare.ts --from v1.0.0 --to HEAD
 
 # Version between commits
 bun run scripts/version-prepare.ts --from abc123 --to def456
+
+# Version-based ranges (NEW!)
+bun run scripts/version-prepare.ts --from-version 0.1.0 --to-version 0.2.0
+
+# Package-specific version ranges (NEW!)
+bun run scripts/version-prepare.ts --package @repo/intershell --from-version 1.0.0 --to-version 1.1.0
+```
+
+### **🆕 Version Switch Benefits**
+
+The new `--from-version` and `--to-version` switches provide several advantages:
+
+- **🎯 Intuitive**: Use semantic versions instead of commit hashes or tags
+- **📦 Package-Aware**: Automatically converts to the correct tag series
+  - Root package: `1.0.0` → `v1.0.0`
+  - Intershell package: `1.0.0` → `intershell-v1.0.0`
+- **🔄 Flexible**: Mix with existing `--from`/`--to` commit/tag options
+- **✅ Validated**: Ensures version exists before processing
+
+```bash
+# Examples of automatic tag conversion
+bun run scripts/version-prepare.ts --from-version 1.0.0
+# → Converts to: v1.0.0 (for root package)
+
+bun run scripts/version-prepare.ts --package @repo/intershell --from-version 1.0.0  
+# → Converts to: intershell-v1.0.0 (for intershell package)
 ```
 
 ### **Manual Version Control**

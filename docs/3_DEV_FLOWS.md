@@ -227,6 +227,9 @@ The changelog system now provides comprehensive commit tracking:
 # Generate changelog for version range
 bun run scripts/version-prepare.ts --package root --from v0.0.2 --to HEAD
 
+# Generate changelog using version ranges (NEW!)
+bun run scripts/version-prepare.ts --package root --from-version 0.0.2 --to-version 0.1.0
+
 # Features:
 # - PR commit detection and grouping
 # - Individual commit inclusion in PR sections
