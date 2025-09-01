@@ -1,17 +1,11 @@
-import type { ParsedCommitData } from "../commit";
-import { EntityCommit } from "../commit";
 import { EntityPackages } from "../packages";
 import { EntityVersion } from "../version";
-import { changelogShell } from "./changelog.shell";
 import type { TemplateEngine } from "./template";
 import type { ChangelogData, VersionData } from "./types";
 
 export class EntityChangelog {
 	private packageName: string;
 	private package: EntityPackages;
-	private packageVersionEntity: EntityVersion;
-	private fromSha?: string;
-	private toSha?: string;
 
 	private changelogData: ChangelogData | undefined;
 	private versionData: VersionData | undefined;
@@ -21,57 +15,54 @@ export class EntityChangelog {
 	constructor(packageName: string, templateEngine: TemplateEngine, versionMode = true) {
 		this.packageName = packageName;
 		this.package = new EntityPackages(this.packageName);
-		this.packageVersionEntity = new EntityVersion(this.packageName);
 		this.templateEngine = templateEngine;
 		this.versionMode = versionMode;
 	}
 
 	async calculateRange(from: string, to?: string): Promise<void> {
-		this.fromSha = from;
-		this.toSha = to || "HEAD";
-		if (!this.fromSha || !this.toSha) {
-			throw new Error(`Range not set: from=${this.fromSha}, to=${this.toSha}`);
+		const fromSha = from;
+		const toSha = to || "HEAD";
+		if (!fromSha || !toSha) {
+			throw new Error(`Range not set: from=${fromSha}, to=${toSha}`);
 		}
 
-		const unreleasedCommits = await this.getCommitsInRange(
-			await this.packageVersionEntity.getBaseTagShaForPackage(),
-			this.toSha,
+		const packageVersionEntity = new EntityVersion(this.packageName);
+
+		const unreleasedCommits = await packageVersionEntity.getCommitsInRange(
+			await packageVersionEntity.getBaseTagShaForPackage(),
+			toSha,
 		);
 
-		const { version: currentVersion } = (await this.packageVersionEntity.getPackageVersionAtTag(
-			await this.packageVersionEntity.getBaseTagShaForPackage(),
+		const { version: currentVersion } = (await packageVersionEntity.getPackageVersionAtTag(
+			await packageVersionEntity.getBaseTagShaForPackage(),
 			this.packageName,
 		)) || { version: "0.0.0" };
 
 		if (!currentVersion) {
 			throw new Error(
-				`Could not get current version for package ${this.packageName} at tag ${await this.packageVersionEntity.getBaseTagShaForPackage()}`,
+				`Could not get current version for package ${this.packageName} at tag ${await packageVersionEntity.getBaseTagShaForPackage()}`,
 			);
 		}
 
-		const versionData = await this.packageVersionEntity.calculateVersionData(
+		this.versionData = await packageVersionEntity.calculateVersionData(
 			currentVersion,
 			unreleasedCommits,
 		);
-		const versionOnDisk = this.package.readVersion();
 
-		const changelogData: ChangelogData = new Map();
-
-		const tagsInRange = await this.packageVersionEntity.getTagsInRangeForPackage(
-			this.fromSha,
-			this.toSha,
-		);
-
-		const versionTags = tagsInRange;
-		if (versionData.shouldBump) {
-			versionTags.push({
-				tag: this.toSha,
-				previousTag: await this.packageVersionEntity.getBaseTagShaForPackage(),
+		const tagsInRange = await packageVersionEntity.getTagsInRangeForPackage(fromSha, toSha);
+		if (this.versionData.shouldBump) {
+			tagsInRange.push({
+				tag: toSha,
+				previousTag: await packageVersionEntity.getBaseTagShaForPackage(),
 			});
 		}
 
-		for (const tag of versionTags) {
-			const commits = await this.getCommitsInRange(tag.previousTag as string, tag.tag);
+		const changelogData: ChangelogData = new Map();
+		for (const tag of tagsInRange) {
+			const commits = await packageVersionEntity.getCommitsInRange(
+				tag.previousTag as string,
+				tag.tag,
+			);
 			const mergeCommits = commits.filter((commit) => commit.message.isMerge);
 			const orphanCommits = commits.filter(
 				(commit) =>
@@ -86,13 +77,13 @@ export class EntityChangelog {
 				(a, b) => new Date(a.info?.date || "0").getTime() - new Date(b.info?.date || "0").getTime(),
 			);
 
-			const packageVersion = await this.packageVersionEntity.getPackageVersionAtTag(
+			const packageVersion = await packageVersionEntity.getPackageVersionAtTag(
 				tag.tag,
 				this.packageName,
 			);
 			if (!packageVersion) {
 				throw new Error(
-					`Could not get version for tag ${tag.tag} in package ${this.packageName} in the range ${this.fromSha}..${this.toSha}`,
+					`Could not get version for tag ${tag.tag} in package ${this.packageName} in the range ${fromSha}..${toSha}`,
 				);
 			}
 
@@ -100,11 +91,6 @@ export class EntityChangelog {
 		}
 
 		this.changelogData = changelogData;
-		this.versionData = {
-			...versionData,
-			bumpType: versionOnDisk === versionData.targetVersion ? "synced" : versionData.bumpType,
-			shouldBump: versionOnDisk === versionData.targetVersion ? false : versionData.shouldBump,
-		};
 	}
 
 	getVersionData(): VersionData {
@@ -168,56 +154,5 @@ export class EntityChangelog {
 					: 0)
 			);
 		}, 0);
-	}
-
-	private async getCommitsInRange(from: string, to: string): Promise<ParsedCommitData[]> {
-		const gitRange = from === "0.0.0" ? to : `${from}..${to}`;
-
-		try {
-			let commitHashes: string[];
-
-			if (this.packageName === "root") {
-				const allHashes = await changelogShell.gitLog(gitRange, {
-					path: ".",
-				});
-
-				const mergeHashes = await changelogShell.gitLog(gitRange, {
-					merges: true,
-				});
-
-				commitHashes = [...new Set([...allHashes, ...mergeHashes])];
-			} else {
-				const packageHashes = await changelogShell.gitLog(gitRange, {
-					path: this.package.getPath(),
-				});
-				const mergeHashes = await changelogShell.gitLog(gitRange, {
-					merges: true,
-				});
-
-				const relevantMergeHashes: string[] = [];
-				for (const hash of mergeHashes) {
-					const prCommitsResult = await changelogShell.gitLog(`${hash}^..${hash}^2`, {
-						path: this.package.getPath(),
-					});
-
-					if (prCommitsResult.length > 0) {
-						relevantMergeHashes.push(hash);
-					}
-				}
-
-				commitHashes = [...new Set([...packageHashes, ...relevantMergeHashes])];
-			}
-
-			const commits: ParsedCommitData[] = [];
-			for (const hash of commitHashes) {
-				const commit = await EntityCommit.parseByHash(hash);
-				commits.push(commit);
-			}
-
-			return commits;
-		} catch (error) {
-			console.warn("Failed to get commits in range:", error);
-			return [];
-		}
 	}
 }
