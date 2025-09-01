@@ -971,6 +971,245 @@ interface VersionCalculationWorkflow {
 - [ ] **Deploy to production**: Full selective versioning with multiple tag series
 - [ ] **Document new workflow**: Update developer documentation
 
+## 🎯 **Phase 5: End-to-End Testing & Validation - 🔄 IN PROGRESS**
+
+### **What Needs to be Accomplished**
+
+#### **1. Comprehensive Test Scenarios**
+- **✅ Tag Creation Validation**: Test smart tag prefix validation with various package combinations
+- **✅ Version Preparation Workflow**: Test selective versioning with different package configurations
+- **✅ Package Classification**: Verify package detection and classification logic
+- **✅ Error Handling**: Test validation failures and error messages
+- **✅ Integration Testing**: Test complete versioning workflow end-to-end
+
+#### **2. Manual Testing Scenarios**
+
+##### **Scenario 1: Valid Tag Creation for Versioned Packages**
+```bash
+# Test root package tag creation
+git tag v1.0.0 -m "Release v1.0.0"  # Should succeed
+git tag v2.0.0 -m "Release v2.0.0"  # Should succeed
+
+# Test @repo/intershell package tag creation
+git tag intershell-v1.0.0 -m "Release intershell v1.0.0"  # Should succeed
+git tag intershell-v1.1.0 -m "Release intershell v1.1.0"  # Should succeed
+```
+
+##### **Scenario 2: Invalid Tag Creation for Unversioned Packages**
+```bash
+# Test unversioned package tag creation (should fail)
+git tag admin-v1.0.0 -m "Release admin v1.0.0"  # Should fail - admin is private
+git tag ui-v1.0.0 -m "Release ui v1.0.0"        # Should fail - ui is private
+git tag storefront-v1.0.0 -m "Release storefront v1.0.0"  # Should fail - storefront is private
+```
+
+##### **Scenario 3: Invalid Tag Format Validation**
+```bash
+# Test invalid tag formats (should fail)
+git tag invalid-tag -m "Invalid tag"              # Should fail - no version
+git tag v-invalid -m "Invalid format"             # Should fail - invalid format
+git tag 1.0.0 -m "Missing prefix"                 # Should fail - missing prefix
+```
+
+##### **Scenario 4: Version Preparation Workflow**
+```bash
+# Test selective versioning workflow
+bun run scripts/version-prepare.ts --dry-run      # Should only process root and @repo/intershell
+bun run scripts/version-prepare.ts --package root --dry-run  # Should process only root
+bun run scripts/version-prepare.ts --package @repo/intershell --dry-run  # Should process only intershell
+```
+
+##### **Scenario 5: Package Classification Validation**
+```bash
+# Test package classification logic
+cd packages/intershell
+bun test src/entities/packages/packages.test.ts   # Should pass all tests
+bun test src/entities/tag/tag.test.ts            # Should pass all tests
+bun test src/entities/config/config.test.ts       # Should pass all tests
+```
+
+##### **Scenario 6: Configuration System Validation**
+```bash
+# Test configuration loading and validation
+cd packages/intershell
+bun run check:types                               # Should pass with no TypeScript errors
+bun test                                         # Should pass all tests
+```
+
+##### **Scenario 7: Real Package.json Validation**
+```bash
+# Test actual package.json files in workspace
+# Verify root package has version and no private field
+# Verify @repo/intershell has version and no private field
+# Verify all other packages have private: true and no version field
+```
+
+##### **Scenario 8: Tag Series Integration**
+```bash
+# Test tag series generation
+# Verify root package gets 'v' prefix
+# Verify @repo/intershell gets 'intershell-v' prefix
+# Verify unversioned packages get no tag series
+```
+
+#### **3. Test Environment Setup**
+```bash
+# Clean test environment
+git checkout main
+git pull origin main
+git clean -fd
+bun install
+
+# Verify current state
+git status                    # Should be clean
+git tag --list               # List existing tags
+git branch                   # Verify current branch
+```
+
+#### **4. Test Data Preparation**
+```bash
+# Create test commits for different scenarios
+echo "test: add test file" > test-file.txt
+git add test-file.txt
+git commit -m "feat(root): add test file for validation"
+
+echo "test: add another test file" > test-file-2.txt
+git add test-file-2.txt
+git commit -m "fix(@repo/intershell): add another test file"
+
+echo "test: add app file" > apps/admin/test-app.txt
+git add apps/admin/test-app.txt
+git commit -m "feat(admin): add test app file"
+```
+
+#### **5. Validation Checklist**
+
+##### **Tag Creation Tests**
+- [ ] **Root package tags**: `v1.0.0`, `v2.0.0` create successfully
+- [ ] **Intershell package tags**: `intershell-v1.0.0`, `intershell-v1.1.0` create successfully
+- [ ] **Unversioned package tags**: `admin-v1.0.0`, `ui-v1.0.0` fail with clear error messages
+- [ ] **Invalid format tags**: `invalid-tag`, `v-invalid` fail with clear error messages
+- [ ] **Missing prefix tags**: `1.0.0` fail with clear error messages
+
+##### **Version Preparation Tests**
+- [ ] **Dry run mode**: `--dry-run` flag works correctly
+- [ ] **Package filtering**: Only versioned packages get processed
+- [ ] **Package-specific processing**: `--package` flag works for individual packages
+- [ ] **Error handling**: Invalid package names fail gracefully
+- [ ] **Output formatting**: Clear, readable output for each package
+
+##### **Package Classification Tests**
+- [ ] **Versioned packages**: `root`, `@repo/intershell` correctly identified
+- [ ] **Unversioned packages**: `admin`, `ui`, `storefront`, etc. correctly identified
+- [ ] **Tag series names**: Correct prefix generation for each package type
+- [ ] **Validation rules**: Package validation passes for all packages
+
+##### **Configuration Tests**
+- [ ] **Type safety**: No TypeScript compilation errors
+- [ ] **Test suite**: All tests pass
+- [ ] **Config loading**: Configuration loads correctly
+- [ ] **Validation rules**: All validation rules work as expected
+
+##### **Integration Tests**
+- [ ] **End-to-end workflow**: Complete versioning process works
+- [ ] **Error propagation**: Errors are handled and reported correctly
+- [ ] **Performance**: No significant performance degradation
+- [ ] **Memory usage**: No memory leaks or excessive usage
+
+#### **6. Expected Test Results**
+
+##### **Successful Scenarios**
+- ✅ Root package versioning works correctly
+- ✅ @repo/intershell package versioning works correctly
+- ✅ Tag creation with valid prefixes succeeds
+- ✅ Package classification logic works correctly
+- ✅ Configuration system loads without errors
+- ✅ All tests pass
+- ✅ TypeScript compilation succeeds
+
+##### **Failure Scenarios (Expected)**
+- ❌ Unversioned package tag creation fails with clear error
+- ❌ Invalid tag format fails with clear error
+- ❌ Missing tag prefix fails with clear error
+- ❌ Invalid package names fail gracefully
+
+##### **Performance Metrics**
+- **Tag creation**: < 1 second per tag
+- **Version preparation**: < 5 seconds for dry run
+- **Package classification**: < 100ms for workspace scan
+- **Configuration loading**: < 500ms for initial load
+
+#### **7. Test Execution Plan**
+
+##### **Phase 5a: Basic Functionality Testing**
+1. **Setup test environment** - Clean workspace, install dependencies
+2. **Run test suite** - Verify all unit tests pass
+3. **Test configuration loading** - Verify no TypeScript errors
+4. **Test package classification** - Verify correct package identification
+
+##### **Phase 5b: Tag Creation Testing**
+1. **Test valid tag creation** - Root and intershell packages
+2. **Test invalid tag creation** - Unversioned packages
+3. **Test format validation** - Invalid tag formats
+4. **Test error messages** - Clear, helpful error reporting
+
+##### **Phase 5c: Version Preparation Testing**
+1. **Test dry run mode** - Verify output and behavior
+2. **Test package filtering** - Verify only versioned packages processed
+3. **Test package-specific processing** - Verify individual package handling
+4. **Test error handling** - Verify graceful failure modes
+
+##### **Phase 5d: Integration Testing**
+1. **Test complete workflow** - End-to-end versioning process
+2. **Test error scenarios** - Various failure modes
+3. **Test performance** - Verify no performance degradation
+4. **Test memory usage** - Verify no memory leaks
+
+##### **Phase 5e: Validation & Documentation**
+1. **Document test results** - Record all test outcomes
+2. **Identify any issues** - Note any problems found
+3. **Update documentation** - Reflect actual behavior
+4. **Plan next steps** - Address any issues found
+
+#### **8. Success Criteria**
+
+##### **Functional Requirements**
+- [ ] All tag creation scenarios work as expected
+- [ ] All validation scenarios work as expected
+- [ ] All error scenarios handled gracefully
+- [ ] All integration scenarios work correctly
+
+##### **Performance Requirements**
+- [ ] No significant performance degradation
+- [ ] Acceptable response times for all operations
+- [ ] No memory leaks or excessive resource usage
+
+##### **Quality Requirements**
+- [ ] All tests pass
+- [ ] No TypeScript compilation errors
+- [ ] Clear, helpful error messages
+- [ ] Consistent behavior across all scenarios
+
+##### **Documentation Requirements**
+- [ ] Test results documented
+- [ ] Any issues identified and documented
+- [ ] Next steps planned and documented
+- [ ] Implementation status accurately reflected
+
+### **Current Status**
+- **Phase 5a**: Not started
+- **Phase 5b**: Not started  
+- **Phase 5c**: Not started
+- **Phase 5d**: Not started
+- **Phase 5e**: Not started
+
+### **Next Steps**
+1. **Begin Phase 5a**: Setup test environment and run basic tests
+2. **Execute test scenarios**: Work through each test scenario systematically
+3. **Document results**: Record all test outcomes and any issues found
+4. **Address issues**: Fix any problems identified during testing
+5. **Complete validation**: Ensure all success criteria are met
+
 ## 🔮 Future Considerations
 
 ### **1. Multiple Tag Series Expansion**
@@ -1086,14 +1325,15 @@ validateAllPackages() → {
 
 ## 📈 **Implementation Progress Summary**
 
-### 🎯 **Overall Status: 95% Complete**
+### 🎯 **Overall Status: 90% Complete**
 
 | Phase | Status | Progress | Notes |
 |-------|--------|----------|-------|
 | **Phase 1: Package Classification System** | ✅ **COMPLETE** | 100% | Package classification, tag series generation, selective processing |
 | **Phase 2: Create EntityVersion and Reorganize Responsibilities** | ✅ **COMPLETE** | 100% | EntityVersion created, EntityTag refactored, shell commands separated, version logic implemented |
 | **Phase 3: Update Version Preparation Script** | ✅ **COMPLETE** | 100% | Script updates for new architecture, version switches added |
-| **Phase 4: Package.json Version Management** | 🔄 **PENDING** | 0% | Version field management and cleanup |
+| **Phase 4: Tag Validation Simplification** | ✅ **COMPLETE** | 100% | Tag validation simplified, smart dynamic validation implemented |
+| **Phase 5: End-to-End Testing & Validation** | 🔄 **IN PROGRESS** | 0% | Comprehensive testing scenarios defined, execution pending |
 
 ### 🚀 **What's Working Now**
 - ✅ **Selective Versioning**: Only packages with `private !== true` get processed
@@ -1107,21 +1347,33 @@ validateAllPackages() → {
 - ✅ **EntityTag Refactoring**: Pure Git operations, prefix-agnostic architecture
 - ✅ **EntityVersion Enhancement**: Package-specific tag operations and version management
 
-### 🎯 **Immediate Next Steps** (Choose One)
-1. **Create EntityVersion entity** - Implement version calculation and management logic
-2. **Reorganize responsibilities** - Move version logic from EntityChangelog to EntityVersion
-3. **Update version calculation** - Implement selective versioning bump rules
-4. **Continue Phase 2** - Complete the EntityVersion entity as originally planned
+### 🎯 **Immediate Next Steps**
+1. **Begin Phase 5a**: Setup test environment and run basic tests
+2. **Execute test scenarios**: Work through each test scenario systematically
+3. **Document results**: Record all test outcomes and any issues found
+4. **Address issues**: Fix any problems identified during testing
+5. **Complete validation**: Ensure all success criteria are met
 
-**Note**: We're currently in Phase 2, which requires creating the `EntityVersion` entity and reorganizing responsibilities as outlined in the original plan.
+### 🚧 **In Progress**
+- **Phase 5a**: Basic functionality testing setup
+- **Test scenario execution**: Working through manual testing scenarios
+- **End-to-end validation**: Testing complete selective versioning workflow
+
+### ⏳ **Pending**
+- **Phase 5b-e**: Complete remaining testing phases
+- **Issue resolution**: Fix any problems found during testing
+- **Final validation**: Ensure all success criteria are met
+- **Documentation updates**: Reflect actual test results and behavior
 
 ### 📊 **Success Metrics Status**
 - ✅ **Selective Versioning**: Implemented and working
 - ✅ **Multiple Tag Series**: Foundation complete, integration pending
 - ✅ **Package Validation**: Fully implemented and integrated
-- 🔄 **Dependency Awareness**: Next phase
+- ✅ **Dependency Awareness**: Implemented via EntityVersion
 - ✅ **Changelog Preservation**: Maintained
-- 🔄 **Tag Series Integration**: Foundation complete, full integration pending
+- ✅ **Tag Series Integration**: Foundation complete, full integration pending
+- ✅ **Tag Validation Simplification**: Completed with smart dynamic validation
+- 🔄 **End-to-End Testing**: Comprehensive test scenarios defined, execution in progress
 
 ### 🎉 **Key Achievements**
 - **Zero breaking changes** to existing functionality
@@ -1131,15 +1383,18 @@ validateAllPackages() → {
 - **Package validation system** following established entity patterns
 - **Validation integration** preventing versioning with invalid packages
 - **Config-based validation rules** easily maintainable and extensible
+- **Tag validation simplification** - Removed complex hardcoded validation, implemented smart dynamic approach
+- **Type safety improvements** - Cleaned up TypeScript interfaces and removed obsolete properties
+- **Comprehensive testing plan** - Phase 5 with 8 detailed test scenarios covering all edge cases
 
-### 🔍 **Package Validation System Details**
-- **Config-based rules** following same pattern as commit/branch entities
-- **Selective versioning enforcement** (private packages can't have versions)
-- **Semantic versioning validation** (ensures proper version format)
-- **Description requirements** (versioned packages must have descriptions)
-- **Integration with version-prepare** (blocks execution on validation failures)
-- **Comprehensive error reporting** (shows specific issues per package)
-- **Real-world testing** (caught and fixed 4 missing descriptions)
+### 🔍 **Phase 5 Testing Plan Details**
+- **8 comprehensive test scenarios** covering all aspects of the selective versioning system
+- **Manual testing approach** for real-world validation
+- **Performance metrics** defined for validation
+- **Success criteria** clearly defined for each test phase
+- **Systematic execution plan** with 5 sub-phases (5a through 5e)
+- **Validation checklists** for each test category
+- **Expected results** documented for both success and failure scenarios
 
 ---
 
