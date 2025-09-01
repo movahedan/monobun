@@ -92,18 +92,6 @@ interface PackageValidationConfig {
 }
 
 interface TagValidationConfig {
-	readonly format: {
-		readonly enabled: boolean;
-		readonly description: string;
-		readonly list: readonly string[];
-		readonly validator?: Validator;
-	};
-	readonly prefix: {
-		readonly enabled: boolean;
-		readonly description: string;
-		readonly list: readonly string[];
-		readonly validator?: Validator;
-	};
 	readonly name: {
 		readonly enabled: boolean;
 		readonly description: string;

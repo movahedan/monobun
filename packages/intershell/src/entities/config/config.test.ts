@@ -42,13 +42,11 @@ describe("Config", () => {
 			const { getEntitiesConfig } = await import("./config");
 			const config = getEntitiesConfig().getConfig();
 
-			expect(config.tag.format.enabled).toBe(true);
-			expect(config.tag.format.list).toEqual(["semver", "calver", "custom"]);
-			expect(config.tag.prefix.enabled).toBe(true);
-			expect(config.tag.prefix.list).toEqual(["v", "intershell-v"]);
 			expect(config.tag.name.enabled).toBe(true);
 			expect(config.tag.name.minLength).toBe(1);
 			expect(config.tag.name.maxLength).toBe(100);
+			expect(config.tag.name.noSpaces).toBe(true);
+			expect(config.tag.name.noSpecialChars).toBe(true);
 		});
 
 		it("should have default branch name validation rules", async () => {
@@ -236,7 +234,7 @@ describe("Config", () => {
 			// The scopes list will be dynamically populated, so we can't do a direct equality check
 			// Instead, check that the structure is correct
 			expect(result.branch).toEqual(defaultConfig.branch);
-			expect(result.tag).toEqual(defaultConfig.tag);
+			expect(result.tag.name).toEqual(defaultConfig.tag.name);
 			expect(result.commit.conventional.type).toEqual(defaultConfig.commit.conventional.type);
 			expect(result.commit.conventional.description).toEqual(
 				defaultConfig.commit.conventional.description,
@@ -283,14 +281,6 @@ describe("Config", () => {
 					defaultBranch: "develop",
 				},
 				tag: {
-					format: {
-						enabled: false,
-						list: ["custom"],
-					},
-					prefix: {
-						enabled: true,
-						list: ["custom-v"],
-					},
 					name: {
 						enabled: true,
 						minLength: 5,
@@ -308,10 +298,6 @@ describe("Config", () => {
 			expect(result.commit.conventional.type?.list?.[0]?.type).toBe("feat");
 			expect(result.commit.staged).toHaveLength(1);
 			expect(result.branch.defaultBranch).toBe("develop");
-			expect(result.tag.format.enabled).toBe(false);
-			expect(result.tag.format.list).toEqual(["custom"]);
-			expect(result.tag.prefix.enabled).toBe(true);
-			expect(result.tag.prefix.list).toEqual(["custom-v"]);
 			expect(result.tag.name.minLength).toBe(5);
 			expect(result.tag.name.maxLength).toBe(50);
 		});

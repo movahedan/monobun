@@ -66,14 +66,6 @@ export class Config {
 			tag: {
 				...defaultConfig.tag,
 				...config.tag,
-				format: {
-					...defaultConfig.tag.format,
-					...config.tag?.format,
-				},
-				prefix: {
-					...defaultConfig.tag.prefix,
-					...config.tag?.prefix,
-				},
 				name: {
 					...defaultConfig.tag.name,
 					...config.tag?.name,

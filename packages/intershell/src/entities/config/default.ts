@@ -207,16 +207,6 @@ export const defaultConfig = {
 		],
 	},
 	tag: {
-		format: {
-			enabled: true,
-			description: "Ensure tags follow valid format patterns",
-			list: ["semver", "calver", "custom"] as const,
-		},
-		prefix: {
-			enabled: true,
-			description: "Validate tag prefixes for different packages",
-			list: ["v", "intershell-v"] as const, // Support multiple prefixes for different packages
-		},
 		name: {
 			enabled: true,
 			description: "Validate tag name structure and content",
