@@ -1,7 +1,6 @@
 import type { ParsedCommitData } from "../commit";
 import { EntityCommit } from "../commit";
 import { EntityPackages } from "../packages";
-import { EntityTag } from "../tag";
 import { EntityVersion } from "../version";
 import { changelogShell } from "./changelog.shell";
 import type { TemplateEngine } from "./template";
@@ -10,7 +9,7 @@ import type { ChangelogData, VersionData } from "./types";
 export class EntityChangelog {
 	private packageName: string;
 	private package: EntityPackages;
-	private entityVersion: EntityVersion;
+	private packageVersionEntity: EntityVersion;
 	private fromSha?: string;
 	private toSha?: string;
 
@@ -22,7 +21,7 @@ export class EntityChangelog {
 	constructor(packageName: string, templateEngine: TemplateEngine, versionMode = true) {
 		this.packageName = packageName;
 		this.package = new EntityPackages(this.packageName);
-		this.entityVersion = new EntityVersion(this.packageName);
+		this.packageVersionEntity = new EntityVersion(this.packageName);
 		this.templateEngine = templateEngine;
 		this.versionMode = versionMode;
 	}
@@ -35,22 +34,22 @@ export class EntityChangelog {
 		}
 
 		const unreleasedCommits = await this.getCommitsInRange(
-			await EntityTag.getBaseTagSha(),
+			await this.packageVersionEntity.getBaseTagShaForPackage(),
 			this.toSha,
 		);
 
-		const { version: currentVersion } = (await this.entityVersion.getPackageVersionAtTag(
-			await EntityTag.getBaseTagSha(),
+		const { version: currentVersion } = (await this.packageVersionEntity.getPackageVersionAtTag(
+			await this.packageVersionEntity.getBaseTagShaForPackage(),
 			this.packageName,
 		)) || { version: "0.0.0" };
 
 		if (!currentVersion) {
 			throw new Error(
-				`Could not get current version for package ${this.packageName} at tag ${await EntityTag.getBaseTagSha()}`,
+				`Could not get current version for package ${this.packageName} at tag ${await this.packageVersionEntity.getBaseTagShaForPackage()}`,
 			);
 		}
 
-		const versionData = await this.entityVersion.calculateVersionData(
+		const versionData = await this.packageVersionEntity.calculateVersionData(
 			currentVersion,
 			unreleasedCommits,
 		);
@@ -58,13 +57,16 @@ export class EntityChangelog {
 
 		const changelogData: ChangelogData = new Map();
 
-		const tagsInRange = await EntityTag.getTagsInRange(this.fromSha, this.toSha);
+		const tagsInRange = await this.packageVersionEntity.getTagsInRangeForPackage(
+			this.fromSha,
+			this.toSha,
+		);
 
 		const versionTags = tagsInRange;
 		if (versionData.shouldBump) {
 			versionTags.push({
 				tag: this.toSha,
-				previousTag: await EntityTag.getBaseTagSha(),
+				previousTag: await this.packageVersionEntity.getBaseTagShaForPackage(),
 			});
 		}
 
@@ -84,7 +86,7 @@ export class EntityChangelog {
 				(a, b) => new Date(a.info?.date || "0").getTime() - new Date(b.info?.date || "0").getTime(),
 			);
 
-			const packageVersion = await this.entityVersion.getPackageVersionAtTag(
+			const packageVersion = await this.packageVersionEntity.getPackageVersionAtTag(
 				tag.tag,
 				this.packageName,
 			);

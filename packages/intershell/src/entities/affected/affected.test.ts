@@ -7,7 +7,7 @@ const mockGetBaseTagSha = mock(() => Promise.resolve("abc123"));
 // Mock modules before importing
 mock.module("../tag", () => ({
 	EntityTag: {
-		getBaseTagSha: mockGetBaseTagSha,
+		getBaseCommitSha: mockGetBaseTagSha,
 	},
 }));
 
@@ -26,7 +26,7 @@ describe("EntityAffected", async () => {
 	});
 
 	describe("getAffectedPackages", () => {
-		it("should call EntityTag.getBaseTagSha with correct parameters", async () => {
+		it("should call EntityTag.getBaseCommitSha with correct parameters", async () => {
 			// Arrange
 			const baseSha = "custom-sha";
 			mockGetBaseTagSha.mockResolvedValue("resolved-sha");
@@ -38,7 +38,7 @@ describe("EntityAffected", async () => {
 			expect(mockGetBaseTagSha).toHaveBeenCalledWith(baseSha);
 		});
 
-		it("should call EntityTag.getBaseTagSha with undefined when no baseSha provided", async () => {
+		it("should call EntityTag.getBaseCommitSha with undefined when no baseSha provided", async () => {
 			// Act
 			await EntityAffected.getAffectedPackages().catch(() => undefined);
 
@@ -46,7 +46,7 @@ describe("EntityAffected", async () => {
 			expect(mockGetBaseTagSha).toHaveBeenCalledWith(undefined);
 		});
 
-		it("should handle EntityTag.getBaseTagSha throwing an error", async () => {
+		it("should handle EntityTag.getBaseCommitSha throwing an error", async () => {
 			// Arrange
 			const error = new Error("Failed to get base tag SHA");
 			mockGetBaseTagSha.mockRejectedValue(error);
@@ -131,7 +131,7 @@ describe("EntityAffected", async () => {
 	});
 
 	describe("error handling", () => {
-		it("should propagate EntityTag.getBaseTagSha errors", () => {
+		it("should propagate EntityTag.getBaseCommitSha errors", () => {
 			// Arrange
 			const error = new Error("Custom error message");
 			mockGetBaseTagSha.mockRejectedValue(error);
@@ -140,7 +140,7 @@ describe("EntityAffected", async () => {
 			expect(EntityAffected.getAffectedPackages()).rejects.toThrow("Custom error message");
 		});
 
-		it("should handle different error types from EntityTag.getBaseTagSha", () => {
+		it("should handle different error types from EntityTag.getBaseCommitSha", () => {
 			// Arrange
 			const error = new TypeError("Type error");
 			mockGetBaseTagSha.mockRejectedValue(error);
