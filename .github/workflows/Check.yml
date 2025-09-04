@@ -44,7 +44,7 @@ jobs:
 
       - name: 📦 Install dependencies
         if: steps.bun-cache.outputs.cache-hit != 'true'
-        run: bun install -E --no-save
+        run: bun install
 
       - name: 🔍 - Check branch name
         run: bun run commit:check --branch
@@ -122,8 +122,28 @@ jobs:
       - name: 🔍 - Type check
         run: bun run check:types ${{ needs.get-affected.outputs.affected-packages }}
 
+      - name: 🔍 - Debug test discovery
+        run: |
+          echo "=== Environment Debug ==="
+          echo "OS: $(uname -a)"
+          echo "Bun version: $(bun --version)"
+          echo "Node version: $(node --version)"
+          echo "Working directory: $(pwd)"
+          echo ""
+          echo "=== Test files found ==="
+          find . -name "*.test.ts" -o -name "*.test.tsx" | wc -l
+          echo "Test files:"
+          find . -name "*.test.ts" -o -name "*.test.tsx" | head -20
+          echo ""
+          echo "=== Package structure ==="
+          ls -la packages/
+          ls -la apps/
+          echo ""
+          echo "=== Affected packages ==="
+          echo "${{ needs.get-affected.outputs.affected-packages }}"
+
       - name: 🧪 - Test
-        run: bun test ${{ needs.get-affected.outputs.affected-packages }}
+        run: bun test --filter="@repo/intershell" --filter="@repo/test-preset" --filter="@repo/typescript-config" --filter="@repo/ui" --filter="@repo/utils" --filter="admin" --filter="api" --filter="docs-astro" --filter="storefront"
 
       - name: 🏗️ - Build
         run: bun run build ${{ needs.get-affected.outputs.affected-packages }}
