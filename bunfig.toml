@@ -58,8 +58,6 @@ coveragePathIgnorePatterns = [
 	"**/.turbo/**",
 	"**/coverage/**",
 	"**/packages/intershell/src/**/*.shell.ts",
-	"**/packages/intershell/src/entities/compose/**",
-	"**/packages/intershell/src/entities/tag/**",
 ]
 
 # Watch mode configuration
