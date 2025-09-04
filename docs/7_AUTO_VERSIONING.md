@@ -120,6 +120,9 @@ Applies version changes and creates git tags.
 # Apply with default message
 bun run scripts/version-apply.ts
 
+# Apply to specific package only
+bun run scripts/version-apply.ts --package api
+
 # Custom tag message
 bun run scripts/version-apply.ts --message "Release version 1.2.3"
 
@@ -131,6 +134,7 @@ bun run scripts/version-apply.ts --no-push
 - Git tag creation
 - Version commit creation
 - Remote tag pushing
+- **Selective package processing** with `--package` flag 🆕
 - Dry run support
 
 ## 🔄 Complete Version Flow
@@ -226,6 +230,11 @@ git commit -m "feat!: change API response format
 
 BREAKING CHANGE: API now returns data in new format"
 
+# Release commit (new!)
+git commit -m "release(api): api-v1.2.0 [minor]
+
+📝 Commits processed: 15 (apps/api/CHANGELOG.md)"
+
 # No version bump
 git commit -m "docs: update API documentation"
 ```
@@ -278,8 +287,11 @@ bun run scripts/ci-attach-affected.ts --mode docker --output-id affected-service
 # Prepare specific package
 bun run scripts/version-prepare.ts --package my-package
 
-# Apply version changes
-bun run scripts/version-apply.ts --message "Release version 1.2.3"
+# Apply version changes to specific package
+bun run scripts/version-apply.ts --package my-package
+
+# Apply version changes with custom message
+bun run scripts/version-apply.ts --package my-package --message "Release version 1.2.3"
 ```
 
 ### **Custom Commit Ranges**

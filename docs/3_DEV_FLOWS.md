@@ -166,8 +166,10 @@ bun run scripts/version-prepare.ts
 bun run scripts/version-prepare.ts --dry-run
 # Manual version preparation
 bun run scripts/version-prepare.ts --package root
-# Apply version changes
+# Apply version changes to all packages
 bun run scripts/version-apply.ts
+# Apply version changes to specific package
+bun run scripts/version-apply.ts --package api
 ```
 
 ## 🚀 CI/CD Integration
@@ -340,6 +342,7 @@ bun run commit:check --branch
 # Version management
 bun run version:prepare
 bun run version:apply
+bun run version:apply --package api  # Apply to specific package
 bun run version:ci
 
 # CI utilities
