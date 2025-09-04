@@ -4,6 +4,28 @@ import type { IConfig } from "../config/types";
 import { EntityBranch } from "./branch";
 import type { ParsedBranch } from "./types";
 
+// Mock the entitiesConfig module
+const mockEntitiesConfig = {
+	getConfig: mock(() => ({
+		branch: {
+			defaultBranch: "main",
+			prefixes: ["feature", "bugfix", "hotfix"],
+			name: {
+				minLength: 3,
+				maxLength: 50,
+				allowedCharacters: /^[a-zA-Z0-9\-_/]+$/,
+				noConsecutiveSeparators: true,
+				noLeadingTrailingSeparators: true,
+			},
+		},
+	})),
+};
+
+// Mock the config module
+mock.module("../config/config", () => ({
+	entitiesConfig: mockEntitiesConfig,
+}));
+
 type BranchConfig = IConfig["branch"];
 
 describe("EntityBranch", () => {
@@ -23,7 +45,12 @@ describe("EntityBranch", () => {
 			},
 		};
 
-		branch = new EntityBranch(mockConfig);
+		// Set up the mock config
+		mockEntitiesConfig.getConfig.mockReturnValue({
+			branch: mockConfig,
+		});
+
+		branch = new EntityBranch();
 	});
 
 	describe("static parseByName", () => {
@@ -77,7 +104,7 @@ describe("EntityBranch", () => {
 
 		parseTestCases.forEach(({ name, input, expected }) => {
 			it(name, () => {
-				const result = new EntityBranch(mockConfig).parseByName(input);
+				const result = new EntityBranch().parseByName(input);
 				expect(result).toEqual(expected);
 			});
 		});
@@ -124,11 +151,13 @@ describe("EntityBranch", () => {
 					name: "should validate branch without prefixes when prefixes array is empty",
 					input: "any-branch-name",
 					setup: () => {
-						const configWithoutPrefixes: BranchConfig = {
-							...mockConfig,
-							prefixes: [],
-						};
-						return new EntityBranch(configWithoutPrefixes);
+						mockEntitiesConfig.getConfig.mockReturnValue({
+							branch: {
+								...mockConfig,
+								prefixes: [] as string[],
+							},
+						} as IConfig);
+						return new EntityBranch();
 					},
 					expected: true as const,
 				},
@@ -274,15 +303,17 @@ describe("EntityBranch", () => {
 			{
 				name: "should handle config with no length restrictions",
 				setup: () => {
-					const configWithoutLength: BranchConfig = {
-						...mockConfig,
-						name: {
-							...mockConfig.name,
-							minLength: 0,
-							maxLength: 0,
+					mockEntitiesConfig.getConfig.mockReturnValue({
+						branch: {
+							...mockConfig,
+							name: {
+								...mockConfig.name,
+								minLength: 0,
+								maxLength: 0,
+							},
 						},
-					};
-					return new EntityBranch(configWithoutLength);
+					} as IConfig);
+					return new EntityBranch();
 				},
 				input: "a",
 				expected: "branch name should have a name",
@@ -290,14 +321,16 @@ describe("EntityBranch", () => {
 			{
 				name: "should handle config with no character restrictions",
 				setup: () => {
-					const configWithoutChars: BranchConfig = {
-						...mockConfig,
-						name: {
-							...mockConfig.name,
-							allowedCharacters: /.*/,
+					mockEntitiesConfig.getConfig.mockReturnValue({
+						branch: {
+							...mockConfig,
+							name: {
+								...mockConfig.name,
+								allowedCharacters: /.*/,
+							},
 						},
-					};
-					return new EntityBranch(configWithoutChars);
+					} as IConfig);
+					return new EntityBranch();
 				},
 				input: "feature/user@auth",
 				expected: true as const,

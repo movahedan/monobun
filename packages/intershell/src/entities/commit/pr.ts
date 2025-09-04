@@ -6,7 +6,7 @@ import type { ParsedCommitData, PRStats } from "./types";
 export class EntityPr {
 	private readonly defaultBranch: string | undefined;
 	constructor(readonly config: IConfig) {
-		this.defaultBranch = config.branch?.defaultBranch;
+		this.defaultBranch = config?.branch?.defaultBranch;
 	}
 
 	async getPRInfo(
@@ -60,7 +60,19 @@ export class EntityPr {
 			firstLine = firstLine.split(":").reverse()[0];
 		}
 
-		const branchInstance = new EntityBranch(this.config.branch);
+		// Remove username prefix if present (e.g., "movahedan/refactor/branch" -> "refactor/branch")
+		const parts = firstLine.split("/");
+		if (parts.length > 1) {
+			const firstPart = parts[0];
+			// Check if first part is not a valid branch prefix (like feature, bugfix, hotfix, etc.)
+			const validPrefixes = this.config?.branch?.prefixes || [];
+			if (!validPrefixes.includes(firstPart)) {
+				// First part is likely a username, remove it
+				firstLine = parts.slice(1).join("/");
+			}
+		}
+
+		const branchInstance = new EntityBranch();
 		return branchInstance.parseByName(firstLine);
 	}
 }
