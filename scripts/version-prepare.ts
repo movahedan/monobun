@@ -102,8 +102,13 @@ async function resolveCommitRange(
 		const fromTag = await versionToTag(args["from-version"], args.package);
 		xConsole.info(`📝 Converting --from-version ${args["from-version"]} to tag: ${fromTag}`);
 		fromCommit = await EntityTag.getBaseCommitSha(fromTag);
-	} else {
+	} else if (args.from) {
 		fromCommit = await EntityTag.getBaseCommitSha(args.from);
+	} else {
+		// No --from specified, let EntityVersion auto-find the correct base SHA
+		// This will use the latest tag if it exists, or fall back to first commit for first-time versioning
+		const versionEntity = new EntityVersion(args.package || "root");
+		fromCommit = await versionEntity.getBaseTagShaForPackage();
 	}
 
 	// Handle --to-version conversion
@@ -123,9 +128,15 @@ export const versionPrepare = createScript(scriptConfig, async function main(arg
 	const processAll = !args.package;
 
 	xConsole.info("🚀 Starting version preparation");
-	xConsole.info(
-		`📝 Generating changelog from ${colorify.blue(fromCommit)} to ${colorify.blue(toCommit)}`,
-	);
+	if (args.from || args["from-version"]) {
+		xConsole.info(
+			`📝 Generating changelog from ${colorify.blue(fromCommit)} to ${colorify.blue(toCommit)}`,
+		);
+	} else {
+		xConsole.info(
+			`📝 Generating changelog to ${colorify.blue(toCommit)} (auto-detecting base for each package)`,
+		);
+	}
 
 	let versionCommitMessage = "";
 	const packageVersionCommitMessages = [];
@@ -145,6 +156,15 @@ export const versionPrepare = createScript(scriptConfig, async function main(arg
 			if (!packageName) {
 				throw new Error("Package name is required when not processing all packages");
 			}
+
+			// Validate that the specified package should be versioned
+			const packageInstance = new EntityPackages(packageName);
+			if (!packageInstance.shouldVersion()) {
+				throw new Error(
+					`Package "${packageName}" should not be versioned (private package). Only versioned packages can be processed.`,
+				);
+			}
+
 			packagesToProcess = [packageName];
 			xConsole.info(`📦 Processing single package: ${colorify.blue(packageName)}`);
 		}
@@ -182,12 +202,20 @@ export const versionPrepare = createScript(scriptConfig, async function main(arg
 
 		for (const packageName of packagesToProcess) {
 			try {
-				const packageJson = new EntityPackages(packageName);
+				let packageJson = new EntityPackages(packageName);
 				const versionEntity = new EntityVersion(packageName);
 				const prefix = await versionEntity.getTagPrefix();
 				const template = new DefaultChangelogTemplate(packageName, prefix);
 				const changelog = new EntityChangelog(packageName, template);
-				await changelog.calculateRange(fromCommit, toCommit);
+
+				// Determine the correct fromCommit for this specific package
+				// If no --from specified, let EntityVersion auto-find the base SHA for this package
+				const packageFromCommit =
+					args.from || args["from-version"]
+						? fromCommit
+						: await versionEntity.getBaseTagShaForPackage();
+
+				await changelog.calculateRange(packageFromCommit, toCommit);
 				const commitCount = changelog.getCommitCount();
 				const versionData = changelog.getVersionData();
 
@@ -201,6 +229,8 @@ export const versionPrepare = createScript(scriptConfig, async function main(arg
 					xConsole.log(
 						colorify.yellow(`📦 ${packageName}: ${colorify.yellow("No commits found")}`),
 					);
+					// Still add to total commits even if no new commits
+					totalCommits += commitCount;
 					continue;
 				}
 
@@ -212,11 +242,14 @@ export const versionPrepare = createScript(scriptConfig, async function main(arg
 						);
 					} else {
 						await packageJson.writeVersion(versionData.targetVersion);
+						// Create a new instance to refresh the cache after updating the version
+						packageJson = new EntityPackages(packageName);
 					}
 
-					if (packageName === "root") {
-						versionCommitMessage += `release: v${versionData.targetVersion}\n\n`;
-					}
+					// Generate proper conventional commit message for each package
+					const tagPrefix = await versionEntity.getTagPrefix();
+					const tagName = `${tagPrefix}${versionData.targetVersion}`;
+					versionCommitMessage += `release(${packageName}): ${tagName} [${versionData.bumpType}]\n\n`;
 
 					const log = `📦 (${versionData.currentVersion} => ${versionData.targetVersion}) ${packageName}: ${versionData.bumpType} (${packageJson.getChangelogPath()})`;
 					packageVersionCommitMessages.push(log);
@@ -245,10 +278,21 @@ export const versionPrepare = createScript(scriptConfig, async function main(arg
 		xConsole.log("🔄 Updating package dependencies in lockfile...");
 		await $`bun install`;
 
-		versionCommitMessage += packageVersionCommitMessages.join("\n");
-		versionCommitMessage += `\n\n📦 Total packages processed: ${packagesToProcess.length}`;
-		versionCommitMessage += `\n🚀 Packages needing version bumps: ${totalBumps}`;
-		versionCommitMessage += `\n📝 Commits re-generated in changelog: ${totalCommits}`;
+		// Generate more descriptive commit message based on processing mode
+		if (packagesToProcess.length === 1) {
+			const packageName = packagesToProcess[0];
+			const packageResult = results.find((r) => r.packageName === packageName);
+			const packageCommits = packageResult?.commitCount || 0;
+			const packageJson = new EntityPackages(packageName);
+			const changelogPath = packageJson.getChangelogPath();
+
+			versionCommitMessage += `\n📝 Commits processed: ${packageCommits} (${changelogPath})`;
+		} else {
+			versionCommitMessage += packageVersionCommitMessages.join("\n");
+			versionCommitMessage += `\n\n📦 Total packages processed: ${packagesToProcess.length}`;
+			versionCommitMessage += `\n🚀 Packages needing version bumps: ${totalBumps}`;
+			versionCommitMessage += `\n📝 Commits re-generated in changelog: ${totalCommits}`;
+		}
 
 		if (totalBumps > 0 || totalCommits > 0) {
 			xConsole.log(

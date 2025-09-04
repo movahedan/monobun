@@ -15,6 +15,14 @@ const scriptConfig = {
 	],
 	options: [
 		{
+			short: "-p",
+			long: "--package",
+			description: "Package name to process (default: all packages)",
+			required: false,
+			type: "string",
+			validator: createScript.validators.nonEmpty,
+		},
+		{
 			short: "-m",
 			long: "--message",
 			description: "Tag message",
@@ -35,11 +43,29 @@ const scriptConfig = {
 } as const satisfies ScriptConfig;
 
 export const versionApply = createScript(scriptConfig, async function main(args, xConsole) {
-	// Get all versioned packages (same logic as version-prepare.ts)
-	const packagesToProcess = await EntityPackages.getVersionedPackages();
-	xConsole.info(
-		`📦 Processing ${packagesToProcess.length} versioned packages: ${packagesToProcess.join(", ")}`,
-	);
+	let packagesToProcess: string[] = [];
+
+	if (args.package) {
+		// Process single package
+		const packageName = args.package;
+
+		// Validate that the specified package should be versioned
+		const packageInstance = new EntityPackages(packageName);
+		if (!packageInstance.shouldVersion()) {
+			throw new Error(
+				`Package "${packageName}" should not be versioned (private package). Only versioned packages can be processed.`,
+			);
+		}
+
+		packagesToProcess = [packageName];
+		xConsole.info(`📦 Processing single package: ${colorify.blue(packageName)}`);
+	} else {
+		// Process all versioned packages
+		packagesToProcess = await EntityPackages.getVersionedPackages();
+		xConsole.info(
+			`📦 Processing ${packagesToProcess.length} versioned packages: ${packagesToProcess.join(", ")}`,
+		);
+	}
 
 	if (args["dry-run"]) {
 		xConsole.log(colorify.yellow("🔍 Dry run mode - would execute:"));
@@ -117,6 +143,15 @@ async function createTagsForPackages(
 			throw new Error(`Version not found for ${packageName}`);
 		}
 		const versionEntity = new EntityVersion(packageName);
+
+		// Check if tag already exists
+		const tagExists = await versionEntity.packageTagExists(version);
+		if (tagExists) {
+			const prefix = await versionEntity.getTagPrefix();
+			const tagName = `${prefix}${version}`;
+			xConsole.log(`⏭️ Tag already exists: ${tagName}`);
+			continue;
+		}
 
 		xConsole.info(`🏷️ Creating tag for ${packageName}: ${version}`);
 
