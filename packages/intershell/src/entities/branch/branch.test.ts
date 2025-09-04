@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
+import type { $ } from "bun";
 import type { IConfig } from "../config/types";
-import { mockEntitiesShell } from "../entities.shell.test";
 import { EntityBranch } from "./branch";
 import type { ParsedBranch } from "./types";
 
@@ -87,13 +87,18 @@ describe("EntityBranch", () => {
 		// keep the trailing space to test the trim() function
 		const mockCurrentBranch = "test-branch ";
 
-		beforeEach(() => {
-			mockEntitiesShell({
-				gitBranchShowCurrent: mock(() => ({
-					exitCode: 0,
-					text: () => mockCurrentBranch,
-				})),
-			});
+		beforeEach(async () => {
+			// Import and mock entitiesShell methods directly
+			const { entitiesShell } = await import("../entities.shell");
+
+			// Mock gitBranchShowCurrent directly
+			entitiesShell.gitBranchShowCurrent = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () => mockCurrentBranch,
+					}) as unknown as $.ShellPromise,
+			);
 		});
 
 		it("should handle git command and return trimmed output", async () => {

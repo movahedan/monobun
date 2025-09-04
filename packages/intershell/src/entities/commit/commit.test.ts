@@ -1,8 +1,114 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
-import { mockEntitiesShell } from "../entities.shell.test";
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import type { $ } from "bun";
 import type { ParsedCommitData } from "./types";
 
 const { EntityCommit, EntityCommitClass } = await import("./commit");
+
+// Mock entitiesShell for testing
+let mockEntitiesShell: (config: {
+	gitShow?: ReturnType<typeof mock>;
+	gitShowNameOnly?: ReturnType<typeof mock>;
+	gitStatus?: ReturnType<typeof mock>;
+	gitDiff?: ReturnType<typeof mock>;
+}) => void;
+
+// Store original methods to restore after tests
+let originalGitShow: (hash: string) => $.ShellPromise;
+let originalGitShowNameOnly: (hash: string) => $.ShellPromise;
+let originalGitStatus: () => $.ShellPromise;
+let originalGitDiff: (file: string) => $.ShellPromise;
+
+beforeEach(async () => {
+	// Import fresh modules to avoid interference
+	const { entitiesShell } = await import("../entities.shell");
+
+	// Store original methods if not already stored
+	if (!originalGitShow) {
+		originalGitShow = entitiesShell.gitShow;
+	}
+	if (!originalGitShowNameOnly) {
+		originalGitShowNameOnly = entitiesShell.gitShowNameOnly;
+	}
+	if (!originalGitStatus) {
+		originalGitStatus = entitiesShell.gitStatus;
+	}
+	if (!originalGitDiff) {
+		originalGitDiff = entitiesShell.gitDiff;
+	}
+
+	// Create default mock functions
+	const defaultGitShow = mock(
+		() =>
+			({
+				exitCode: 0,
+				text: () =>
+					"abc123\nJohn Doe\n2024-01-01\nfeat: add new feature\nThis is the body\nof the commit",
+			}) as unknown as $.ShellPromise,
+	);
+	const defaultGitShowNameOnly = mock(
+		() =>
+			({
+				exitCode: 0,
+				text: () => "package.json",
+			}) as unknown as $.ShellPromise,
+	);
+	const defaultGitStatus = mock(
+		() =>
+			({
+				exitCode: 0,
+				text: () => "M  modified-file.txt\nA  new-file.txt",
+			}) as unknown as $.ShellPromise,
+	);
+	const defaultGitDiff = mock(
+		() =>
+			({
+				exitCode: 0,
+				text: () => "diff content",
+			}) as unknown as $.ShellPromise,
+	);
+
+	// Mock the entitiesShell methods directly
+	entitiesShell.gitShow = defaultGitShow;
+	entitiesShell.gitShowNameOnly = defaultGitShowNameOnly;
+	entitiesShell.gitStatus = defaultGitStatus;
+	entitiesShell.gitDiff = defaultGitDiff;
+
+	// Create the mockEntitiesShell function
+	mockEntitiesShell = (config) => {
+		if (config.gitShow) {
+			entitiesShell.gitShow = config.gitShow;
+		}
+		if (config.gitShowNameOnly) {
+			entitiesShell.gitShowNameOnly = config.gitShowNameOnly;
+		}
+		if (config.gitStatus) {
+			entitiesShell.gitStatus = config.gitStatus;
+		}
+		if (config.gitDiff) {
+			entitiesShell.gitDiff = config.gitDiff;
+		}
+	};
+
+	// Original methods are now stored globally above
+});
+
+afterEach(async () => {
+	// Restore original methods
+	const { entitiesShell } = await import("../entities.shell");
+
+	if (originalGitShow) {
+		entitiesShell.gitShow = originalGitShow;
+	}
+	if (originalGitShowNameOnly) {
+		entitiesShell.gitShowNameOnly = originalGitShowNameOnly;
+	}
+	if (originalGitStatus) {
+		entitiesShell.gitStatus = originalGitStatus;
+	}
+	if (originalGitDiff) {
+		entitiesShell.gitDiff = originalGitDiff;
+	}
+});
 
 export function createMockCommit(
 	parsedCommit: Partial<{
@@ -331,18 +437,26 @@ describe("EntityCommit", () => {
 	});
 
 	describe("parseByHash", () => {
-		beforeEach(() => {
-			mockEntitiesShell({
-				gitShow: mock(() => ({
-					exitCode: 0,
-					text: () =>
-						"abc123\nJohn Doe\n2024-01-01\nfeat: add new feature\nThis is the body\nof the commit",
-				})),
-				gitShowNameOnly: mock(() => ({
-					exitCode: 0,
-					text: () => "package.json",
-				})),
-			});
+		beforeEach(async () => {
+			// Import and mock entitiesShell methods directly
+			const { entitiesShell } = await import("../entities.shell");
+
+			// Mock gitShow and gitShowNameOnly directly
+			entitiesShell.gitShow = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () =>
+							"abc123\nJohn Doe\n2024-01-01\nfeat: add new feature\nThis is the body\nof the commit",
+					}) as unknown as $.ShellPromise,
+			);
+			entitiesShell.gitShowNameOnly = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () => "package.json",
+					}) as unknown as $.ShellPromise,
+			);
 		});
 
 		it("should parse commit by hash successfully", async () => {
@@ -358,16 +472,23 @@ describe("EntityCommit", () => {
 		});
 
 		it("should handle git show failure", async () => {
-			mockEntitiesShell({
-				gitShow: mock(() => ({
-					exitCode: 1,
-					text: () => "error: Could not find commit",
-				})),
-				gitShowNameOnly: mock(() => ({
-					exitCode: 0,
-					text: () => "",
-				})),
-			});
+			// Import and mock entitiesShell methods directly for this specific test
+			const { entitiesShell } = await import("../entities.shell");
+
+			entitiesShell.gitShow = mock(
+				() =>
+					({
+						exitCode: 1,
+						text: () => "error: Could not find commit",
+					}) as unknown as $.ShellPromise,
+			);
+			entitiesShell.gitShowNameOnly = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () => "",
+					}) as unknown as $.ShellPromise,
+			);
 
 			expect(EntityCommit.parseByHash("invalid-hash")).rejects.toThrow(
 				"Failed to parse commit invalid-hash: Could not find commit invalid-hash",
@@ -375,16 +496,23 @@ describe("EntityCommit", () => {
 		});
 
 		it("should handle missing subject", async () => {
-			mockEntitiesShell({
-				gitShow: mock(() => ({
-					exitCode: 0,
-					text: () => "abc123\nJohn Doe\n2024-01-01\n\nThis is the body",
-				})),
-				gitShowNameOnly: mock(() => ({
-					exitCode: 0,
-					text: () => "",
-				})),
-			});
+			// Import and mock entitiesShell methods directly for this specific test
+			const { entitiesShell } = await import("../entities.shell");
+
+			entitiesShell.gitShow = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () => "abc123\nJohn Doe\n2024-01-01\n\nThis is the body",
+					}) as unknown as $.ShellPromise,
+			);
+			entitiesShell.gitShowNameOnly = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () => "",
+					}) as unknown as $.ShellPromise,
+			);
 
 			expect(EntityCommit.parseByHash("abc123")).rejects.toThrow(
 				"No subject found for commit abc123",
@@ -392,32 +520,46 @@ describe("EntityCommit", () => {
 		});
 
 		it("should handle parseByHash error", async () => {
-			mockEntitiesShell({
-				gitShow: mock(() => ({
-					exitCode: 1,
-					text: () => "error: git command failed",
-				})),
-				gitShowNameOnly: mock(() => ({
-					exitCode: 0,
-					text: () => "",
-				})),
-			});
+			// Import and mock entitiesShell methods directly for this specific test
+			const { entitiesShell } = await import("../entities.shell");
+
+			entitiesShell.gitShow = mock(
+				() =>
+					({
+						exitCode: 1,
+						text: () => "error: git command failed",
+					}) as unknown as $.ShellPromise,
+			);
+			entitiesShell.gitShowNameOnly = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () => "",
+					}) as unknown as $.ShellPromise,
+			);
 
 			expect(EntityCommit.parseByHash("abc123")).rejects.toThrow("Could not find commit abc123");
 		});
 
 		it("should handle merge commits with PR info", async () => {
-			mockEntitiesShell({
-				gitShow: mock(() => ({
-					exitCode: 0,
-					text: () =>
-						"abc123\nJohn Doe\n2024-01-01\nMerge pull request #123 from feature\nMerge body",
-				})),
-				gitShowNameOnly: mock(() => ({
-					exitCode: 0,
-					text: () => "",
-				})),
-			});
+			// Import and mock entitiesShell methods directly for this specific test
+			const { entitiesShell } = await import("../entities.shell");
+
+			entitiesShell.gitShow = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () =>
+							"abc123\nJohn Doe\n2024-01-01\nMerge pull request #123 from feature\nMerge body",
+					}) as unknown as $.ShellPromise,
+			);
+			entitiesShell.gitShowNameOnly = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () => "",
+					}) as unknown as $.ShellPromise,
+			);
 
 			const result = await EntityCommit.parseByHash("abc123");
 
@@ -427,76 +569,103 @@ describe("EntityCommit", () => {
 		});
 
 		it("should extract files changed in commit", async () => {
-			mockEntitiesShell({
-				gitShow: mock(() => ({
-					exitCode: 0,
-					text: () =>
-						"abc123\nJohn Doe\n2024-01-01\nfeat: add new feature\nThis is the body\nof the commit",
-				})),
-				gitShowNameOnly: mock(() => ({
-					exitCode: 0,
-					text: () => "src/app/page.tsx\npackage.json\nREADME.md",
-				})),
-			});
+			// Import and mock entitiesShell methods directly for this specific test
+			const { entitiesShell } = await import("../entities.shell");
+
+			entitiesShell.gitShow = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () =>
+							"abc123\nJohn Doe\n2024-01-01\nfeat: add new feature\nThis is the body\nof the commit",
+					}) as unknown as $.ShellPromise,
+			);
+			entitiesShell.gitShowNameOnly = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () => "file1.txt\nfile2.txt",
+					}) as unknown as $.ShellPromise,
+			);
 
 			const result = await EntityCommit.parseByHash("abc123");
 
-			expect(result.files).toBeDefined();
-			expect(result.files).toEqual(["src/app/page.tsx", "package.json", "README.md"]);
+			expect(result.files).toEqual(["file1.txt", "file2.txt"]);
 		});
 
 		it("should handle commits with no files changed", async () => {
-			mockEntitiesShell({
-				gitShow: mock(() => ({
-					exitCode: 0,
-					text: () => "abc123\nJohn Doe\n2024-01-01\ndocs: update documentation",
-				})),
-				gitShowNameOnly: mock(() => ({
-					exitCode: 0,
-					text: () => "",
-				})),
-			});
+			// Import and mock entitiesShell methods directly for this specific test
+			const { entitiesShell } = await import("../entities.shell");
+
+			entitiesShell.gitShow = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () =>
+							"abc123\nJohn Doe\n2024-01-01\nfeat: add new feature\nThis is the body\nof the commit",
+					}) as unknown as $.ShellPromise,
+			);
+			entitiesShell.gitShowNameOnly = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () => "",
+					}) as unknown as $.ShellPromise,
+			);
 
 			const result = await EntityCommit.parseByHash("abc123");
 
-			expect(result.files).toBeDefined();
 			expect(result.files).toEqual([]);
 		});
 
 		it("should handle git show --name-only failure gracefully", async () => {
-			mockEntitiesShell({
-				gitShow: mock(() => ({
-					exitCode: 0,
-					text: () => "abc123\nJohn Doe\n2024-01-01\nfeat: add new feature",
-				})),
-				gitShowNameOnly: mock(() => ({
-					exitCode: 1,
-					text: () => "error: git command failed",
-				})),
-			});
+			// Import and mock entitiesShell methods directly for this specific test
+			const { entitiesShell } = await import("../entities.shell");
+
+			entitiesShell.gitShow = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () =>
+							"abc123\nJohn Doe\n2024-01-01\nfeat: add new feature\nThis is the body\nof the commit",
+					}) as unknown as $.ShellPromise,
+			);
+			entitiesShell.gitShowNameOnly = mock(
+				() =>
+					({
+						exitCode: 1,
+						text: () => "error: git command failed",
+					}) as unknown as $.ShellPromise,
+			);
 
 			const result = await EntityCommit.parseByHash("abc123");
 
-			expect(result.files).toBeDefined();
 			expect(result.files).toEqual([]);
 		});
 
 		it("should handle commits with single file change", async () => {
-			mockEntitiesShell({
-				gitShow: mock(() => ({
-					exitCode: 0,
-					text: () => "abc123\nJohn Doe\n2024-01-01\nfix: resolve bug in component",
-				})),
-				gitShowNameOnly: mock(() => ({
-					exitCode: 0,
-					text: () => "src/components/Button.tsx",
-				})),
-			});
+			// Import and mock entitiesShell methods directly for this specific test
+			const { entitiesShell } = await import("../entities.shell");
+
+			entitiesShell.gitShow = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () =>
+							"abc123\nJohn Doe\n2024-01-01\nfeat: add new feature\nThis is the body\nof the commit",
+					}) as unknown as $.ShellPromise,
+			);
+			entitiesShell.gitShowNameOnly = mock(
+				() =>
+					({
+						exitCode: 0,
+						text: () => "single-file.txt",
+					}) as unknown as $.ShellPromise,
+			);
 
 			const result = await EntityCommit.parseByHash("abc123");
 
-			expect(result.files).toBeDefined();
-			expect(result.files).toEqual(["src/components/Button.tsx"]);
+			expect(result.files).toEqual(["single-file.txt"]);
 		});
 	});
 

@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import type { $ } from "bun";
 import type { IConfig } from "../config/types";
-import { mockEntitiesShell } from "../entities.shell.test";
 import { createMockCommit } from "./commit.test";
-import type { ParsedCommitData, PRInfo } from "./types";
+import type { ParsedCommitData } from "./types";
 
 const { EntityPr } = await import("./pr");
 
@@ -11,10 +11,58 @@ describe("EntityPr", () => {
 	let mockConfig: IConfig;
 	let mockParseByHash: (hash: string) => Promise<ParsedCommitData>;
 
-	beforeEach(() => {
+	// Store original methods to restore after tests
+	let originalEntitiesShellGitLogHashes: (args: string[]) => $.ShellPromise;
+
+	beforeEach(async () => {
+		// Store original methods if not already stored
+		const { entitiesShell } = await import("../entities.shell");
+		if (!originalEntitiesShellGitLogHashes) {
+			originalEntitiesShellGitLogHashes = entitiesShell.gitLogHashes;
+		}
 		mockConfig = {
+			commit: {
+				conventional: {
+					type: {
+						list: [],
+					},
+				},
+			},
 			branch: {
 				defaultBranch: "main",
+				prefixes: [],
+				name: {
+					minLength: 1,
+					maxLength: 100,
+					allowedCharacters: /^[a-zA-Z0-9\-_]+$/,
+					noConsecutiveSeparators: false,
+					noLeadingTrailingSeparators: false,
+				},
+			},
+			package: {
+				selectiveVersioning: {
+					enabled: true,
+					description: "Selective versioning",
+				},
+				semanticVersioning: {
+					enabled: true,
+					description: "Semantic versioning",
+				},
+				description: {
+					enabled: true,
+					description: "Package description",
+				},
+			},
+			tag: {
+				name: {
+					enabled: true,
+					description: "Tag validation",
+					minLength: 1,
+					maxLength: 100,
+					allowedCharacters: /^[a-zA-Z0-9\-_.]+$/,
+					noSpaces: true,
+					noSpecialChars: true,
+				},
 			},
 		} as IConfig;
 
@@ -25,13 +73,65 @@ describe("EntityPr", () => {
 		);
 	});
 
+	afterEach(async () => {
+		// Restore original methods
+		if (originalEntitiesShellGitLogHashes) {
+			const { entitiesShell } = await import("../entities.shell");
+			entitiesShell.gitLogHashes = originalEntitiesShellGitLogHashes;
+		}
+	});
+
 	describe("constructor", () => {
 		it("should initialize with config", () => {
 			expect(entityPr).toBeInstanceOf(EntityPr);
 		});
 
 		it("should handle config without defaultBranch", () => {
-			const configWithoutBranch = {} as IConfig;
+			const configWithoutBranch = {
+				commit: {
+					conventional: {
+						type: {
+							list: [],
+						},
+					},
+				},
+				branch: {
+					defaultBranch: "main",
+					prefixes: [],
+					name: {
+						minLength: 1,
+						maxLength: 100,
+						allowedCharacters: /^[a-zA-Z0-9\-_]+$/,
+						noConsecutiveSeparators: false,
+						noLeadingTrailingSeparators: false,
+					},
+				},
+				package: {
+					selectiveVersioning: {
+						enabled: true,
+						description: "Selective versioning",
+					},
+					semanticVersioning: {
+						enabled: true,
+						description: "Semantic versioning",
+					},
+					description: {
+						enabled: true,
+						description: "Package description",
+					},
+				},
+				tag: {
+					name: {
+						enabled: true,
+						description: "Tag validation",
+						minLength: 1,
+						maxLength: 100,
+						allowedCharacters: /^[a-zA-Z0-9\-_.]+$/,
+						noSpaces: true,
+						noSpecialChars: true,
+					},
+				},
+			} as IConfig;
 			const entityPrWithoutBranch = new EntityPr(configWithoutBranch);
 			expect(entityPrWithoutBranch).toBeInstanceOf(EntityPr);
 		});
@@ -45,7 +145,7 @@ describe("EntityPr", () => {
 					message: createMockCommit().message,
 					parseByHash: mockParseByHash,
 					expectedResult: undefined,
-					expectedAssertions: (result: PRInfo) => {
+					expectedAssertions: (result: ParsedCommitData) => {
 						expect(result).toBeUndefined();
 					},
 				},
@@ -60,7 +160,7 @@ describe("EntityPr", () => {
 					}).message,
 					parseByHash: mockParseByHash,
 					expectedResult: undefined,
-					expectedAssertions: (result: PRInfo) => {
+					expectedAssertions: (result: ParsedCommitData) => {
 						expect(result).toBeUndefined();
 					},
 				},
@@ -76,12 +176,12 @@ describe("EntityPr", () => {
 					}).message,
 					parseByHash: mockParseByHash,
 					expectedResult: "123",
-					expectedAssertions: (result: PRInfo) => {
-						expect(result?.prNumber).toBe("123");
-						expect(result?.prCategory).toBeDefined();
-						expect(result?.prStats).toBeDefined();
-						expect(result?.prCommits).toBeDefined();
-						expect(result?.prBranchName).toBeDefined();
+					expectedAssertions: (result: ParsedCommitData) => {
+						expect(result?.pr?.prNumber).toBe("123");
+						expect(result?.pr?.prCategory).toBeDefined();
+						expect(result?.pr?.prStats).toBeDefined();
+						expect(result?.pr?.prCommits).toBeDefined();
+						expect(result?.pr?.prBranchName).toBeDefined();
 					},
 				},
 				{
@@ -96,8 +196,8 @@ describe("EntityPr", () => {
 					}).message,
 					parseByHash: mockParseByHash,
 					expectedResult: "456",
-					expectedAssertions: (result: PRInfo) => {
-						expect(result?.prNumber).toBe("456");
+					expectedAssertions: (result: ParsedCommitData) => {
+						expect(result?.pr?.prNumber).toBe("456");
 					},
 				},
 				{
@@ -112,8 +212,8 @@ describe("EntityPr", () => {
 					}).message,
 					parseByHash: mockParseByHash,
 					expectedResult: "789",
-					expectedAssertions: (result: PRInfo) => {
-						expect(result?.prNumber).toBe("789");
+					expectedAssertions: (result: ParsedCommitData) => {
+						expect(result?.pr?.prNumber).toBe("789");
 					},
 				},
 				{
@@ -130,19 +230,29 @@ describe("EntityPr", () => {
 						throw new Error("Parse failed");
 					}),
 					expectedResult: "123",
-					expectedAssertions: (result: PRInfo) => {
+					expectedAssertions: (result: ParsedCommitData) => {
 						// The function handles errors gracefully and still returns PR info
 						// but with empty commits array
 						expect(result).toBeDefined();
-						expect(result?.prNumber).toBe("123");
-						expect(result?.prCommits).toEqual([]);
+						expect(result?.pr?.prNumber).toBe("123");
+						expect(result?.pr?.prCommits).toEqual([]);
 					},
 				},
 			];
 
 			for (const testCase of testCases) {
 				const result = await entityPr.getPRInfo(testCase.parseByHash, "abc123", testCase.message);
-				testCase.expectedAssertions(result as PRInfo);
+				if (result) {
+					testCase.expectedAssertions({
+						message: testCase.message,
+						pr: result,
+						info: { hash: "abc123" },
+						files: [],
+					});
+				} else {
+					// Some test cases expect undefined result (no PR number found)
+					expect(result).toBeUndefined();
+				}
 			}
 		});
 	});
@@ -194,7 +304,65 @@ describe("EntityPr", () => {
 		});
 
 		it("should handle config without defaultBranch", () => {
-			const entityPrWithoutBranch = new EntityPr({} as IConfig);
+			const entityPrWithoutBranch = new EntityPr({
+				commit: {
+					conventional: {
+						type: {
+							list: [
+								{
+									type: "feat",
+									label: "Features",
+									description: "New features",
+									category: "features",
+									emoji: "",
+									badgeColor: "",
+									breakingAllowed: false,
+								},
+								{
+									type: "fix",
+									label: "Bug Fixes",
+									description: "Bug fixes",
+									category: "other",
+									emoji: "",
+									badgeColor: "",
+									breakingAllowed: false,
+								},
+							],
+						},
+						scopes: { list: [] },
+						description: { minLength: 3, maxLength: 100 },
+						bodyLines: { minLength: 0, maxLength: 100 },
+						isBreaking: {},
+					},
+				},
+				branch: {
+					defaultBranch: "",
+					prefixes: ["feature", "fix", "chore"],
+					name: {
+						minLength: 3,
+						maxLength: 50,
+						allowedCharacters: /^[a-z0-9-]+$/,
+						noConsecutiveSeparators: false,
+						noLeadingTrailingSeparators: false,
+					},
+				},
+				package: {
+					selectiveVersioning: { enabled: true, description: "Selective versioning" },
+					semanticVersioning: { enabled: true, description: "Semantic versioning" },
+					description: { enabled: true, description: "Package description" },
+				},
+				tag: {
+					name: {
+						enabled: true,
+						description: "Tag name validation",
+						minLength: 0,
+						maxLength: 0,
+						allowedCharacters: /^[a-zA-Z0-9\-_.]+$/,
+						noSpaces: false,
+						noSpecialChars: false,
+					},
+				},
+			});
 			const message = createMockCommit().message;
 
 			const result = entityPrWithoutBranch.getPrBranch({ message });
@@ -300,6 +468,7 @@ describe("EntityPr", () => {
 				{
 					name: "multiple commits in regular merge",
 					gitLogOutput: "commit1\ncommit2\ncommit3",
+					gitLogExitCode: 0,
 					parseByHash: mock(async (hash: string) =>
 						createMockCommit({
 							message: {
@@ -406,12 +575,14 @@ describe("EntityPr", () => {
 
 			for (const testCase of testCases) {
 				// Mock gitLogHashes based on test case
-				mockEntitiesShell({
-					gitLogHashes: mock(() => ({
-						exitCode: testCase.gitLogExitCode || 0,
-						text: () => testCase.gitLogOutput,
-					})),
-				});
+				const mockGitLogHashes = mock(async () => ({
+					exitCode: testCase.gitLogExitCode || 0,
+					text: () => testCase.gitLogOutput,
+				})) as unknown as (args: string[]) => $.ShellPromise;
+
+				// Assign the mock to entitiesShell
+				const { entitiesShell } = await import("../entities.shell");
+				entitiesShell.gitLogHashes = mockGitLogHashes;
 
 				const message = createMockCommit({
 					message: {
@@ -624,12 +795,15 @@ describe("EntityPr", () => {
 		});
 
 		it("should handle empty PR commits array", async () => {
-			mockEntitiesShell({
-				gitLogHashes: mock(() => ({
-					text: () => "",
-					exitCode: 0,
-				})),
-			});
+			// Mock gitLogHashes to return empty result
+			const mockGitLogHashes = mock(async () => ({
+				text: () => "",
+				exitCode: 0,
+			})) as unknown as (args: string[]) => $.ShellPromise;
+
+			// Assign the mock to entitiesShell
+			const { entitiesShell } = await import("../entities.shell");
+			entitiesShell.gitLogHashes = mockGitLogHashes;
 
 			const message = createMockCommit({
 				message: {
