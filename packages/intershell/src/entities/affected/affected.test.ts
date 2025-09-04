@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import type { $ } from "bun";
 
-describe.skip("EntityAffected", async () => {
+describe("EntityAffected", async () => {
 	beforeEach(async () => {
 		// Import and mock entitiesShell methods directly
 		const { entitiesShell } = await import("../entities.shell");

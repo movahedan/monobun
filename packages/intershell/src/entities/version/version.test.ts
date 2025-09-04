@@ -510,4 +510,443 @@ describe("EntityVersion", () => {
 		// Cleanup mocks
 		await cleanupMocks();
 	});
+
+	test("should handle getFirstCommitForPackage for root package", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+		const { EntityTag } = await import("../tag");
+
+		const entityVersion = new EntityVersion("root");
+
+		// Mock EntityTag.getBaseCommitSha for root package
+		const mockGetBaseCommitSha = mock(() => Promise.resolve("root-commit-123"));
+		EntityTag.getBaseCommitSha = mockGetBaseCommitSha;
+
+		const firstCommit = await entityVersion.getFirstCommitForPackage();
+		expect(firstCommit).toBe("root-commit-123");
+		expect(mockGetBaseCommitSha).toHaveBeenCalled();
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle getFirstCommitForPackage for sub-package with successful git log", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+		const { entitiesShell } = await import("../entities.shell");
+
+		const entityVersion = new EntityVersion("test-package");
+
+		// Mock successful git log for package path
+		entitiesShell.gitLogHashes = mock(
+			() =>
+				({
+					exitCode: 0,
+					text: () => "commit3\ncommit2\ncommit1", // newest first, so commit1 is oldest
+				}) as unknown as $.ShellPromise,
+		);
+
+		const firstCommit = await entityVersion.getFirstCommitForPackage();
+		expect(firstCommit).toBe("commit1"); // Should return the last (oldest) commit
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle getFirstCommitForPackage for sub-package with failed git log", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+		const { EntityTag } = await import("../tag");
+		const { entitiesShell } = await import("../entities.shell");
+
+		const entityVersion = new EntityVersion("test-package");
+
+		// Mock failed git log
+		entitiesShell.gitLogHashes = mock(
+			() =>
+				({
+					exitCode: 1,
+					text: () => "",
+				}) as unknown as $.ShellPromise,
+		);
+
+		// Mock EntityTag.getBaseCommitSha as fallback
+		const mockGetBaseCommitSha = mock(() => Promise.resolve("fallback-commit"));
+		EntityTag.getBaseCommitSha = mockGetBaseCommitSha;
+
+		const firstCommit = await entityVersion.getFirstCommitForPackage();
+		expect(firstCommit).toBe("fallback-commit");
+		expect(mockGetBaseCommitSha).toHaveBeenCalled();
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle getFirstCommitForPackage for sub-package with empty git log", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+		const { EntityTag } = await import("../tag");
+		const { entitiesShell } = await import("../entities.shell");
+
+		const entityVersion = new EntityVersion("test-package");
+
+		// Mock empty git log
+		entitiesShell.gitLogHashes = mock(
+			() =>
+				({
+					exitCode: 0,
+					text: () => "",
+				}) as unknown as $.ShellPromise,
+		);
+
+		// Mock EntityTag.getBaseCommitSha as fallback
+		const mockGetBaseCommitSha = mock(() => Promise.resolve("fallback-commit"));
+		EntityTag.getBaseCommitSha = mockGetBaseCommitSha;
+
+		const firstCommit = await entityVersion.getFirstCommitForPackage();
+		expect(firstCommit).toBe("fallback-commit");
+		expect(mockGetBaseCommitSha).toHaveBeenCalled();
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle calculateRootBumpType with app-level breaking changes", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+
+		const entityVersion = new EntityVersion("root");
+
+		// Test app-level breaking changes (should be minor for root)
+		const appBreakingCommits: ParsedCommitData[] = [
+			createMockCommit({
+				message: { type: "feat", isBreaking: true },
+				files: ["apps/admin/src/test.ts"],
+			}),
+		];
+
+		const bumpType = await entityVersion.calculateBumpType(appBreakingCommits);
+		expect(bumpType).toBe("minor");
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle calculateRootBumpType with workspace-level breaking changes", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+
+		const entityVersion = new EntityVersion("root");
+
+		// Test workspace-level breaking changes (should be major for root)
+		const workspaceBreakingCommits: ParsedCommitData[] = [
+			createMockCommit({
+				message: { type: "feat", isBreaking: true, scopes: ["root"] },
+				files: ["package.json"],
+			}),
+		];
+
+		const bumpType = await entityVersion.calculateBumpType(workspaceBreakingCommits);
+		expect(bumpType).toBe("major");
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle calculateRootBumpType with workspace-level features", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+
+		const entityVersion = new EntityVersion("root");
+
+		// Test workspace-level features (should be minor for root)
+		const workspaceFeatureCommits: ParsedCommitData[] = [
+			createMockCommit({
+				message: { type: "feat", scopes: [] }, // empty scopes means root
+				files: ["package.json"],
+			}),
+		];
+
+		const bumpType = await entityVersion.calculateBumpType(workspaceFeatureCommits);
+		expect(bumpType).toBe("minor");
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle calculateRootBumpType with internal dependency changes", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+
+		const entityVersion = new EntityVersion("root");
+
+		// Test internal dependency changes (should be patch for root)
+		const internalChangeCommits: ParsedCommitData[] = [
+			createMockCommit({
+				message: { type: "chore" },
+				files: ["packages/test/package.json"],
+			}),
+		];
+
+		const bumpType = await entityVersion.calculateBumpType(internalChangeCommits);
+		expect(bumpType).toBe("patch");
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle getCommitsInRange for root package", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+		const { EntityCommit } = await import("../commit");
+		const { entitiesShell } = await import("../entities.shell");
+
+		const entityVersion = new EntityVersion("root");
+
+		// Mock git log operations for root package
+		entitiesShell.gitLogHashes = mock(
+			() =>
+				({
+					exitCode: 0,
+					text: () => "commit1\ncommit2",
+				}) as unknown as $.ShellPromise,
+		);
+
+		// Mock EntityCommit.parseByHash
+		const mockParseByHash = mock(() =>
+			Promise.resolve(createMockCommit({ info: { hash: "commit1" } })),
+		);
+		EntityCommit.parseByHash = mockParseByHash;
+
+		const commits = await entityVersion.getCommitsInRange("abc123", "def456");
+		expect(commits).toHaveLength(2);
+		expect(mockParseByHash).toHaveBeenCalledTimes(2);
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle getCommitsInRange for sub-package", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+		const { EntityCommit } = await import("../commit");
+		const { entitiesShell } = await import("../entities.shell");
+
+		const entityVersion = new EntityVersion("test-package");
+
+		// Mock git log operations for sub-package
+		entitiesShell.gitLogHashes = mock(
+			() =>
+				({
+					exitCode: 0,
+					text: () => "commit1\ncommit2",
+				}) as unknown as $.ShellPromise,
+		);
+
+		// Mock EntityCommit.parseByHash
+		const mockParseByHash = mock(() =>
+			Promise.resolve(createMockCommit({ info: { hash: "commit1" } })),
+		);
+		EntityCommit.parseByHash = mockParseByHash;
+
+		const commits = await entityVersion.getCommitsInRange("abc123", "def456");
+		expect(commits).toHaveLength(2);
+		expect(mockParseByHash).toHaveBeenCalledTimes(2);
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle getCommitsInRange with git log failures", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+		const { entitiesShell } = await import("../entities.shell");
+
+		const entityVersion = new EntityVersion("test-package");
+
+		// Mock failed git log operations
+		entitiesShell.gitLogHashes = mock(
+			() =>
+				({
+					exitCode: 1,
+					text: () => "",
+				}) as unknown as $.ShellPromise,
+		);
+
+		const commits = await entityVersion.getCommitsInRange("abc123", "def456");
+		expect(commits).toEqual([]);
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle getCommitsInRange with merge commits for sub-package", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+		const { EntityCommit } = await import("../commit");
+		const { entitiesShell } = await import("../entities.shell");
+
+		const entityVersion = new EntityVersion("test-package");
+
+		// Mock git log operations with merge commits
+		let callCount = 0;
+		entitiesShell.gitLogHashes = mock(() => {
+			callCount++;
+			if (callCount === 1) {
+				// First call: package commits
+				return {
+					exitCode: 0,
+					text: () => "commit1\ncommit2",
+				} as unknown as $.ShellPromise;
+			}
+			if (callCount === 2) {
+				// Second call: merge commits
+				return {
+					exitCode: 0,
+					text: () => "merge1\nmerge2",
+				} as unknown as $.ShellPromise;
+			}
+			// Subsequent calls: PR commits for each merge
+			return {
+				exitCode: 0,
+				text: () => "pr-commit1",
+			} as unknown as $.ShellPromise;
+		});
+
+		// Mock EntityCommit.parseByHash
+		const mockParseByHash = mock(() =>
+			Promise.resolve(createMockCommit({ info: { hash: "commit1" } })),
+		);
+		EntityCommit.parseByHash = mockParseByHash;
+
+		const commits = await entityVersion.getCommitsInRange("abc123", "def456");
+		expect(commits).toHaveLength(4); // 2 package commits + 2 merge commits
+		expect(mockParseByHash).toHaveBeenCalledTimes(4);
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle getCommitsInRange with 0.0.0 from version", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+		const { EntityCommit } = await import("../commit");
+		const { entitiesShell } = await import("../entities.shell");
+
+		const entityVersion = new EntityVersion("test-package");
+
+		// Mock git log operations
+		entitiesShell.gitLogHashes = mock(
+			() =>
+				({
+					exitCode: 0,
+					text: () => "commit1",
+				}) as unknown as $.ShellPromise,
+		);
+
+		// Mock EntityCommit.parseByHash
+		const mockParseByHash = mock(() =>
+			Promise.resolve(createMockCommit({ info: { hash: "commit1" } })),
+		);
+		EntityCommit.parseByHash = mockParseByHash;
+
+		// Test with 0.0.0 as from version (should use only 'to' as range)
+		const commits = await entityVersion.getCommitsInRange("0.0.0", "def456");
+		expect(commits).toHaveLength(1);
+		expect(mockParseByHash).toHaveBeenCalledWith("commit1");
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle validateTagPrefixForPackage with valid v prefix", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+		const { EntityPackages } = await import("../packages");
+
+		const entityVersion = new EntityVersion("root");
+
+		// Mock EntityPackages.shouldVersion to return true
+		EntityPackages.prototype.shouldVersion = mock(() => true);
+
+		// Should not throw for valid v prefix
+		expect(() => entityVersion.validateTagPrefixForPackage("v1.0.0")).not.toThrow();
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle validateTagPrefixForPackage with valid package prefix", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+		const { EntityPackages } = await import("../packages");
+
+		const entityVersion = new EntityVersion("test-package");
+
+		// Mock EntityPackages.shouldVersion to return true
+		EntityPackages.prototype.shouldVersion = mock(() => true);
+
+		// Should not throw for valid package prefix
+		expect(() => entityVersion.validateTagPrefixForPackage("test-package-v1.0.0")).not.toThrow();
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle validateTagPrefixForPackage with invalid prefix format", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+
+		const entityVersion = new EntityVersion("test-package");
+
+		// Should throw for invalid prefix format
+		expect(() => entityVersion.validateTagPrefixForPackage("invalid1.0.0")).toThrow(
+			'Invalid tag prefix format: "invalid". Expected format: v (root) or package-name-v (e.g., api-v, intershell-v)',
+		);
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle validateTagPrefixForPackage with private package", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+		const { EntityPackages } = await import("../packages");
+
+		const entityVersion = new EntityVersion("private-package");
+
+		// Mock EntityPackages.shouldVersion to return false (private package)
+		EntityPackages.prototype.shouldVersion = mock(() => false);
+
+		// Should throw for private package
+		expect(() => entityVersion.validateTagPrefixForPackage("private-package-v1.0.0")).toThrow(
+			'Package "private-package" should not be versioned (private package)',
+		);
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	test("should handle detectTagPrefix method", async () => {
+		await setupMocks();
+		const { EntityVersion } = await import("./version");
+
+		const entityVersion = new EntityVersion("test-package");
+
+		// Test various tag prefix detection scenarios
+		// Access private method through bracket notation for testing
+		const detectTagPrefix = (
+			entityVersion as unknown as { detectTagPrefix: (tag: string) => string | undefined }
+		).detectTagPrefix.bind(entityVersion);
+
+		expect(detectTagPrefix("v1.0.0")).toBe("v");
+		expect(detectTagPrefix("test-v1.0.0")).toBe("test-v");
+		expect(detectTagPrefix("intershell-v2.0.0")).toBe("intershell-v");
+		expect(detectTagPrefix("1.0.0")).toBeUndefined();
+		expect(detectTagPrefix("")).toBeUndefined();
+		expect(detectTagPrefix("123.0.0")).toBeUndefined();
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
 });
