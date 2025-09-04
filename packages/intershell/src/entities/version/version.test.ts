@@ -240,7 +240,7 @@ describe("EntityVersion", () => {
 			createMockCommit({ message: { type: "feat" }, files: ["test.ts"] }),
 		];
 
-		const versionData = await entityVersion.calculateVersionData("1.0.0", mockCommits);
+		const versionData = await entityVersion.calculateVersionData("1.0.0", "1.0.0", mockCommits);
 		expect(versionData.currentVersion).toBe("1.0.0");
 		expect(versionData.shouldBump).toBe(true);
 		expect(versionData.bumpType).toBe("minor");
@@ -252,7 +252,7 @@ describe("EntityVersion", () => {
 		expect(entityVersion.compareVersions("1.0.0", "1.0.0")).toBe(0);
 
 		// Test no bump for empty commits
-		const emptyVersionData = await entityVersion.calculateVersionData("1.0.0", []);
+		const emptyVersionData = await entityVersion.calculateVersionData("1.0.0", "1.0.0", []);
 		expect(emptyVersionData.shouldBump).toBe(false);
 		expect(emptyVersionData.bumpType).toBe("none");
 		expect(emptyVersionData.reason).toBe("No commits in range");
@@ -388,7 +388,7 @@ describe("EntityVersion", () => {
 			Promise.resolve("minor" as "major" | "minor" | "patch" | "none"),
 		);
 
-		const existingVersionData = await entityVersion.calculateVersionData("1.0.0", [
+		const existingVersionData = await entityVersion.calculateVersionData("1.0.0", "1.0.0", [
 			createMockCommit({ message: { type: "feat" }, files: ["test.ts"] }),
 		]);
 		expect(existingVersionData.shouldBump).toBe(false);
@@ -398,7 +398,7 @@ describe("EntityVersion", () => {
 		entityVersion.packageVersionExistsInHistory = mock(() => Promise.resolve(false));
 		entityVersion.getLatestPackageVersionInHistory = mock(() => Promise.resolve("1.0.0")); // Changed from 2.0.0 to avoid validation error
 
-		const higherVersionData = await entityVersion.calculateVersionData("1.0.0", [
+		const higherVersionData = await entityVersion.calculateVersionData("1.0.0", "1.0.0", [
 			// Changed from 3.0.0 to 1.0.0
 			createMockCommit({ message: { type: "feat" }, files: ["test.ts"] }),
 		]);
@@ -415,7 +415,11 @@ describe("EntityVersion", () => {
 		entityVersion.calculateBumpType = mock(() =>
 			Promise.resolve("none" as "major" | "minor" | "patch" | "none"),
 		);
-		const complexVersionData = await entityVersion.calculateVersionData("1.0.0", complexCommits);
+		const complexVersionData = await entityVersion.calculateVersionData(
+			"1.0.0",
+			"1.0.0",
+			complexCommits,
+		);
 		expect(complexVersionData.shouldBump).toBe(false);
 		expect(complexVersionData.bumpType).toBe("none");
 
@@ -429,6 +433,7 @@ describe("EntityVersion", () => {
 			Promise.resolve("major" as "major" | "minor" | "patch" | "none"),
 		);
 		const breakingFeatureData = await entityVersion.calculateVersionData(
+			"1.0.0",
 			"1.0.0",
 			breakingFeatureCommits,
 		);

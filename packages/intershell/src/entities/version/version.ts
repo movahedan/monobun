@@ -65,6 +65,35 @@ export class EntityVersion {
 		return await EntityTag.tagExists(tagName);
 	}
 
+	// Find the first commit where this specific package was introduced
+	async getFirstCommitForPackage(): Promise<string> {
+		if (this.packageName === "root") {
+			// For root package, use the very first commit of the repository
+			return await EntityTag.getBaseCommitSha();
+		}
+
+		// For sub-packages, find the first commit where the package directory was introduced
+		const packagePath = new EntityPackages(this.packageName).getPath();
+
+		// Use git log to find the first commit that touched this package path
+		// We'll use a simple approach: get all commits for the package and take the first one
+		const result = await entitiesShell.gitLogHashes([packagePath]);
+
+		if (result.exitCode !== 0 || !result.text().trim()) {
+			// If no commits found for this package path, fall back to first commit
+			return await EntityTag.getBaseCommitSha();
+		}
+
+		// Get the last commit hash from the result (since git log returns newest first)
+		const commitHashes = result.text().trim().split("\n").filter(Boolean);
+		if (commitHashes.length === 0) {
+			return await EntityTag.getBaseCommitSha();
+		}
+
+		// Return the last commit (which is the first chronologically)
+		return commitHashes[commitHashes.length - 1];
+	}
+
 	// Convenience methods for changelog and scripts
 	async getBaseTagShaForPackage(from?: string): Promise<string> {
 		if (!from) {
@@ -72,7 +101,8 @@ export class EntityVersion {
 			if (latestTag) {
 				return await EntityTag.getTagSha(latestTag);
 			}
-			return await EntityTag.getBaseCommitSha();
+			// For first-time versioning, find the first commit where this specific package was introduced
+			return await this.getFirstCommitForPackage();
 		}
 
 		// Check if it's already a valid reference
@@ -134,7 +164,7 @@ export class EntityVersion {
 			}
 
 			// Sort by semantic version (newest first)
-			versions.sort((a, b) => this.compareVersions(a.version, b.version));
+			versions.sort((a, b) => this.compareVersions(b.version, a.version));
 
 			return {
 				packageName: this.packageName,
@@ -264,11 +294,32 @@ export class EntityVersion {
 
 	// Version data calculation (moved from EntityChangelog)
 	async calculateVersionData(
+		versionOnDisk: string,
 		currentVersion: string,
 		commits: ParsedCommitData[],
 	): Promise<EntityVersionData> {
-		// If no commits, no version change needed
+		// Check if version on disk is higher than the current version (early validation)
+		const currentVersionComparison = this.compareVersions(versionOnDisk, currentVersion);
+		if (currentVersionComparison > 0) {
+			throw new Error(
+				`Package version on disk (${versionOnDisk}) is higher than current git tag version (${currentVersion}). ` +
+					`Please clean up the disk changes and revert package.json to version ${currentVersion} before running version preparation.`,
+			);
+		}
+
+		// If no commits, check if this is a first version (0.0.0)
 		if (commits.length === 0) {
+			if (currentVersion === "0.0.0") {
+				// First version - bump to 0.1.0 even with no commits
+				return {
+					currentVersion,
+					shouldBump: true,
+					targetVersion: "0.1.0",
+					bumpType: "minor",
+					reason: "First version bump from 0.0.0",
+				};
+			}
+			// No new commits, no version change needed
 			return {
 				currentVersion,
 				shouldBump: false,
@@ -313,17 +364,20 @@ export class EntityVersion {
 
 		const latestPackageVersionInHistory = await this.getLatestPackageVersionInHistory();
 		if (latestPackageVersionInHistory && latestPackageVersionInHistory !== currentVersion) {
-			throw new Error(
-				`Package version ${currentVersion} is behind git tag version ${latestPackageVersionInHistory}`,
-			);
+			// Check if current version is actually behind the git tag version
+			const versionComparison = this.compareVersions(currentVersion, latestPackageVersionInHistory);
+			if (versionComparison < 0) {
+				throw new Error(
+					`Package version ${currentVersion} is behind git tag version ${latestPackageVersionInHistory}`,
+				);
+			}
+			// If current version is ahead of git tag version, that's fine - we can proceed
 		}
 
 		// Check if version on disk is already synced
-		const packageInstance = new EntityPackages(this.packageName);
-		const versionOnDisk = packageInstance.readVersion();
 		if (versionOnDisk === nextVersion) {
 			return {
-				currentVersion,
+				currentVersion: versionOnDisk,
 				shouldBump: false,
 				targetVersion: nextVersion,
 				bumpType: "synced",
@@ -333,7 +387,7 @@ export class EntityVersion {
 
 		// Normal version bump - if we have commits and the next version doesn't exist, we should bump
 		return {
-			currentVersion,
+			currentVersion: versionOnDisk,
 			shouldBump: true,
 			targetVersion: nextVersion,
 			bumpType,
@@ -362,7 +416,7 @@ export class EntityVersion {
 			let commitHashes: string[];
 
 			if (this.packageName === "root") {
-				const allHashesResult = await entitiesShell.gitLogHashes([gitRange, "--", "."]);
+				const allHashesResult = await entitiesShell.gitLogHashes([gitRange]);
 				const mergeHashesResult = await entitiesShell.gitLogHashes([gitRange, "--merges"]);
 
 				const allHashes =
@@ -377,7 +431,7 @@ export class EntityVersion {
 				commitHashes = [...new Set([...allHashes, ...mergeHashes])];
 			} else {
 				const packagePath = new EntityPackages(this.packageName).getPath();
-				const packageHashesResult = await entitiesShell.gitLogHashes([gitRange, "--", packagePath]);
+				const packageHashesResult = await entitiesShell.gitLogHashes([gitRange]);
 				const mergeHashesResult = await entitiesShell.gitLogHashes([gitRange, "--merges"]);
 
 				const packageHashes =
