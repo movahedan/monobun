@@ -269,6 +269,24 @@ bun test --watch
 
 # Test specific package
 bun test packages/my-package
+
+# Test intershell package (with proper isolation)
+bun test packages/intershell/src/entities/
+```
+
+### **Test Isolation & Mocking**
+
+> **Important**: This project uses function-level mocking to prevent cross-test interference. See [Bun Test Isolation Bug Solution](../planning/24_BUN_TEST_ISOLATION_BUG_SOLUTION.md) for detailed information about test isolation patterns and best practices.
+
+```bash
+# Run tests by folder (debugging tool for isolation issues)
+bun run @repo/test-preset/test-by-folder
+
+# Run specific test combinations
+bun test src/entities/affected/ src/entities/packages/
+
+# Run individual test files for debugging
+bun test src/entities/packages/packages.test.ts
 ```
 
 ### **Build Verification**
@@ -430,6 +448,21 @@ bun run check
 
 # Run tests to identify problems
 bun test
+```
+
+#### **Test Isolation Issues**
+```bash
+# If tests fail when run together but pass individually
+bun run @repo/test-preset/test-by-folder  # Run tests by folder to identify interference
+
+# Run individual test files for debugging
+bun test src/entities/packages/packages.test.ts
+
+# Check for mock interference
+bun test src/entities/affected/ src/entities/packages/
+
+# See detailed solution documentation
+# Reference: docs/planning/24_BUN_TEST_ISOLATION_BUG_SOLUTION.md
 ```
 
 #### **Build Failures**

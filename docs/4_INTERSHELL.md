@@ -570,6 +570,31 @@ describe('WrapShell', () => {
 });
 ```
 
+### **Test Isolation & Mocking**
+
+> **Important**: This package uses function-level mocking to prevent cross-test interference. See [Bun Test Isolation Bug Solution](../planning/24_BUN_TEST_ISOLATION_BUG_SOLUTION.md) for detailed information about the test isolation patterns and the complex bug we solved.
+
+**Key Testing Principles:**
+- ✅ **Function-level mocking** instead of global mock setup
+- ✅ **Proper cleanup** with `beforeEach`/`afterEach` hooks
+- ✅ **Dynamic imports** for fresh module instances
+- ✅ **Test isolation** to prevent cross-test interference
+
+**Test Execution Commands:**
+```bash
+# Run all intershell tests
+bun test packages/intershell/src/entities/
+
+# Run tests by folder (debugging tool for isolation issues)
+bun run @repo/test-preset/test-by-folder packages/intershell/src/entities/
+
+# Run specific entity tests
+bun test packages/intershell/src/entities/commit/
+
+# Run individual test files for debugging
+bun test packages/intershell/src/entities/packages/packages.test.ts
+```
+
 ## 🚀 Current Usage Examples
 
 The InterShell entities are currently being used in production scripts:

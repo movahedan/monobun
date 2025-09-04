@@ -9,7 +9,6 @@
 	"types": "./dist/index.d.ts",
 	"exports": {
 		"./core": "./src/core/index.ts",
-		"./interactive": "./src/interactive/index.ts",
 		"./entities": "./src/entities/index.ts"
 	},
 	"files": [
