@@ -49,6 +49,9 @@ export class EntityVersion {
 		const tagName = `${prefix}${version}`;
 		const tagMessage = message || `Release ${this.packageName} version ${version}`;
 
+		// Validate the tag prefix for this package before creating the tag
+		this.validateTagPrefixForPackage(tagName);
+
 		await EntityTag.createTag(tagName, tagMessage);
 	}
 
@@ -415,5 +418,36 @@ export class EntityVersion {
 			console.warn("Failed to get commits in range:", error);
 			return [];
 		}
+	}
+
+	// Package validation methods (moved from EntityTag to break circular dependency)
+	validateTagPrefixForPackage(tagName: string): void {
+		const prefix = this.detectTagPrefix(tagName);
+		if (prefix) {
+			// Extract package name from prefix and check if it should be versioned
+			let packageName: string;
+			if (prefix === "v") {
+				packageName = "root";
+			} else if (prefix.endsWith("-v")) {
+				packageName = prefix.replace("-v", "");
+			} else {
+				throw new Error(
+					`Invalid tag prefix format: "${prefix}". Expected format: v (root) or package-name-v (e.g., api-v, intershell-v)`,
+				);
+			}
+
+			// Check if this package should be versioned
+			const packageInstance = new EntityPackages(packageName);
+			if (!packageInstance.shouldVersion()) {
+				throw new Error(`Package "${packageName}" should not be versioned (private package)`);
+			}
+		}
+	}
+
+	private detectTagPrefix(tagName: string): string | undefined {
+		if (!tagName) return undefined; // empty tag
+		const firstPart = tagName.split(".")[0].replace(/[0-9]/g, ""); // v1.0.0 -> v
+		if (/^[a-zA-Z-]+/.test(firstPart)) return firstPart; // v1.0.0 -> v, intershell-v1.0.0 -> intershell-v
+		return undefined; // 1.0.0 -> undefined
 	}
 }

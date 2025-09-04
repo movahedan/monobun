@@ -1,6 +1,5 @@
 import { getEntitiesConfig } from "../config/config";
 import { entitiesShell } from "../entities.shell";
-import { EntityPackages } from "../packages";
 import type { ParsedTag, TagValidationResult } from "./types";
 
 export * from "./types";
@@ -107,28 +106,6 @@ export const EntityTag = {
 		const validation = EntityTag.validate(tagName);
 		if (!validation.isValid) {
 			throw new Error(`Tag ${tagName} is invalid: ${validation.errors.join(", ")}`);
-		}
-
-		// Validate that tag prefix corresponds to a versioned package
-		const prefix = EntityTag.detectPrefix(tagName);
-		if (prefix) {
-			// Extract package name from prefix and check if it should be versioned
-			let packageName: string;
-			if (prefix === "v") {
-				packageName = "root";
-			} else if (prefix.endsWith("-v")) {
-				packageName = prefix.replace("-v", "");
-			} else {
-				throw new Error(
-					`Invalid tag prefix format: "${prefix}". Expected format: v (root) or package-name-v (e.g., api-v, intershell-v)`,
-				);
-			}
-
-			// Check if this package should be versioned
-			const packageInstance = new EntityPackages(packageName);
-			if (!packageInstance.shouldVersion()) {
-				throw new Error(`Package "${packageName}" should not be versioned (private package)`);
-			}
 		}
 
 		try {
