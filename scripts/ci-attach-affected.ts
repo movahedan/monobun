@@ -53,8 +53,26 @@ export const ciAttachAffected = createScript(
 			const isPR = eventName === "pull_request";
 
 			if (isPR) {
+				// Try multiple sources for base SHA
 				baseSha = process.env.GITHUB_BASE_SHA;
-				xConsole.log(`🔍 PR detected, using base branch: ${baseSha}`);
+
+				// If GITHUB_BASE_SHA is not available, try to get it from GitHub context
+				if (!baseSha && process.env.GITHUB_EVENT_PATH) {
+					try {
+						const eventData = JSON.parse(await Bun.file(process.env.GITHUB_EVENT_PATH).text());
+						baseSha = eventData.pull_request?.base?.sha;
+						xConsole.log(`🔍 Got base SHA from GitHub context: ${baseSha}`);
+					} catch (error) {
+						xConsole.log(`🔍 Failed to read GitHub context: ${error}`);
+					}
+				}
+
+				if (baseSha) {
+					xConsole.log(`🔍 PR detected, using base branch: ${baseSha}`);
+				} else {
+					xConsole.log("🔍 PR detected, but base SHA not available from any source, using HEAD~1");
+					baseSha = "HEAD~1";
+				}
 			} else {
 				baseSha = process.env.GITHUB_BEFORE_SHA || "HEAD~1";
 				xConsole.log(`🔍 Push detected, using base SHA: ${baseSha}`);
