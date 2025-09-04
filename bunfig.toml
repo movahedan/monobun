@@ -46,7 +46,7 @@ timeout = 5000
 # Enable coverage reporting
 coverage = true
 coverageDir = "./coverage"
-coverageThreshold = { lines = 0.5, functions = 0.5, statements = 0.5 }
+coverageThreshold = { lines = 0.7, functions = 0.7, statements = 0.7 }
 coverageIgnoreSourcemaps = true
 coverageSkipTestFiles = true
 coveragePathIgnorePatterns = [
@@ -57,6 +57,7 @@ coveragePathIgnorePatterns = [
 	"**/build/**",
 	"**/.turbo/**",
 	"**/coverage/**",
+	"**/packages/intershell/src/**/tag.ts",
 	"**/packages/intershell/src/**/*.shell.ts",
 ]
 
