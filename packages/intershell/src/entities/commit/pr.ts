@@ -55,25 +55,35 @@ export class EntityPr {
 		const fromIndex = mainMessage.indexOf("from ");
 		const afterFrom = mainMessage.substring(fromIndex + 5);
 		let firstLine = afterFrom.split("\n")[0].trim();
+		const originalFullName = firstLine; // Store the original full name
 
 		if (firstLine.includes(":")) {
 			firstLine = firstLine.split(":").reverse()[0];
 		}
 
-		// Remove username prefix if present (e.g., "movahedan/refactor/branch" -> "refactor/branch")
+		// Remove remote prefix if present (e.g., "origin/feature-branch" -> "feature-branch")
 		const parts = firstLine.split("/");
 		if (parts.length > 1) {
 			const firstPart = parts[0];
-			// Check if first part is not a valid branch prefix (like feature, bugfix, hotfix, etc.)
+			// Check if first part is a remote name (like origin, upstream, etc.) or username
 			const validPrefixes = this.config?.branch?.prefixes || [];
-			if (!validPrefixes.includes(firstPart)) {
-				// First part is likely a username, remove it
+			if (
+				!validPrefixes.includes(firstPart) &&
+				(firstPart === "origin" || firstPart === "upstream" || firstPart.includes("/"))
+			) {
+				// First part is likely a remote name or username, remove it
 				firstLine = parts.slice(1).join("/");
 			}
 		}
 
 		const branchInstance = new EntityBranch();
-		return branchInstance.parseByName(firstLine);
+		const parsed = branchInstance.parseByName(firstLine);
+
+		// Return the extracted branch name with the original full name
+		return {
+			name: parsed.name || parsed.fullName,
+			fullName: originalFullName, // Keep the original full name from the commit
+		};
 	}
 }
 

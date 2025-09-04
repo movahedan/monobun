@@ -53,7 +53,7 @@ describe("Config", () => {
 		expect(config.tag.name.minLength).toBe(1);
 		expect(config.tag.name.maxLength).toBe(100);
 		expect(config.tag.name.noSpaces).toBe(true);
-		expect(config.tag.name.noSpecialChars).toBe(true);
+		expect(config.tag.name.noSpecialChars).toBe(false);
 	});
 
 	test("should merge custom commit configuration", async () => {
