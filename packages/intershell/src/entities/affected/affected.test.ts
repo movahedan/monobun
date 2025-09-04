@@ -205,6 +205,148 @@ describe("EntityAffected", async () => {
 		});
 	});
 
+	describe("successful execution", () => {
+		it("should return affected packages from turbo output", async () => {
+			// Import and mock EntityTag first
+			const { EntityTag } = await import("../tag");
+			const mockGetBaseTagSha = mock(() => Promise.resolve("resolved-sha"));
+			EntityTag.getBaseCommitSha = mockGetBaseTagSha;
+
+			// Import and mock entitiesShell
+			const { entitiesShell } = await import("../entities.shell");
+			const mockTurboRunBuild = mock(
+				() =>
+					({
+						text: () =>
+							Promise.resolve(
+								JSON.stringify({
+									tasks: [
+										{ package: "package1" },
+										{ package: "package2" },
+										{ package: "//" }, // root package should be filtered out
+									],
+								}),
+							),
+					}) as unknown as $.ShellPromise,
+			);
+			entitiesShell.turboRunBuild = mockTurboRunBuild as unknown as (
+				args: string[],
+			) => $.ShellPromise;
+
+			// Now import EntityAffected after mocking
+			const { EntityAffected } = await import("./affected");
+
+			// Act
+			const result = await EntityAffected.getAffectedPackages("test-sha");
+
+			// Assert
+			expect(result).toEqual(["package1", "package2"]);
+			expect(mockTurboRunBuild).toHaveBeenCalledWith(["--filter=...[resolved-sha...HEAD]"]);
+		});
+
+		it("should handle empty tasks array", async () => {
+			// Import and mock EntityTag first
+			const { EntityTag } = await import("../tag");
+			const mockGetBaseTagSha = mock(() => Promise.resolve("resolved-sha"));
+			EntityTag.getBaseCommitSha = mockGetBaseTagSha;
+
+			// Import and mock entitiesShell
+			const { entitiesShell } = await import("../entities.shell");
+			const mockTurboRunBuild = mock(
+				() =>
+					({
+						text: () =>
+							Promise.resolve(
+								JSON.stringify({
+									tasks: [],
+								}),
+							),
+					}) as unknown as $.ShellPromise,
+			);
+			entitiesShell.turboRunBuild = mockTurboRunBuild as unknown as (
+				args: string[],
+			) => $.ShellPromise;
+
+			// Now import EntityAffected after mocking
+			const { EntityAffected } = await import("./affected");
+
+			// Act
+			const result = await EntityAffected.getAffectedPackages("test-sha");
+
+			// Assert
+			expect(result).toEqual([]);
+		});
+
+		it("should handle missing tasks property", async () => {
+			// Import and mock EntityTag first
+			const { EntityTag } = await import("../tag");
+			const mockGetBaseTagSha = mock(() => Promise.resolve("resolved-sha"));
+			EntityTag.getBaseCommitSha = mockGetBaseTagSha;
+
+			// Import and mock entitiesShell
+			const { entitiesShell } = await import("../entities.shell");
+			const mockTurboRunBuild = mock(
+				() =>
+					({
+						text: () =>
+							Promise.resolve(
+								JSON.stringify({
+									packages: ["package1", "package2"],
+								}),
+							),
+					}) as unknown as $.ShellPromise,
+			);
+			entitiesShell.turboRunBuild = mockTurboRunBuild as unknown as (
+				args: string[],
+			) => $.ShellPromise;
+
+			// Now import EntityAffected after mocking
+			const { EntityAffected } = await import("./affected");
+
+			// Act
+			const result = await EntityAffected.getAffectedPackages("test-sha");
+
+			// Assert
+			expect(result).toEqual([]);
+		});
+
+		it("should filter out root package and undefined values", async () => {
+			// Import and mock EntityTag first
+			const { EntityTag } = await import("../tag");
+			const mockGetBaseTagSha = mock(() => Promise.resolve("resolved-sha"));
+			EntityTag.getBaseCommitSha = mockGetBaseTagSha;
+
+			// Import and mock entitiesShell
+			const { entitiesShell } = await import("../entities.shell");
+			const mockTurboRunBuild = mock(() => ({
+				text: () =>
+					Promise.resolve(
+						JSON.stringify({
+							tasks: [
+								{ package: "package1" },
+								{ package: "//" }, // root package should be filtered out
+								{ package: "" }, // empty string should be filtered out
+								{ package: undefined }, // undefined should be filtered out
+								{ package: "package2" },
+							],
+						}),
+					),
+			}));
+			entitiesShell.turboRunBuild = mockTurboRunBuild as unknown as (
+				args: string[],
+			) => $.ShellPromise;
+
+			// Now import EntityAffected after mocking
+			const { EntityAffected } = await import("./affected");
+
+			// Act
+			const result = await EntityAffected.getAffectedPackages("test-sha");
+
+			// Assert
+			expect(result).toEqual(["package1", "package2"]);
+		});
+	});
+
 	describe("error handling", () => {
 		it("should propagate EntityTag.getBaseCommitSha errors", async () => {
 			// Import EntityAffected first
@@ -230,6 +372,56 @@ describe("EntityAffected", async () => {
 
 			// Act & Assert
 			expect(EntityAffected.getAffectedPackages()).rejects.toThrow("Type error");
+		});
+
+		it("should handle turbo command errors and return empty array", async () => {
+			// Import and mock EntityTag first
+			const { EntityTag } = await import("../tag");
+			const mockGetBaseTagSha = mock(() => Promise.resolve("resolved-sha"));
+			EntityTag.getBaseCommitSha = mockGetBaseTagSha;
+
+			// Import and mock entitiesShell
+			const { entitiesShell } = await import("../entities.shell");
+			const mockTurboRunBuild = mock(() => ({
+				text: () => Promise.reject(new Error("Turbo command failed")),
+			}));
+			entitiesShell.turboRunBuild = mockTurboRunBuild as unknown as (
+				args: string[],
+			) => $.ShellPromise;
+
+			// Now import EntityAffected after mocking
+			const { EntityAffected } = await import("./affected");
+
+			// Act
+			const result = await EntityAffected.getAffectedPackages("test-sha");
+
+			// Assert
+			expect(result).toEqual([]);
+		});
+
+		it("should handle JSON parsing errors and return empty array", async () => {
+			// Import and mock EntityTag first
+			const { EntityTag } = await import("../tag");
+			const mockGetBaseTagSha = mock(() => Promise.resolve("resolved-sha"));
+			EntityTag.getBaseCommitSha = mockGetBaseTagSha;
+
+			// Import and mock entitiesShell
+			const { entitiesShell } = await import("../entities.shell");
+			const mockTurboRunBuild = mock(() => ({
+				text: () => Promise.resolve("invalid json"),
+			}));
+			entitiesShell.turboRunBuild = mockTurboRunBuild as unknown as (
+				args: string[],
+			) => $.ShellPromise;
+
+			// Now import EntityAffected after mocking
+			const { EntityAffected } = await import("./affected");
+
+			// Act
+			const result = await EntityAffected.getAffectedPackages("test-sha");
+
+			// Assert
+			expect(result).toEqual([]);
 		});
 	});
 });

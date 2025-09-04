@@ -39,7 +39,7 @@ export const entitiesShell: EntitiesShell = {
 		$`git merge-base --is-ancestor ${ancestor} ${descendant}`.quiet().nothrow(),
 
 	turboRunBuild: (args: string[]) =>
-		$`bunx turbo run build ${args.join(" ")} --dry-run=json`.quiet().nothrow(),
+		$`bunx turbo run build ${args.join(" ")} --dry-run=json`.nothrow(),
 
 	runBiomeCheck: (filePath: string) =>
 		$`bun biome check --write --no-errors-on-unmatched ${filePath}`.quiet().nothrow(),
