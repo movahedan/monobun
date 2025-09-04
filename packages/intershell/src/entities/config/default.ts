@@ -124,6 +124,15 @@ export const defaultConfig = {
 						badgeColor: "6B7280",
 						breakingAllowed: false,
 					},
+					{
+						type: "release",
+						label: "Release",
+						description: "Release version changes",
+						category: "other" as const,
+						emoji: "🚀",
+						badgeColor: "059669",
+						breakingAllowed: false,
+					},
 				] as const,
 			},
 			scopes: {
@@ -214,7 +223,7 @@ export const defaultConfig = {
 			maxLength: 100,
 			allowedCharacters: /^[a-zA-Z0-9\-_.]+$/,
 			noSpaces: true,
-			noSpecialChars: true,
+			noSpecialChars: false,
 		},
 	},
 } as const satisfies IConfig;

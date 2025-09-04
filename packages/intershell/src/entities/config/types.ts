@@ -66,7 +66,7 @@ export type StagedConfig = {
 
 interface BranchConfig {
 	readonly defaultBranch: string;
-	readonly prefixes: readonly string[];
+	readonly prefixes: string[];
 	readonly name: {
 		readonly minLength: number;
 		readonly maxLength: number;
