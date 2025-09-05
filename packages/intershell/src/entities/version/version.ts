@@ -483,7 +483,9 @@ export class EntityVersion {
 			if (prefix === "v") {
 				packageName = "root";
 			} else if (prefix.endsWith("-v")) {
-				packageName = prefix.replace("-v", "");
+				const baseName = prefix.replace("-v", "");
+				// Convert to proper package name format
+				packageName = baseName.startsWith("@repo/") ? baseName : `@repo/${baseName}`;
 			} else {
 				throw new Error(
 					`Invalid tag prefix format: "${prefix}". Expected format: v (root) or package-name-v (e.g., api-v, intershell-v)`,

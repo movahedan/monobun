@@ -920,7 +920,7 @@ describe("EntityVersion", () => {
 
 		// Should throw for private package
 		expect(() => entityVersion.validateTagPrefixForPackage("private-package-v1.0.0")).toThrow(
-			'Package "private-package" should not be versioned (private package)',
+			'Package "@repo/private-package" should not be versioned (private package)',
 		);
 
 		// Cleanup mocks
