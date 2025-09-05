@@ -7,13 +7,136 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v0.1.1
-###### <a href="https://github.com/movahedan/monobun/commit/3d1902093cc537812cae71982865d762528944c5"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> changelog entity - improve merge commit message ([3d19020](https://github.com/movahedan/monobun/commit/3d1902093cc537812cae71982865d762528944c5)) by **Soheil Movahedan**
-###### <a href="https://github.com/movahedan/monobun/commit/dd582f2d504db9d5fdbfa8f83d46f875c77a3b44"><img src="https://img.shields.io/badge/chore-(@repo/intershell)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> update changelog ([dd582f2](https://github.com/movahedan/monobun/commit/dd582f2d504db9d5fdbfa8f83d46f875c77a3b44)) by **Soheil Movahedan**
-###### <a href="https://github.com/movahedan/monobun/commit/329d36f822ba1a8ca8a83185711d3210c4d4def4"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> commit entity - changelog manual change error ([329d36f](https://github.com/movahedan/monobun/commit/329d36f822ba1a8ca8a83185711d3210c4d4def4)) by **Soheil Movahedan**
-###### <a href="https://github.com/movahedan/monobun/commit/63e1dbea0b9eb293ed93528785755bc9cdaa6486"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> support for protected branches in branch validation ([63e1dbe](https://github.com/movahedan/monobun/commit/63e1dbea0b9eb293ed93528785755bc9cdaa6486)) by **Soheil Movahedan**
+## intershell-v0.2.0
+###### <a href="https://github.com/movahedan/monobun/commit/5b251b7f6566b115158caaffb673eb8e8b380f05"><img src="https://img.shields.io/badge/release-(api)-059669?style=flat" alt="release" style="vertical-align: middle;" /></a> api-v0.1.0 [minor] (0.0.0 => 0.1.0) ([5b251b7](https://github.com/movahedan/monobun/commit/5b251b7f6566b115158caaffb673eb8e8b380f05)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/53d0b76db1b6ecf956078018fab025119ab5240c"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> clean up version tests and fix all type errors ([53d0b76](https://github.com/movahedan/monobun/commit/53d0b76db1b6ecf956078018fab025119ab5240c)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/7abec14532f8adfc12f62d9ce0c6e51bb3db5ca7"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> improve tag validation to use proper package lookup ([7abec14](https://github.com/movahedan/monobun/commit/7abec14532f8adfc12f62d9ce0c6e51bb3db5ca7)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/6a00f1ecfb2110d5f52502d8aaf9f1fe87e11a04"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> handle @repo/ prefix in tag validation and update test ([6a00f1e](https://github.com/movahedan/monobun/commit/6a00f1ecfb2110d5f52502d8aaf9f1fe87e11a04)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/c283651546f5eabe1828c0a95dc223c6c1c0810b"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> resolve test isolation issues and improve config system ([c283651](https://github.com/movahedan/monobun/commit/c283651546f5eabe1828c0a95dc223c6c1c0810b)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/89ce04b4483c0430e69a60075a5f93005c530e29"><img src="https://img.shields.io/badge/chore-(deps)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> update dependency @biomejs/biome to v2.2.3 (#190) ([89ce04b](https://github.com/movahedan/monobun/commit/89ce04b4483c0430e69a60075a5f93005c530e29)) by **renovate[bot]**
+###### <a href="https://github.com/movahedan/monobun/commit/da0e79e918f78e310b4fcff586baeee5e2c7f2a8"><img src="https://img.shields.io/badge/chore-(deps)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> update tailwindcss monorepo to v4.1.13 (#188) ([da0e79e](https://github.com/movahedan/monobun/commit/da0e79e918f78e310b4fcff586baeee5e2c7f2a8)) by **renovate[bot]**
+###### <a href="https://github.com/movahedan/monobun/commit/f2ecccde6988dcdd38f2695f3efe05d44c570d0f"><img src="https://img.shields.io/badge/chore-(deps)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> update dependency vite to v7.1.4 (#186) ([f2ecccd](https://github.com/movahedan/monobun/commit/f2ecccde6988dcdd38f2695f3efe05d44c570d0f)) by **renovate[bot]**
+###### <a href="https://github.com/movahedan/monobun/commit/561f8a87b3ec294f9ff21592f4a9e421cda6682a"><img src="https://img.shields.io/badge/chore-(deps)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> update dependency serve to v14.2.5 (#187) ([561f8a8](https://github.com/movahedan/monobun/commit/561f8a87b3ec294f9ff21592f4a9e421cda6682a)) by **renovate[bot]**
+###### <a href="https://github.com/movahedan/monobun/commit/c2456063ad6508e92184fe661ded57a6c4e25ffa"><img src="https://img.shields.io/badge/test-(@repo/intershell)-10B981?style=flat" alt="test" style="vertical-align: middle;" /></a> add comprehensive test coverage and fix bun test isolation (#189) ([c245606](https://github.com/movahedan/monobun/commit/c2456063ad6508e92184fe661ded57a6c4e25ffa)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/3fa2563ed884fe4fe9ef2d96d33a0ffc9b6173fa"><img src="https://img.shields.io/badge/test-(@repo/intershell)-10B981?style=flat" alt="test" style="vertical-align: middle;" /></a> add comprehensive test coverage and fix bun test isolation (#189) ([3fa2563](https://github.com/movahedan/monobun/commit/3fa2563ed884fe4fe9ef2d96d33a0ffc9b6173fa)) by **Soheil Movahedan**
 
-### 📦 [object Object] <img src="https://img.shields.io/badge/Dependency%20Updates-495057?style=flat" alt="Dependency Updates" style="vertical-align: middle;" /> <a href="https://github.com/movahedan/monobun/pull/173"><img src="https://img.shields.io/badge/%23173-blue?style=flat" alt="#173" style="vertical-align: middle;" /></a> <img src="https://img.shields.io/badge/7%20commits-green?style=flat" alt="7 commits" style="vertical-align: middle;" />
+### 🐛 refactor/cleanup <img src="https://img.shields.io/badge/Bug%20Fixes%20%26%20Improvements-495057?style=flat" alt="Bug Fixes & Improvements" style="vertical-align: middle;" /> <a href="https://github.com/movahedan/monobun/pull/185"><img src="https://img.shields.io/badge/%23185-blue?style=flat" alt="#185" style="vertical-align: middle;" /></a> <img src="https://img.shields.io/badge/5%20commits-green?style=flat" alt="5 commits" style="vertical-align: middle;" />
+
+#### Summary
+This PR cleans up the repository and make sure the basic setup works fine.
+Except for the changelog and version management, which will be refactored in next PR.
+
+<details><summary><strong>📝 Commits</strong> (Click to expand)</summary>
+
+- <a href="https://github.com/movahedan/monobun/commit/55dbec3d1b4ab3513f0a480cf53a9a6e82920fc2"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> update branch name reference in changelog template ([55dbec3](https://github.com/movahedan/monobun/commit/55dbec3d1b4ab3513f0a480cf53a9a6e82920fc2)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/6841043f433613b5d36d816bc4fee2cd58912b4d"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> ensure changelog file is created ([6841043](https://github.com/movahedan/monobun/commit/6841043f433613b5d36d816bc4fee2cd58912b4d)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/18f63253d1ec59a4f66c9c2441080dfb6d7b066b"><img src="https://img.shields.io/badge/fix-(noscope)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> console logs ([18f6325](https://github.com/movahedan/monobun/commit/18f63253d1ec59a4f66c9c2441080dfb6d7b066b)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/5f5f5e44d173d52afce1ed43fede3a9eec998f9d"><img src="https://img.shields.io/badge/docs-(noscope)-646CFF?style=flat" alt="docs" style="vertical-align: middle;" /></a> update ([5f5f5e4](https://github.com/movahedan/monobun/commit/5f5f5e44d173d52afce1ed43fede3a9eec998f9d)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/657b1a0bb7e07037b3fbb9b27144da9d80cd8e4e"><img src="https://img.shields.io/badge/fix-(root)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> basic setup should work ([657b1a0](https://github.com/movahedan/monobun/commit/657b1a0bb7e07037b3fbb9b27144da9d80cd8e4e)) by **Soheil Movahedan**
+
+</details>
+
+
+### 📦 renovate/biomejs-biome-2.x <img src="https://img.shields.io/badge/Dependency%20Updates-495057?style=flat" alt="Dependency Updates" style="vertical-align: middle;" /> <a href="https://github.com/movahedan/monobun/pull/131"><img src="https://img.shields.io/badge/%23131-blue?style=flat" alt="#131" style="vertical-align: middle;" /></a> <img src="https://img.shields.io/badge/2%20commits-green?style=flat" alt="2 commits" style="vertical-align: middle;" />
+
+chore(deps): update dependency @biomejs/biome to v2.2.2
+
+<details><summary><strong>📝 Commits</strong> (Click to expand)</summary>
+
+- <a href="https://github.com/movahedan/monobun/commit/8666afbe3797f1d00209f2e10280ff8373a9b525"><img src="https://img.shields.io/badge/fix-(noscope)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> resolve all biome check issues and improve code quality ([8666afb](https://github.com/movahedan/monobun/commit/8666afbe3797f1d00209f2e10280ff8373a9b525)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/8383cb90ab3eab81097d00ab7cfa96d2b641827a"><img src="https://img.shields.io/badge/chore-(deps)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> update dependency @biomejs/biome to v2.2.2 ([8383cb9](https://github.com/movahedan/monobun/commit/8383cb90ab3eab81097d00ab7cfa96d2b641827a)) by **renovate[bot]**
+
+</details>
+
+
+### 📚 feature/claude-cursor-developer-docs <img src="https://img.shields.io/badge/Documentation-495057?style=flat" alt="Documentation" style="vertical-align: middle;" /> <a href="https://github.com/movahedan/monobun/pull/181"><img src="https://img.shields.io/badge/%23181-blue?style=flat" alt="#181" style="vertical-align: middle;" /></a> <img src="https://img.shields.io/badge/5%20commits-green?style=flat" alt="5 commits" style="vertical-align: middle;" />
+
+#### 📊 Summary
+This PR implements a comprehensive three-tier documentation system that significantly improves the project's documentation architecture and developer experience.
+#### 🔑 Key Changes
+- **New Cursor Rules**: Comprehensive development standards for JavaScript, TypeScript, security, and package management
+- **CLAUDE.md Integration**: Project-level architecture documentation throughout the monorepo
+- **Documentation Restructuring**: Updated docs to reflect new three-tier system
+- **New Test Package**: Added test-package app with version 3.0.0
+- **MCP Integration**: Added Model Context Protocol support
+- **Enhanced Workflow**: Interactive commit workflow with documentation updates
+#### 📚 Documentation System
+The project now uses a three-tier documentation structure:
+1. **CLAUDE.md Files**: Project-level architecture and key decisions
+2. **Cursor Rules**: Development standards and best practices
+3. **Developer Docs**: Practical guidance and setup instructions
+#### 🚀 Impact
+This refactoring provides:
+- Better AI assistant understanding of the codebase
+- Improved developer onboarding experience
+- Consistent development standards across the team
+- Enhanced project architecture documentation
+
+<details><summary><strong>📝 Commits</strong> (Click to expand)</summary>
+
+- <a href="https://github.com/movahedan/monobun/commit/ed04c32b9d44c282a32eda11f44b916cec46cd2f"><img src="https://img.shields.io/badge/chore-(noscope)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> remove outdated documentation files ([ed04c32](https://github.com/movahedan/monobun/commit/ed04c32b9d44c282a32eda11f44b916cec46cd2f)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/9545d054c182b35916e68da5151daed9ba7fc19f"><img src="https://img.shields.io/badge/feat-(root)-00D4AA?style=flat" alt="feat" style="vertical-align: middle;" /></a> add new test-package and development tools ([9545d05](https://github.com/movahedan/monobun/commit/9545d054c182b35916e68da5151daed9ba7fc19f)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/c4a2b547833cfa1d3b1906cad9da14eae16dcca5"><img src="https://img.shields.io/badge/docs-(root)-646CFF?style=flat" alt="docs" style="vertical-align: middle;" /></a> add comprehensive CLAUDE.md architecture documentation ([c4a2b54](https://github.com/movahedan/monobun/commit/c4a2b547833cfa1d3b1906cad9da14eae16dcca5)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/c2f236ea5a98bdcb3af6ea750050799d420101c2"><img src="https://img.shields.io/badge/docs-(noscope)-646CFF?style=flat" alt="docs" style="vertical-align: middle;" /></a> update and improve cursor rules ([c2f236e](https://github.com/movahedan/monobun/commit/c2f236ea5a98bdcb3af6ea750050799d420101c2)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/8c680e2d8b9aacdfcd934563c87d351a991e4d8b"><img src="https://img.shields.io/badge/docs-(noscope)-646CFF?style=flat" alt="docs" style="vertical-align: middle;" /></a> update documentation to reflect new three-tier system ([8c680e2](https://github.com/movahedan/monobun/commit/8c680e2d8b9aacdfcd934563c87d351a991e4d8b)) by **Soheil Movahedan**
+
+</details>
+
+
+### 📦 refactor/interhsell-testing <img src="https://img.shields.io/badge/Dependency%20Updates-495057?style=flat" alt="Dependency Updates" style="vertical-align: middle;" /> <a href="https://github.com/movahedan/monobun/pull/180"><img src="https://img.shields.io/badge/%23180-blue?style=flat" alt="#180" style="vertical-align: middle;" /></a> <img src="https://img.shields.io/badge/29%20commits-green?style=flat" alt="29 commits" style="vertical-align: middle;" />
+
+#### Summary
+Comprehensive improvements to testing infrastructure, mock system architecture, and code quality across Intershell entities.
+- **Test Infrastructure**: Enhanced mock system with better type safety and command chaining
+- **Test Coverage**: Added comprehensive test cases for commit parsing, PR handling, and compose functionality  
+- **Bug Fixes**: Resolved commit parsing issues and improved error handling
+- **Code Quality**: Fixed linting issues and improved method accessibility for testing
+- **Configuration**: Updated bunfig.toml and package.json exports
+
+<details><summary><strong>📝 Commits</strong> (Click to expand)</summary>
+
+- <a href="https://github.com/movahedan/monobun/commit/868cf61fee0e4be4165ac293b0ef9b3bf679d3df"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> resolve remaining linting issues in compose tests ([868cf61](https://github.com/movahedan/monobun/commit/868cf61fee0e4be4165ac293b0ef9b3bf679d3df)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/faac2b9782a4f7a474c6f47a605df7d63f59ec5b"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> resolve linting issues in PR tests ([faac2b9](https://github.com/movahedan/monobun/commit/faac2b9782a4f7a474c6f47a605df7d63f59ec5b)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/3331a69491ec074197089a46bfd1004e479bc876"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> resolve commit parsing issues and update config ([3331a69](https://github.com/movahedan/monobun/commit/3331a69491ec074197089a46bfd1004e479bc876)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/96706ecafb394893aa603f2f45c51ad010474374"><img src="https://img.shields.io/badge/test-(@repo/intershell)-10B981?style=flat" alt="test" style="vertical-align: middle;" /></a> enhance test coverage and mock integration ([96706ec](https://github.com/movahedan/monobun/commit/96706ecafb394893aa603f2f45c51ad010474374)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/fe5c1ff7d194daec89557577d31d715b42cee25e"><img src="https://img.shields.io/badge/refactor-(@repo/test%20preset)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> improve mock system architecture and type safety ([fe5c1ff](https://github.com/movahedan/monobun/commit/fe5c1ff7d194daec89557577d31d715b42cee25e)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/b09901e7805058819c3be9931dda717d0cbe7579"><img src="https://img.shields.io/badge/chore-(noscope)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> remove logs ([b09901e](https://github.com/movahedan/monobun/commit/b09901e7805058819c3be9931dda717d0cbe7579)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/2dea2acff2209d43c26f2cbcd18f9326ce7dd3e5"><img src="https://img.shields.io/badge/docs-(noscope)-646CFF?style=flat" alt="docs" style="vertical-align: middle;" /></a> update planning ([2dea2ac](https://github.com/movahedan/monobun/commit/2dea2acff2209d43c26f2cbcd18f9326ce7dd3e5)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/bcc9f916b5305446893c96c6c4fdbff0d43697fa"><img src="https://img.shields.io/badge/refactor-(@repo/intershell)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> integrate bun yaml parser and consolidate code ([bcc9f91](https://github.com/movahedan/monobun/commit/bcc9f916b5305446893c96c6c4fdbff0d43697fa)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/7e2b0c208dde455f3ffea276538ed0124941a1bb"><img src="https://img.shields.io/badge/deps-(root)-059669?style=flat" alt="deps" style="vertical-align: middle;" /></a> upgrade bun to 1.2.21 and update biome dependency ([7e2b0c2](https://github.com/movahedan/monobun/commit/7e2b0c208dde455f3ffea276538ed0124941a1bb)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/1563686d94d2ceefc838d7fe272296a423f345b4"><img src="https://img.shields.io/badge/chore-(@repo/test%20preset)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> add mock-bun export to package.json ([1563686](https://github.com/movahedan/monobun/commit/1563686d94d2ceefc838d7fe272296a423f345b4)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/15fc2a7f9cd973ecb505eaf0c7f107d4a18fb234"><img src="https://img.shields.io/badge/test-(@repo/intershell)-10B981?style=flat" alt="test" style="vertical-align: middle;" /></a> cleanup test file and add comprehensive getAllPackages tests ([15fc2a7](https://github.com/movahedan/monobun/commit/15fc2a7f9cd973ecb505eaf0c7f107d4a18fb234)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/87ad24882dc6fbfbb74cc10355206b580fed4de4"><img src="https://img.shields.io/badge/refactor-(@repo/intershell)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> replace shell commands with Node.js fs operations in getAllPackages ([87ad248](https://github.com/movahedan/monobun/commit/87ad24882dc6fbfbb74cc10355206b580fed4de4)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/78f3ff02c6b75c57be84b1ced4604da651e739d4"><img src="https://img.shields.io/badge/feat-(@repo/test%20preset)-00D4AA?style=flat" alt="feat" style="vertical-align: middle;" /></a> add new mocking utilities for Bun and async fs operations ([78f3ff0](https://github.com/movahedan/monobun/commit/78f3ff02c6b75c57be84b1ced4604da651e739d4)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/f1b11552ef86c9dceac843767ac641767a16e688"><img src="https://img.shields.io/badge/refactor-(@repo/intershell)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> final cleanup and test additions ([f1b1155](https://github.com/movahedan/monobun/commit/f1b11552ef86c9dceac843767ac641767a16e688)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/0de5008891c33b72308d775b5dc881ba908f772a"><img src="https://img.shields.io/badge/refactor-(root)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> update commit-check to use new entity architecture ([0de5008](https://github.com/movahedan/monobun/commit/0de5008891c33b72308d775b5dc881ba908f772a)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/67f60f3a3bf361409a8ba2854fc3f65b6da4e7cf"><img src="https://img.shields.io/badge/chore-(@repo/intershell)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> update package configuration and dependencies ([67f60f3](https://github.com/movahedan/monobun/commit/67f60f3a3bf361409a8ba2854fc3f65b6da4e7cf)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/d3f5fb98e8530ad7c8728a1192074f4df7e5b197"><img src="https://img.shields.io/badge/feat-(@repo/intershell)-00D4AA?style=flat" alt="feat" style="vertical-align: middle;" /></a> enhance PR entity with comprehensive testing ([d3f5fb9](https://github.com/movahedan/monobun/commit/d3f5fb98e8530ad7c8728a1192074f4df7e5b197)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/bfb611bf27ce5188135a131b41d3eaf66ae15be8"><img src="https://img.shields.io/badge/refactor-(@repo/intershell)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> convert commit entity to class-based architecture ([bfb611b](https://github.com/movahedan/monobun/commit/bfb611bf27ce5188135a131b41d3eaf66ae15be8)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/d51b7109480937befb0eed53c2cae48680a7dac5"><img src="https://img.shields.io/badge/feat-(@repo/intershell)-00D4AA?style=flat" alt="feat" style="vertical-align: middle;" /></a> complete config entity with dynamic package discovery ([d51b710](https://github.com/movahedan/monobun/commit/d51b7109480937befb0eed53c2cae48680a7dac5)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/c0ec9f148c7a012749d4556e9522f345785d41ee"><img src="https://img.shields.io/badge/refactor-(@repo/intershell)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> complete branch entity refactoring with 100% test coverage ([c0ec9f1](https://github.com/movahedan/monobun/commit/c0ec9f148c7a012749d4556e9522f345785d41ee)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/2552fcb8127407395aedcf363687422487f2bfcf"><img src="https://img.shields.io/badge/chore-(@repo/intershell)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> export new config entity from index ([2552fcb](https://github.com/movahedan/monobun/commit/2552fcb8127407395aedcf363687422487f2bfcf)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/8dc7cc8f6e0c9c497d9396d0f368490f1634ef91"><img src="https://img.shields.io/badge/test-(@repo/intershell)-10B981?style=flat" alt="test" style="vertical-align: middle;" /></a> improve packages testing and mock modules ([8dc7cc8](https://github.com/movahedan/monobun/commit/8dc7cc8f6e0c9c497d9396d0f368490f1634ef91)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/94a472ac76efa43a3ed6f6c0b909c48f60ed6622"><img src="https://img.shields.io/badge/feat-(@repo/intershell)-00D4AA?style=flat" alt="feat" style="vertical-align: middle;" /></a> add new config entity with comprehensive testing ([94a472a](https://github.com/movahedan/monobun/commit/94a472ac76efa43a3ed6f6c0b909c48f60ed6622)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/10d4751223c833291678328daac05b2af87ed895"><img src="https://img.shields.io/badge/refactor-(@repo/intershell)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> testing of branch entity ([10d4751](https://github.com/movahedan/monobun/commit/10d4751223c833291678328daac05b2af87ed895)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/f4f27aa9129599a8e9248630b866451a89a47d20"><img src="https://img.shields.io/badge/chore-(@repo/intershell)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> update package configuration and add i.config.ts ([f4f27aa](https://github.com/movahedan/monobun/commit/f4f27aa9129599a8e9248630b866451a89a47d20)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/1731dac24b1dfc95773724d34b1f380d71fee865"><img src="https://img.shields.io/badge/chore-(@repo/intershell)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> simplify branch naming rules and update devcontainer scopes ([1731dac](https://github.com/movahedan/monobun/commit/1731dac24b1dfc95773724d34b1f380d71fee865)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/73b8c71184d96f03406fb75f9bb4b6014d68734e"><img src="https://img.shields.io/badge/chore-(@repo/intershell)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> update package versions and TypeScript configuration ([73b8c71](https://github.com/movahedan/monobun/commit/73b8c71184d96f03406fb75f9bb4b6014d68734e)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/3b19a0767d75ea90ce58a988a012f6872c2958f0"><img src="https://img.shields.io/badge/test-(@repo/intershell)-10B981?style=flat" alt="test" style="vertical-align: middle;" /></a> cover affected, compose, yaml, and package tests ([3b19a07](https://github.com/movahedan/monobun/commit/3b19a0767d75ea90ce58a988a012f6872c2958f0)) by **Soheil Movahedan**
+- <a href="https://github.com/movahedan/monobun/commit/1dface9fb9049f9170b68dd7b1b0e5fa73b93ba8"><img src="https://img.shields.io/badge/refactor-(@repo/intershell)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> major compose entity refactor and dependency cleanup ([1dface9](https://github.com/movahedan/monobun/commit/1dface9fb9049f9170b68dd7b1b0e5fa73b93ba8)) by **Soheil Movahedan**
+
+</details>
+
+###### <a href="https://github.com/movahedan/monobun/commit/33c5870b486f2af57cbb9b0537d8d4c4383d174d"><img src="https://img.shields.io/badge/fix-(deps)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> update dependency @types/react-dom to v19.1.9 (#179) ([33c5870](https://github.com/movahedan/monobun/commit/33c5870b486f2af57cbb9b0537d8d4c4383d174d)) by **renovate[bot]**
+###### <a href="https://github.com/movahedan/monobun/commit/3ab24d60bcad79e75f58c4405768fdc9d0c352fb"><img src="https://img.shields.io/badge/fix-(deps)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> update dependency @types/react to v19.1.12 (#178) ([3ab24d6](https://github.com/movahedan/monobun/commit/3ab24d60bcad79e75f58c4405768fdc9d0c352fb)) by **renovate[bot]**
+###### <a href="https://github.com/movahedan/monobun/commit/70c358306f0ed87fa6badf85305c07e1a1d4c864"><img src="https://img.shields.io/badge/fix-(deps)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> update dependency @types/react-dom to v19.1.8 (#177) ([70c3583](https://github.com/movahedan/monobun/commit/70c358306f0ed87fa6badf85305c07e1a1d4c864)) by **renovate[bot]**
+###### <a href="https://github.com/movahedan/monobun/commit/973e04e3eb43de43c2e71430e4f48dcae68f9efd"><img src="https://img.shields.io/badge/chore-(deps)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> update oven/bun docker tag to v1.2.21 (#176) ([973e04e](https://github.com/movahedan/monobun/commit/973e04e3eb43de43c2e71430e4f48dcae68f9efd)) by **renovate[bot]**
+###### <a href="https://github.com/movahedan/monobun/commit/58717865aec7edd35ba376243470b686baf5f00a"><img src="https://img.shields.io/badge/chore-(deps)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> update dependency bun-types to v1.2.21 (#175) ([5871786](https://github.com/movahedan/monobun/commit/58717865aec7edd35ba376243470b686baf5f00a)) by **renovate[bot]**
+###### <a href="https://github.com/movahedan/monobun/commit/cd08c215e9166b5c21f6242d7e7e8b47c7129dc2"><img src="https://img.shields.io/badge/fix-(deps)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> update dependency @types/react to v19.1.11 (#174) ([cd08c21](https://github.com/movahedan/monobun/commit/cd08c215e9166b5c21f6242d7e7e8b47c7129dc2)) by **renovate[bot]**
+###### <a href="https://github.com/movahedan/monobun/commit/c14e9753363ed392a5b3db727f6480463846cc10"><img src="https://img.shields.io/badge/docs-(noscope)-646CFF?style=flat" alt="docs" style="vertical-align: middle;" /></a> update planning ([c14e975](https://github.com/movahedan/monobun/commit/c14e9753363ed392a5b3db727f6480463846cc10)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/a677b93d2c59807f12d64e7eeed3558cd8148d27"><img src="https://img.shields.io/badge/release-(noscope)-059669?style=flat" alt="release" style="vertical-align: middle;" /></a> v0.1.2 ([a677b93](https://github.com/movahedan/monobun/commit/a677b93d2c59807f12d64e7eeed3558cd8148d27)) by **github-actions[bot]**
+
+### 📦 refactor/intershell-minor-refactoring <img src="https://img.shields.io/badge/Dependency%20Updates-495057?style=flat" alt="Dependency Updates" style="vertical-align: middle;" /> <a href="https://github.com/movahedan/monobun/pull/173"><img src="https://img.shields.io/badge/%23173-blue?style=flat" alt="#173" style="vertical-align: middle;" /></a> <img src="https://img.shields.io/badge/7%20commits-green?style=flat" alt="7 commits" style="vertical-align: middle;" />
 
 #### 🎯 Overview
 This PR refactors the intershell package to improve performance, code quality, and maintainability through several key improvements.
@@ -42,21 +165,24 @@ This PR refactors the intershell package to improve performance, code quality, a
 
 </details>
 
-## v0.1.0
-###### <a href="https://github.com/movahedan/monobun/commit/2516669d74bc53aba52b5a1f7477a7fbd52fec84"><img src="https://img.shields.io/badge/refactor-(root)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> streamline commit and version change ([2516669](https://github.com/movahedan/monobun/commit/2516669d74bc53aba52b5a1f7477a7fbd52fec84)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/63e1dbea0b9eb293ed93528785755bc9cdaa6486"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> support for protected branches in branch validation ([63e1dbe](https://github.com/movahedan/monobun/commit/63e1dbea0b9eb293ed93528785755bc9cdaa6486)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/329d36f822ba1a8ca8a83185711d3210c4d4def4"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> commit entity - changelog manual change error ([329d36f](https://github.com/movahedan/monobun/commit/329d36f822ba1a8ca8a83185711d3210c4d4def4)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/dd582f2d504db9d5fdbfa8f83d46f875c77a3b44"><img src="https://img.shields.io/badge/chore-(@repo/intershell)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> update changelog ([dd582f2](https://github.com/movahedan/monobun/commit/dd582f2d504db9d5fdbfa8f83d46f875c77a3b44)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/3d1902093cc537812cae71982865d762528944c5"><img src="https://img.shields.io/badge/fix-(@repo/intershell)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> changelog entity - improve merge commit message ([3d19020](https://github.com/movahedan/monobun/commit/3d1902093cc537812cae71982865d762528944c5)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/086504c3164ebf15161291f13fa1fcddf1c97120"><img src="https://img.shields.io/badge/release-(noscope)-059669?style=flat" alt="release" style="vertical-align: middle;" /></a> v0.1.1 ([086504c](https://github.com/movahedan/monobun/commit/086504c3164ebf15161291f13fa1fcddf1c97120)) by **github-actions[bot]**
 
 ### 🔄 feature/staged-check <img src="https://img.shields.io/badge/Code%20Quality%20%26%20Refactoring-495057?style=flat" alt="Code Quality & Refactoring" style="vertical-align: middle;" /> <a href="https://github.com/movahedan/monobun/pull/172"><img src="https://img.shields.io/badge/%23172-blue?style=flat" alt="#172" style="vertical-align: middle;" /></a> <img src="https://img.shields.io/badge/2%20commits-green?style=flat" alt="2 commits" style="vertical-align: middle;" />
 
-#### 🎯 Overview
+## Overview
 This PR refactors the commit validation system to improve code organization and add comprehensive staged file validation capabilities.
-#### ✨ Key Changes
+## Key Changes
 - Staged File Validation: Added getStagedFiles() and validateStagedFiles() methods to EntityCommit
 - Naming Consistency: Renamed prefixes to prefix throughout branch entity for better clarity
 - Code Organization: Moved staged file validation logic from scripts into the commit entity
 - Enhanced Validation: Added configurable validation rules with file patterns, content patterns, and ignore rules
 - CI Environment Support: Improved error handling and CI environment detection
 - Bug Fixes: Fixed duplicate error throwing in commit-check script
-#### 🔧 Technical Notes
+## Technical Notes
 - No Breaking Changes: All public APIs remain compatible
 - Enhanced Validation: New StagedConfig type for configurable validation rules
 - Better Separation of Concerns: Validation logic moved from scripts to entities
@@ -69,7 +195,8 @@ This PR refactors the commit validation system to improve code organization and 
 
 </details>
 
-## v0.0.0
+###### <a href="https://github.com/movahedan/monobun/commit/2516669d74bc53aba52b5a1f7477a7fbd52fec84"><img src="https://img.shields.io/badge/refactor-(root)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> streamline commit and version change ([2516669](https://github.com/movahedan/monobun/commit/2516669d74bc53aba52b5a1f7477a7fbd52fec84)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/902429181a0a8c6152a5d7a34d9cd045b770643a"><img src="https://img.shields.io/badge/release-(noscope)-059669?style=flat" alt="release" style="vertical-align: middle;" /></a> v0.1.0 ([9024291](https://github.com/movahedan/monobun/commit/902429181a0a8c6152a5d7a34d9cd045b770643a)) by **github-actions[bot]**
 
 ### 📦 feature/intershell <img src="https://img.shields.io/badge/Dependency%20Updates-495057?style=flat" alt="Dependency Updates" style="vertical-align: middle;" /> <a href="https://github.com/movahedan/monobun/pull/171"><img src="https://img.shields.io/badge/%23171-blue?style=flat" alt="#171" style="vertical-align: middle;" /></a> <img src="https://img.shields.io/badge/24%20commits-green?style=flat" alt="24 commits" style="vertical-align: middle;" />
 
