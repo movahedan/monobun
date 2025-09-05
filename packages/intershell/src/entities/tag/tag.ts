@@ -1,4 +1,4 @@
-import { getEntitiesConfig } from "../config/config";
+import { entitiesConfig } from "../config/config";
 import { entitiesShell } from "../entities.shell";
 import type { ParsedTag, TagValidationResult } from "./types";
 
@@ -19,7 +19,7 @@ export const EntityTag = {
 
 	validate(tag: string | ParsedTag): TagValidationResult {
 		const parsedTag = typeof tag === "string" ? EntityTag.parseByName(tag) : tag;
-		const config = getEntitiesConfig().getConfig();
+		const config = entitiesConfig.getConfig();
 		const errors = [];
 
 		// Name validation

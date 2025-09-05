@@ -1,4 +1,4 @@
-import { getEntitiesConfig } from "../config/config";
+import { entitiesConfig } from "../config/config";
 import { entitiesShell } from "../entities.shell";
 import { packagesShell } from "./packages.shell";
 import type { PackageJson } from "./types";
@@ -64,7 +64,7 @@ export class EntityPackages {
 
 	validatePackage(): string[] {
 		const packageJson = this.readJson();
-		const config = getEntitiesConfig().getConfig();
+		const config = entitiesConfig.getConfig();
 		const errors: string[] = [];
 
 		// Only validate if package validation is enabled

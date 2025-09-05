@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { defaultConfig } from "./default";
 import type { CustomConfigJson, IConfig } from "./types";
 
-export class Config {
+class Config {
 	private config: IConfig;
 
 	constructor(customConfig?: CustomConfigJson) {
@@ -63,6 +63,10 @@ export class Config {
 				...defaultConfig.branch,
 				...config.branch,
 			} as IConfig["branch"],
+			package: {
+				...defaultConfig.package,
+				...config.package,
+			} as IConfig["package"],
 			tag: {
 				...defaultConfig.tag,
 				...config.tag,
@@ -129,7 +133,7 @@ function getCustomConfig(): CustomConfigJson | undefined {
 // Lazy initialization to allow mocking in tests
 let _entitiesConfig: Config | undefined;
 
-export function getEntitiesConfig(): Config {
+function getEntitiesConfig(): Config {
 	if (!_entitiesConfig) {
 		_entitiesConfig = new Config(getCustomConfig());
 	}

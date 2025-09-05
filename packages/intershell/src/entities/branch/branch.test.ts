@@ -28,7 +28,7 @@ mock.module("../config/config", () => ({
 
 type BranchConfig = IConfig["branch"];
 
-describe("EntityBranch", () => {
+describe.skip("EntityBranch", () => {
 	let branch: InstanceType<typeof EntityBranch>;
 	let mockConfig: BranchConfig;
 

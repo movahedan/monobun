@@ -1,4 +1,4 @@
-import { getEntitiesConfig } from "../config/config";
+import { entitiesConfig } from "../config/config";
 import type { IConfig } from "../config/types";
 import { entitiesShell } from "../entities.shell";
 import { EntityPr } from "./pr";
@@ -241,4 +241,4 @@ export class EntityCommitClass {
 	}
 }
 
-export const EntityCommit = new EntityCommitClass(getEntitiesConfig().getConfig());
+export const EntityCommit = new EntityCommitClass(entitiesConfig.getConfig());

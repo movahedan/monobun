@@ -2,11 +2,9 @@
 
 import { colorify, createScript, type ScriptConfig } from "@repo/intershell/core";
 import { EntityBranch, EntityCommit } from "@repo/intershell/entities";
-import { getEntitiesConfig } from "../packages/intershell/src/entities/config/config";
 
 const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
-const branchConfig = getEntitiesConfig().getConfig().branch;
-const branchInstance = new EntityBranch(branchConfig);
+const branchInstance = new EntityBranch();
 
 const scriptConfig = {
 	name: "Commit Check",
