@@ -11,11 +11,11 @@ const getIsMerge = (message: string) =>
 const getIsDependency = (message: string) =>
 	message.includes("renovate[bot]") || message.includes("dependabot[bot]");
 
-export class EntityCommitClass {
+export class EntityCommit {
 	private readonly config: IConfig;
 
-	constructor(config: IConfig) {
-		this.config = config;
+	constructor() {
+		this.config = entitiesConfig.getConfig();
 	}
 
 	static parseByMessage(message: string): CommitMessageData {
@@ -50,7 +50,7 @@ export class EntityCommitClass {
 
 	validateCommitMessage(message: string): string[] {
 		if (!message.trim()) return ["commit message cannot be empty"];
-		const match = EntityCommitClass.parseByMessage(message);
+		const match = EntityCommit.parseByMessage(message);
 
 		const errors: string[] = [];
 		const commitConfig = this.config.commit;
@@ -181,7 +181,7 @@ export class EntityCommitClass {
 			const files =
 				filesResult.exitCode === 0 ? filesResult.text().trim().split("\n").filter(Boolean) : [];
 
-			const message = EntityCommitClass.parseByMessage(`${subject}\n${bodyLines.join("\n")}`);
+			const message = EntityCommit.parseByMessage(`${subject}\n${bodyLines.join("\n")}`);
 			return {
 				message,
 				info: {
@@ -190,7 +190,7 @@ export class EntityCommitClass {
 					date: date || undefined,
 				},
 				pr: message.isMerge
-					? await new EntityPr(this.config).getPRInfo(this.parseByHash, hash, message)
+					? await new EntityPr(this.config).getPRInfo(this.parseByHash.bind(this), hash, message)
 					: undefined,
 				files,
 			};
@@ -240,5 +240,3 @@ export class EntityCommitClass {
 		return errors;
 	}
 }
-
-export const EntityCommit = new EntityCommitClass(entitiesConfig.getConfig());

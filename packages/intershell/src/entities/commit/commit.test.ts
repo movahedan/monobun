@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import type { $ } from "bun";
 import type { ParsedCommitData } from "./types";
 
-const { EntityCommit, EntityCommitClass } = await import("./commit");
+const { EntityCommit } = await import("./commit");
 
 // Mock entitiesShell for testing
 let mockEntitiesShell: (config: {
@@ -142,14 +142,14 @@ export function createMockCommit(
 describe("EntityCommit", () => {
 	it("should be available as singleton instance", () => {
 		expect(EntityCommit).toBeDefined();
-		expect(typeof EntityCommit.validateCommitMessage).toBe("function");
-		expect(typeof EntityCommit.formatCommitMessage).toBe("function");
+		expect(typeof new EntityCommit().validateCommitMessage).toBe("function");
+		expect(typeof new EntityCommit().formatCommitMessage).toBe("function");
 	});
 
 	describe("static parseByMessage", () => {
 		it("should parse conventional commit message", () => {
 			const message = "feat(ui): add new button component";
-			const result = EntityCommitClass.parseByMessage(message);
+			const result = EntityCommit.parseByMessage(message);
 
 			expect(result.type).toBe("feat");
 			expect(result.scopes).toEqual(["ui"]);
@@ -161,7 +161,7 @@ describe("EntityCommit", () => {
 
 		it("should parse merge commit message", () => {
 			const message = "Merge pull request #123 from feature/new-feature";
-			const result = EntityCommitClass.parseByMessage(message);
+			const result = EntityCommit.parseByMessage(message);
 
 			expect(result.type).toBe("merge");
 			expect(result.isMerge).toBe(true);
@@ -169,7 +169,7 @@ describe("EntityCommit", () => {
 
 		it("should parse dependency update message", () => {
 			const message = "deps(deps): update react to v18";
-			const result = EntityCommitClass.parseByMessage(message);
+			const result = EntityCommit.parseByMessage(message);
 
 			expect(result.type).toBe("deps");
 			expect(result.isDependency).toBe(true);
@@ -177,7 +177,7 @@ describe("EntityCommit", () => {
 
 		it("should parse breaking change commit message", () => {
 			const message = "feat(ui)!: add new button component";
-			const result = EntityCommitClass.parseByMessage(message);
+			const result = EntityCommit.parseByMessage(message);
 
 			expect(result.type).toBe("feat");
 			expect(result.scopes).toEqual(["ui"]);
@@ -189,7 +189,7 @@ describe("EntityCommit", () => {
 
 		it("should parse commit with multiple scopes", () => {
 			const message = "feat(ui,api,core): add new button component";
-			const result = EntityCommitClass.parseByMessage(message);
+			const result = EntityCommit.parseByMessage(message);
 
 			expect(result.type).toBe("feat");
 			expect(result.scopes).toEqual(["ui", "api", "core"]);
@@ -201,7 +201,7 @@ describe("EntityCommit", () => {
 
 		it("should parse commit with empty scopes", () => {
 			const message = "feat(): add new button component";
-			const result = EntityCommitClass.parseByMessage(message);
+			const result = EntityCommit.parseByMessage(message);
 
 			// Empty scopes don't match conventional format, so it falls back to "other"
 			expect(result.type).toBe("other");
@@ -214,7 +214,7 @@ describe("EntityCommit", () => {
 
 		it("should parse commit without scopes", () => {
 			const message = "feat: add new button component";
-			const result = EntityCommitClass.parseByMessage(message);
+			const result = EntityCommit.parseByMessage(message);
 
 			expect(result.type).toBe("feat");
 			expect(result.scopes).toEqual([]);
@@ -226,7 +226,7 @@ describe("EntityCommit", () => {
 
 		it("should detect dependency from scope names", () => {
 			const message = "chore(dependencies): update packages";
-			const result = EntityCommitClass.parseByMessage(message);
+			const result = EntityCommit.parseByMessage(message);
 
 			expect(result.type).toBe("chore");
 			expect(result.scopes).toEqual(["dependencies"]);
@@ -236,7 +236,7 @@ describe("EntityCommit", () => {
 
 		it("should detect dependency from renovate bot", () => {
 			const message = "chore: update renovate[bot]";
-			const result = EntityCommitClass.parseByMessage(message);
+			const result = EntityCommit.parseByMessage(message);
 
 			// The message matches conventional format, so type stays "chore" but isDependency is true
 			expect(result.type).toBe("chore");
@@ -247,7 +247,7 @@ describe("EntityCommit", () => {
 
 		it("should detect dependency from dependabot bot", () => {
 			const message = "chore: update dependabot[bot]";
-			const result = EntityCommitClass.parseByMessage(message);
+			const result = EntityCommit.parseByMessage(message);
 
 			// The message matches conventional format, so type stays "chore" but isDependency is true
 			expect(result.type).toBe("chore");
@@ -258,7 +258,7 @@ describe("EntityCommit", () => {
 
 		it("should not detect dependency when no dependency indicators present", () => {
 			const message = "feat(ui): add new button component";
-			const result = EntityCommitClass.parseByMessage(message);
+			const result = EntityCommit.parseByMessage(message);
 
 			expect(result.type).toBe("feat");
 			expect(result.scopes).toEqual(["ui"]);
@@ -268,7 +268,7 @@ describe("EntityCommit", () => {
 
 		it("should parse merge branch message", () => {
 			const message = "Merge branch 'feature/new-feature' into main";
-			const result = EntityCommitClass.parseByMessage(message);
+			const result = EntityCommit.parseByMessage(message);
 
 			expect(result.type).toBe("merge");
 			expect(result.isMerge).toBe(true);
@@ -279,14 +279,14 @@ describe("EntityCommit", () => {
 	describe("validateCommitMessage", () => {
 		it("should validate valid conventional commit", () => {
 			const message = "feat(root): add new button component";
-			const errors = EntityCommit.validateCommitMessage(message);
+			const errors = new EntityCommit().validateCommitMessage(message);
 
 			expect(errors).toEqual([]);
 		});
 
 		it("should reject invalid commit type", () => {
 			const message = "invalid(root): add new button component";
-			const errors = EntityCommit.validateCommitMessage(message);
+			const errors = new EntityCommit().validateCommitMessage(message);
 
 			expect(errors.length).toBeGreaterThan(0);
 			expect(errors.some((error) => error.includes("invalid type"))).toBe(true);
@@ -294,7 +294,7 @@ describe("EntityCommit", () => {
 
 		it("should reject invalid scope", () => {
 			const message = "feat(invalid-scope): add new button component";
-			const errors = EntityCommit.validateCommitMessage(message);
+			const errors = new EntityCommit().validateCommitMessage(message);
 
 			expect(errors.length).toBeGreaterThan(0);
 			expect(errors.some((error) => error.includes("invalid scope"))).toBe(true);
@@ -302,7 +302,7 @@ describe("EntityCommit", () => {
 
 		it("should reject description that starts with type", () => {
 			const message = "feat(root): feat add new button component";
-			const errors = EntityCommit.validateCommitMessage(message);
+			const errors = new EntityCommit().validateCommitMessage(message);
 
 			expect(errors.length).toBeGreaterThan(0);
 			expect(errors.some((error) => error.includes("should not start with a type"))).toBe(true);
@@ -310,7 +310,7 @@ describe("EntityCommit", () => {
 
 		it("should reject description that ends with period", () => {
 			const message = "feat(root): add new button component.";
-			const errors = EntityCommit.validateCommitMessage(message);
+			const errors = new EntityCommit().validateCommitMessage(message);
 
 			expect(errors.length).toBeGreaterThan(0);
 			expect(errors.some((error) => error.includes("should not end with a period"))).toBe(true);
@@ -318,7 +318,7 @@ describe("EntityCommit", () => {
 
 		it("should validate bodyLines minLength", () => {
 			const message = "feat(root): add new button component\n\nShort";
-			const errors = EntityCommit.validateCommitMessage(message);
+			const errors = new EntityCommit().validateCommitMessage(message);
 
 			// This test depends on the config having bodyLines.minLength set
 			// We'll test the structure even if validation passes
@@ -328,7 +328,7 @@ describe("EntityCommit", () => {
 		it("should validate bodyLines maxLength", () => {
 			const message =
 				"feat(root): add new button component\n\nThis is a very long body line that exceeds the maximum allowed length for commit body lines according to the configuration";
-			const errors = EntityCommit.validateCommitMessage(message);
+			const errors = new EntityCommit().validateCommitMessage(message);
 
 			// This test depends on the config having bodyLines.maxLength set
 			// We'll test the structure even if validation passes
@@ -337,7 +337,7 @@ describe("EntityCommit", () => {
 
 		it("should reject breaking change for non-allowed types", () => {
 			const message = "docs(root): BREAKING CHANGE: update documentation";
-			const errors = EntityCommit.validateCommitMessage(message);
+			const errors = new EntityCommit().validateCommitMessage(message);
 
 			// This test depends on the config having breakingAllowed set for types
 			// We'll test the structure even if validation passes
@@ -346,7 +346,7 @@ describe("EntityCommit", () => {
 
 		it("should reject breaking change with short description", () => {
 			const message = "feat(root): BREAKING CHANGE: short";
-			const errors = EntityCommit.validateCommitMessage(message);
+			const errors = new EntityCommit().validateCommitMessage(message);
 
 			// This test depends on the config having breaking change validation
 			// We'll test the structure even if validation passes
@@ -355,14 +355,14 @@ describe("EntityCommit", () => {
 
 		it("should handle empty commit message", () => {
 			const message = "";
-			const errors = EntityCommit.validateCommitMessage(message);
+			const errors = new EntityCommit().validateCommitMessage(message);
 
 			expect(errors).toEqual(["commit message cannot be empty"]);
 		});
 
 		it("should handle whitespace-only commit message", () => {
 			const message = "   \n  \t  ";
-			const errors = EntityCommit.validateCommitMessage(message);
+			const errors = new EntityCommit().validateCommitMessage(message);
 
 			expect(errors).toEqual(["commit message cannot be empty"]);
 		});
@@ -381,7 +381,7 @@ describe("EntityCommit", () => {
 				isDependency: false,
 			};
 
-			const formatted = EntityCommit.formatCommitMessage(messageData);
+			const formatted = new EntityCommit().formatCommitMessage(messageData);
 			expect(formatted).toBe(
 				"feat(root): add new button component\n\nThis adds a new reusable button component\nwith proper TypeScript types",
 			);
@@ -399,7 +399,7 @@ describe("EntityCommit", () => {
 				isDependency: false,
 			};
 
-			const formatted = EntityCommit.formatCommitMessage(messageData);
+			const formatted = new EntityCommit().formatCommitMessage(messageData);
 			expect(formatted).toContain("BREAKING CHANGE");
 		});
 
@@ -415,7 +415,7 @@ describe("EntityCommit", () => {
 				isDependency: false,
 			};
 
-			const formatted = EntityCommit.formatCommitMessage(messageData);
+			const formatted = new EntityCommit().formatCommitMessage(messageData);
 			expect(formatted).toBe("feat: add new button component");
 		});
 
@@ -431,7 +431,7 @@ describe("EntityCommit", () => {
 				isDependency: false,
 			};
 
-			const formatted = EntityCommit.formatCommitMessage(messageData);
+			const formatted = new EntityCommit().formatCommitMessage(messageData);
 			expect(formatted).toBe("feat(root): add new button component");
 		});
 	});
@@ -460,7 +460,7 @@ describe("EntityCommit", () => {
 		});
 
 		it("should parse commit by hash successfully", async () => {
-			const result = await EntityCommit.parseByHash("abc123");
+			const result = await new EntityCommit().parseByHash("abc123");
 
 			expect(result.message.type).toBe("feat");
 			expect(result.message.description).toBe("add new feature");
@@ -490,7 +490,7 @@ describe("EntityCommit", () => {
 					}) as unknown as $.ShellPromise,
 			);
 
-			expect(EntityCommit.parseByHash("invalid-hash")).rejects.toThrow(
+			expect(new EntityCommit().parseByHash("invalid-hash")).rejects.toThrow(
 				"Failed to parse commit invalid-hash: Could not find commit invalid-hash",
 			);
 		});
@@ -514,7 +514,7 @@ describe("EntityCommit", () => {
 					}) as unknown as $.ShellPromise,
 			);
 
-			expect(EntityCommit.parseByHash("abc123")).rejects.toThrow(
+			expect(new EntityCommit().parseByHash("abc123")).rejects.toThrow(
 				"No subject found for commit abc123",
 			);
 		});
@@ -538,7 +538,9 @@ describe("EntityCommit", () => {
 					}) as unknown as $.ShellPromise,
 			);
 
-			expect(EntityCommit.parseByHash("abc123")).rejects.toThrow("Could not find commit abc123");
+			expect(new EntityCommit().parseByHash("abc123")).rejects.toThrow(
+				"Could not find commit abc123",
+			);
 		});
 
 		it("should handle merge commits with PR info", async () => {
@@ -561,7 +563,7 @@ describe("EntityCommit", () => {
 					}) as unknown as $.ShellPromise,
 			);
 
-			const result = await EntityCommit.parseByHash("abc123");
+			const result = await new EntityCommit().parseByHash("abc123");
 
 			expect(result.message.isMerge).toBe(true);
 			expect(result.pr).toBeDefined();
@@ -588,7 +590,7 @@ describe("EntityCommit", () => {
 					}) as unknown as $.ShellPromise,
 			);
 
-			const result = await EntityCommit.parseByHash("abc123");
+			const result = await new EntityCommit().parseByHash("abc123");
 
 			expect(result.files).toEqual(["file1.txt", "file2.txt"]);
 		});
@@ -613,7 +615,7 @@ describe("EntityCommit", () => {
 					}) as unknown as $.ShellPromise,
 			);
 
-			const result = await EntityCommit.parseByHash("abc123");
+			const result = await new EntityCommit().parseByHash("abc123");
 
 			expect(result.files).toEqual([]);
 		});
@@ -638,7 +640,7 @@ describe("EntityCommit", () => {
 					}) as unknown as $.ShellPromise,
 			);
 
-			const result = await EntityCommit.parseByHash("abc123");
+			const result = await new EntityCommit().parseByHash("abc123");
 
 			expect(result.files).toEqual([]);
 		});
@@ -663,7 +665,7 @@ describe("EntityCommit", () => {
 					}) as unknown as $.ShellPromise,
 			);
 
-			const result = await EntityCommit.parseByHash("abc123");
+			const result = await new EntityCommit().parseByHash("abc123");
 
 			expect(result.files).toEqual(["single-file.txt"]);
 		});
@@ -678,7 +680,7 @@ describe("EntityCommit", () => {
 				})),
 			});
 
-			const result = await EntityCommit.getStagedFiles();
+			const result = await new EntityCommit().getStagedFiles();
 
 			expect(result.stagedFiles).toEqual(["new-file.txt", "modified-file.txt"]);
 		});
@@ -691,7 +693,7 @@ describe("EntityCommit", () => {
 				})),
 			});
 
-			const result = await EntityCommit.getStagedFiles();
+			const result = await new EntityCommit().getStagedFiles();
 
 			expect(result.stagedFiles).toEqual([]);
 		});
@@ -705,7 +707,7 @@ describe("EntityCommit", () => {
 				})),
 			});
 
-			const result = await EntityCommit.getStagedFiles();
+			const result = await new EntityCommit().getStagedFiles();
 
 			expect(result.stagedFiles).toEqual(["staged-new.txt", "staged-modified.txt"]);
 		});
@@ -721,14 +723,14 @@ describe("EntityCommit", () => {
 			});
 
 			const files = ["test.txt"];
-			const result = await EntityCommit.validateStagedFiles(files);
+			const result = await new EntityCommit().validateStagedFiles(files);
 
 			expect(Array.isArray(result)).toBe(true);
 		});
 
 		it("should handle files with no staged config", async () => {
 			const files = ["test.txt"];
-			const result = await EntityCommit.validateStagedFiles(files);
+			const result = await new EntityCommit().validateStagedFiles(files);
 
 			expect(result).toEqual([]);
 		});
@@ -739,7 +741,7 @@ describe("EntityCommit", () => {
 			});
 
 			const files = ["test.txt"];
-			const result = await EntityCommit.validateStagedFiles(files);
+			const result = await new EntityCommit().validateStagedFiles(files);
 
 			expect(Array.isArray(result)).toBe(true);
 		});
@@ -750,7 +752,7 @@ describe("EntityCommit", () => {
 			});
 
 			const files = ["new-file.txt"];
-			const result = await EntityCommit.validateStagedFiles(files);
+			const result = await new EntityCommit().validateStagedFiles(files);
 
 			expect(Array.isArray(result)).toBe(true);
 		});
@@ -759,7 +761,7 @@ describe("EntityCommit", () => {
 			mockEntitiesShell({ gitDiff: mock(() => ({ text: "diff content", exitCode: 0 })) });
 
 			const files = ["test.txt"];
-			const result = await EntityCommit.validateStagedFiles(files);
+			const result = await new EntityCommit().validateStagedFiles(files);
 
 			expect(Array.isArray(result)).toBe(true);
 		});

@@ -4,7 +4,6 @@ import { colorify, createScript, type ScriptConfig } from "@repo/intershell/core
 import { EntityBranch, EntityCommit } from "@repo/intershell/entities";
 
 const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
-const branchInstance = new EntityBranch();
 
 const scriptConfig = {
 	name: "Commit Check",
@@ -58,6 +57,9 @@ const scriptConfig = {
 } as const satisfies ScriptConfig;
 
 export const commitCheck = createScript(scriptConfig, async (args, xConsole) => {
+	const entityCommit = new EntityCommit();
+	const branchInstance = new EntityBranch();
+
 	if (args["message-file"] || args.message) {
 		xConsole.log(colorify.blue("🔍 Validating commit message from file..."));
 		const commitMessage = args["message-file"]
@@ -72,7 +74,7 @@ export const commitCheck = createScript(scriptConfig, async (args, xConsole) => 
 			throw new Error("No commit message found");
 		}
 
-		const validation = EntityCommit.validateCommitMessage(commitMessage.trimEnd());
+		const validation = entityCommit.validateCommitMessage(commitMessage.trimEnd());
 		if (validation.length > 0) {
 			xConsole.error(colorify.red("❌ Commit message validation failed:"));
 			for (const error of validation) {
@@ -116,11 +118,11 @@ export const commitCheck = createScript(scriptConfig, async (args, xConsole) => 
 	if (args.staged) {
 		try {
 			xConsole.log(colorify.blue("🔍 Running staged files validation..."));
-			const { stagedFiles } = await EntityCommit.getStagedFiles();
+			const { stagedFiles } = await entityCommit.getStagedFiles();
 			if (!stagedFiles.length) {
 				xConsole.log(colorify.green("✅ No staged changes"));
 			} else {
-				const errors = await EntityCommit.validateStagedFiles(stagedFiles);
+				const errors = await new EntityCommit().validateStagedFiles(stagedFiles);
 				if (errors.length === 0) {
 					xConsole.log(colorify.green("✅ No policy violations found in staged files"));
 				} else {

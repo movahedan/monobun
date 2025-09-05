@@ -463,7 +463,8 @@ export class EntityVersion {
 
 			const commits: ParsedCommitData[] = [];
 			for (const hash of commitHashes) {
-				const commit = await EntityCommit.parseByHash(hash);
+				const entityCommit = new EntityCommit();
+				const commit = await entityCommit.parseByHash(hash);
 				commits.push(commit);
 			}
 
