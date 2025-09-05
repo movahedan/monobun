@@ -475,7 +475,7 @@ export class EntityVersion {
 	}
 
 	// Package validation methods (moved from EntityTag to break circular dependency)
-	validateTagPrefixForPackage(tagName: string): void {
+	async validateTagPrefixForPackage(tagName: string): Promise<void> {
 		const prefix = this.detectTagPrefix(tagName);
 		if (prefix) {
 			// Extract package name from prefix and check if it should be versioned
@@ -483,9 +483,18 @@ export class EntityVersion {
 			if (prefix === "v") {
 				packageName = "root";
 			} else if (prefix.endsWith("-v")) {
-				const baseName = prefix.replace("-v", "");
-				// Convert to proper package name format
-				packageName = baseName.startsWith("@repo/") ? baseName : `@repo/${baseName}`;
+				// Get all packages and find the one that matches this tag prefix
+				const allPackages = await EntityPackages.getAllPackages();
+				const matchingPackage = allPackages.find((pkg) => {
+					const packageInstance = new EntityPackages(pkg);
+					return packageInstance.getTagSeriesName() === prefix;
+				});
+
+				if (!matchingPackage) {
+					throw new Error(`No package found with tag prefix "${prefix}"`);
+				}
+
+				packageName = matchingPackage;
 			} else {
 				throw new Error(
 					`Invalid tag prefix format: "${prefix}". Expected format: v (root) or package-name-v (e.g., api-v, intershell-v)`,

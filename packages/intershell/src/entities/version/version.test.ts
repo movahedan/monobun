@@ -870,7 +870,7 @@ describe("EntityVersion", () => {
 		EntityPackages.prototype.shouldVersion = mock(() => true);
 
 		// Should not throw for valid v prefix
-		expect(() => entityVersion.validateTagPrefixForPackage("v1.0.0")).not.toThrow();
+		await expect(entityVersion.validateTagPrefixForPackage("v1.0.0")).resolves.not.toThrow();
 
 		// Cleanup mocks
 		await cleanupMocks();
@@ -881,13 +881,13 @@ describe("EntityVersion", () => {
 		const { EntityVersion } = await import("./version");
 		const { EntityPackages } = await import("../packages");
 
-		const entityVersion = new EntityVersion("test-package");
+		const entityVersion = new EntityVersion("api");
 
 		// Mock EntityPackages.shouldVersion to return true
 		EntityPackages.prototype.shouldVersion = mock(() => true);
 
 		// Should not throw for valid package prefix
-		expect(() => entityVersion.validateTagPrefixForPackage("test-package-v1.0.0")).not.toThrow();
+		await expect(entityVersion.validateTagPrefixForPackage("api-v1.0.0")).resolves.not.toThrow();
 
 		// Cleanup mocks
 		await cleanupMocks();
@@ -897,10 +897,10 @@ describe("EntityVersion", () => {
 		await setupMocks();
 		const { EntityVersion } = await import("./version");
 
-		const entityVersion = new EntityVersion("test-package");
+		const entityVersion = new EntityVersion("api");
 
 		// Should throw for invalid prefix format
-		expect(() => entityVersion.validateTagPrefixForPackage("invalid1.0.0")).toThrow(
+		await expect(entityVersion.validateTagPrefixForPackage("invalid1.0.0")).rejects.toThrow(
 			'Invalid tag prefix format: "invalid". Expected format: v (root) or package-name-v (e.g., api-v, intershell-v)',
 		);
 
@@ -913,14 +913,14 @@ describe("EntityVersion", () => {
 		const { EntityVersion } = await import("./version");
 		const { EntityPackages } = await import("../packages");
 
-		const entityVersion = new EntityVersion("private-package");
+		const entityVersion = new EntityVersion("api");
 
 		// Mock EntityPackages.shouldVersion to return false (private package)
 		EntityPackages.prototype.shouldVersion = mock(() => false);
 
 		// Should throw for private package
-		expect(() => entityVersion.validateTagPrefixForPackage("private-package-v1.0.0")).toThrow(
-			'Package "@repo/private-package" should not be versioned (private package)',
+		await expect(entityVersion.validateTagPrefixForPackage("api-v1.0.0")).rejects.toThrow(
+			'Package "api" should not be versioned (private package)',
 		);
 
 		// Cleanup mocks
