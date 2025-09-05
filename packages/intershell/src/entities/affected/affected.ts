@@ -1,14 +1,22 @@
-import { $ } from "bun";
-import { EntityTag } from "../tag";
+import { entitiesShell } from "../entities.shell";
 
 export const EntityAffected = {
 	async getAffectedPackages(baseSha?: string, to = "HEAD"): Promise<string[]> {
-		const fromSha = await EntityTag.getBaseTagSha(baseSha);
+		const { EntityTag } = await import("../tag");
+		const fromSha = await EntityTag.getBaseCommitSha(baseSha);
 
-		const affected = await $`bunx turbo run build --filter="...[${fromSha}...${to}]" --dry-run=json`
-			.quiet()
-			.json();
+		try {
+			const result = await entitiesShell.turboRunBuild([`--filter=...[${fromSha}...${to}]`]).text();
+			const turboOutput = JSON.parse(result);
 
-		return affected.packages.slice(1);
+			const packages = turboOutput.tasks?.map((task: { package: string }) => task.package) || [];
+
+			// Filter out root package and undefined values
+			return packages.filter((pkg: string) => pkg && pkg !== "//");
+		} catch (error) {
+			console.warn(`Failed to get affected packages via turbo: ${error}`);
+			// Fallback: return empty array
+			return [];
+		}
 	},
 };

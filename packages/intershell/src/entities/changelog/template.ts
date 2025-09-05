@@ -1,6 +1,5 @@
 import type { ParsedCommitData } from "../commit";
 import { EntityPackages } from "../packages";
-import { EntityTag } from "../tag";
 import type { ChangelogData } from "./types";
 
 export interface TemplateEngine {
@@ -10,14 +9,15 @@ export interface TemplateEngine {
 }
 export type TemplateEngineData = ChangelogData;
 
-const prefix = EntityTag.getPrefix();
 const repoUrl = EntityPackages.getRepoUrl();
 
 export class ChangelogTemplate implements TemplateEngine {
 	readonly packageName: string;
+	readonly prefix: string;
 
-	constructor(packageName: string) {
+	constructor(packageName: string, prefix: string) {
 		this.packageName = packageName;
+		this.prefix = prefix;
 	}
 
 	generateContent(changelogData: TemplateEngineData): string {
@@ -53,7 +53,7 @@ export class ChangelogTemplate implements TemplateEngine {
 			const line = lines[i];
 			const isVersionLine =
 				line.match(/## \[Unreleased\]/) ||
-				line.match(new RegExp(`^## ${prefix}?\\d+\\.\\d+\\.\\d+`));
+				line.match(new RegExp(`^## ${this.prefix}?\\d+\\.\\d+\\.\\d+`));
 
 			if (isVersionLine) {
 				if (currentVersion) {
@@ -68,7 +68,7 @@ export class ChangelogTemplate implements TemplateEngine {
 					// Extract version from "## v1.2.3" format
 					const versionMatch = line.match(/## (v?\d+\.\d+\.\d+)/);
 					if (versionMatch) {
-						cleanVersion = versionMatch[1].replace(prefix, "");
+						cleanVersion = versionMatch[1].replace(this.prefix, "");
 					}
 				}
 

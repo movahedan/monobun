@@ -77,4 +77,5 @@ export interface ParsedCommitData {
 		date?: string;
 	};
 	pr?: PRInfo;
+	files?: string[];
 }

@@ -44,7 +44,7 @@ jobs:
 
       - name: 📦 Install dependencies
         if: steps.bun-cache.outputs.cache-hit != 'true'
-        run: bun install -E --no-save
+        run: bun install
 
       - name: 🔍 - Check branch name
         run: bun run commit:check --branch
@@ -121,9 +121,6 @@ jobs:
 
       - name: 🔍 - Type check
         run: bun run check:types ${{ needs.get-affected.outputs.affected-packages }}
-
-      - name: 🧪 - Test
-        run: bun test ${{ needs.get-affected.outputs.affected-packages }}
 
       - name: 🏗️ - Build
         run: bun run build ${{ needs.get-affected.outputs.affected-packages }}

@@ -124,6 +124,15 @@ export const defaultConfig = {
 						badgeColor: "6B7280",
 						breakingAllowed: false,
 					},
+					{
+						type: "release",
+						label: "Release",
+						description: "Release version changes",
+						category: "other" as const,
+						emoji: "🚀",
+						badgeColor: "059669",
+						breakingAllowed: false,
+					},
 				] as const,
 			},
 			scopes: {
@@ -170,9 +179,22 @@ export const defaultConfig = {
 			},
 		],
 	},
+	package: {
+		selectiveVersioning: {
+			enabled: true,
+			description: "Enforce selective versioning based on private field",
+		},
+		semanticVersioning: {
+			enabled: true,
+			description: "Ensure versions follow semantic versioning format",
+		},
+		description: {
+			enabled: true,
+			description: "Require descriptions for versioned packages",
+		},
+	},
 	branch: {
 		defaultBranch: "main",
-		protectedBranches: ["main"],
 		name: {
 			minLength: 1,
 			maxLength: 100,
@@ -193,5 +215,15 @@ export const defaultConfig = {
 			"renovate",
 		],
 	},
-	tag: [],
+	tag: {
+		name: {
+			enabled: true,
+			description: "Validate tag name structure and content",
+			minLength: 1,
+			maxLength: 100,
+			allowedCharacters: /^[a-zA-Z0-9\-_.]+$/,
+			noSpaces: true,
+			noSpecialChars: false,
+		},
+	},
 } as const satisfies IConfig;

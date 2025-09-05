@@ -1,7 +1,8 @@
 {
+	"private": true,
 	"name": "docs-astro",
+	"description": "Documentation site built with Astro for the monobun project",
 	"type": "module",
-	"version": "0.1.0",
 	"scripts": {
 		"astro": "astro",
 		"dev": "astro dev",

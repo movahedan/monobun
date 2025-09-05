@@ -1,26 +1,40 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import { restoreBunMocks, setupBunMocks } from "@repo/test-preset/mock-bun";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+import type { $ } from "bun";
 import type { IConfig } from "../config/types";
+import { EntityBranch } from "./branch";
 import type { ParsedBranch } from "./types";
 
+// Mock the entitiesConfig module
+const mockEntitiesConfig = {
+	getConfig: mock(() => ({
+		branch: {
+			defaultBranch: "main",
+			prefixes: ["feature", "bugfix", "hotfix"],
+			name: {
+				minLength: 3,
+				maxLength: 50,
+				allowedCharacters: /^[a-zA-Z0-9\-_/]+$/,
+				noConsecutiveSeparators: true,
+				noLeadingTrailingSeparators: true,
+			},
+		},
+	})),
+};
+
+// Mock the config module
+mock.module("../config/config", () => ({
+	entitiesConfig: mockEntitiesConfig,
+}));
+
 type BranchConfig = IConfig["branch"];
-
-setupBunMocks();
-
-import { EntityBranch } from "./branch";
 
 describe("EntityBranch", () => {
 	let branch: InstanceType<typeof EntityBranch>;
 	let mockConfig: BranchConfig;
 
 	beforeEach(() => {
-		if (!globalThis.Bun?.$ || globalThis.Bun.$.toString().includes("Mock")) {
-			setupBunMocks();
-		}
-
 		mockConfig = {
 			defaultBranch: "main",
-			protectedBranches: ["main", "develop"],
 			prefixes: ["feature", "bugfix", "hotfix"],
 			name: {
 				minLength: 3,
@@ -31,12 +45,12 @@ describe("EntityBranch", () => {
 			},
 		};
 
-		branch = new EntityBranch(mockConfig);
-	});
+		// Set up the mock config
+		mockEntitiesConfig.getConfig.mockReturnValue({
+			branch: mockConfig,
+		});
 
-	afterEach(() => {
-		restoreBunMocks();
-		mock.restore();
+		branch = new EntityBranch();
 	});
 
 	describe("static parseByName", () => {
@@ -90,49 +104,33 @@ describe("EntityBranch", () => {
 
 		parseTestCases.forEach(({ name, input, expected }) => {
 			it(name, () => {
-				const result = new EntityBranch(mockConfig).parseByName(input);
+				const result = new EntityBranch().parseByName(input);
 				expect(result).toEqual(expected);
 			});
 		});
 	});
 
 	describe("getCurrentBranch", () => {
-		const getCurrentBranchTests = [
-			{
-				name: "should return current branch name",
-				assertions: (result: string) => {
-					expect(typeof result).toBe("string");
-					expect(result.length).toBeGreaterThan(0);
-				},
-			},
-			{
-				name: "should handle git command and return trimmed output",
-				assertions: (result: string) => {
-					expect(result).toBe(result.trim());
-				},
-			},
-			{
-				name: "should return string from git command",
-				assertions: (result: string) => {
-					expect(typeof result).toBe("string");
-				},
-			},
-		];
+		// keep the trailing space to test the trim() function
+		const mockCurrentBranch = "test-branch ";
 
-		getCurrentBranchTests.forEach(({ name, assertions }) => {
-			it(name, async () => {
-				setupBunMocks({
-					command: {
-						text: "test",
+		beforeEach(async () => {
+			// Import and mock entitiesShell methods directly
+			const { entitiesShell } = await import("../entities.shell");
+
+			// Mock gitBranchShowCurrent directly
+			entitiesShell.gitBranchShowCurrent = mock(
+				() =>
+					({
 						exitCode: 0,
-					},
-				});
+						text: () => mockCurrentBranch,
+					}) as unknown as $.ShellPromise,
+			);
+		});
 
-				const result = await branch.getCurrentBranch();
-				assertions(result);
-
-				restoreBunMocks();
-			});
+		it("should handle git command and return trimmed output", async () => {
+			const result = await branch.getCurrentBranch();
+			expect(result).toBe(mockCurrentBranch.trim());
 		});
 	});
 
@@ -153,11 +151,13 @@ describe("EntityBranch", () => {
 					name: "should validate branch without prefixes when prefixes array is empty",
 					input: "any-branch-name",
 					setup: () => {
-						const configWithoutPrefixes: BranchConfig = {
-							...mockConfig,
-							prefixes: [],
-						};
-						return new EntityBranch(configWithoutPrefixes);
+						mockEntitiesConfig.getConfig.mockReturnValue({
+							branch: {
+								...mockConfig,
+								prefixes: [] as string[],
+							},
+						} as IConfig);
+						return new EntityBranch();
 					},
 					expected: true as const,
 				},
@@ -303,15 +303,17 @@ describe("EntityBranch", () => {
 			{
 				name: "should handle config with no length restrictions",
 				setup: () => {
-					const configWithoutLength: BranchConfig = {
-						...mockConfig,
-						name: {
-							...mockConfig.name,
-							minLength: 0,
-							maxLength: 0,
+					mockEntitiesConfig.getConfig.mockReturnValue({
+						branch: {
+							...mockConfig,
+							name: {
+								...mockConfig.name,
+								minLength: 0,
+								maxLength: 0,
+							},
 						},
-					};
-					return new EntityBranch(configWithoutLength);
+					} as IConfig);
+					return new EntityBranch();
 				},
 				input: "a",
 				expected: "branch name should have a name",
@@ -319,14 +321,16 @@ describe("EntityBranch", () => {
 			{
 				name: "should handle config with no character restrictions",
 				setup: () => {
-					const configWithoutChars: BranchConfig = {
-						...mockConfig,
-						name: {
-							...mockConfig.name,
-							allowedCharacters: /.*/,
+					mockEntitiesConfig.getConfig.mockReturnValue({
+						branch: {
+							...mockConfig,
+							name: {
+								...mockConfig.name,
+								allowedCharacters: /.*/,
+							},
 						},
-					};
-					return new EntityBranch(configWithoutChars);
+					} as IConfig);
+					return new EntityBranch();
 				},
 				input: "feature/user@auth",
 				expected: true as const,

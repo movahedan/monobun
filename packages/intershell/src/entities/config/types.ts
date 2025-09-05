@@ -66,8 +66,7 @@ export type StagedConfig = {
 
 interface BranchConfig {
 	readonly defaultBranch: string;
-	readonly protectedBranches: readonly string[];
-	readonly prefixes: readonly string[];
+	readonly prefixes: string[];
 	readonly name: {
 		readonly minLength: number;
 		readonly maxLength: number;
@@ -77,10 +76,39 @@ interface BranchConfig {
 	};
 }
 
+interface PackageValidationConfig {
+	readonly selectiveVersioning: {
+		readonly enabled: boolean;
+		readonly description: string;
+	};
+	readonly semanticVersioning: {
+		readonly enabled: boolean;
+		readonly description: string;
+	};
+	readonly description: {
+		readonly enabled: boolean;
+		readonly description: string;
+	};
+}
+
+interface TagValidationConfig {
+	readonly name: {
+		readonly enabled: boolean;
+		readonly description: string;
+		readonly minLength: number;
+		readonly maxLength: number;
+		readonly allowedCharacters: RegExp;
+		readonly noSpaces: boolean;
+		readonly noSpecialChars: boolean;
+		readonly validator?: Validator;
+	};
+}
+
 export interface IConfig {
 	readonly commit: CommitConfig;
 	readonly branch: BranchConfig;
-	readonly tag: readonly string[];
+	readonly package: PackageValidationConfig;
+	readonly tag: TagValidationConfig;
 }
 
 type DeepPartial<T> = {

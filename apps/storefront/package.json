@@ -1,8 +1,8 @@
 {
-	"name": "storefront",
-	"version": "0.0.3",
-	"type": "module",
 	"private": true,
+	"name": "storefront",
+	"description": "E-commerce storefront built with Next.js and React",
+	"type": "module",
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",

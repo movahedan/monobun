@@ -1,16 +1,11 @@
-import { $ } from "bun";
-import type { ParsedCommitData } from "../commit";
-import { EntityCommit } from "../commit";
 import { EntityPackages } from "../packages";
-import { EntityTag } from "../tag";
+import { EntityVersion } from "../version";
 import type { TemplateEngine } from "./template";
-import type { ChangelogData, VersionBumpType, VersionData } from "./types";
+import type { ChangelogData, VersionData } from "./types";
 
 export class EntityChangelog {
 	private packageName: string;
 	private package: EntityPackages;
-	private fromSha?: string;
-	private toSha?: string;
 
 	private changelogData: ChangelogData | undefined;
 	private versionData: VersionData | undefined;
@@ -25,45 +20,73 @@ export class EntityChangelog {
 	}
 
 	async calculateRange(from: string, to?: string): Promise<void> {
-		this.fromSha = from;
-		this.toSha = to || "HEAD";
-		if (!this.fromSha || !this.toSha) {
-			throw new Error(`Range not set: from=${this.fromSha}, to=${this.toSha}`);
+		const fromSha = from;
+		const toSha = to || "HEAD";
+		if (!fromSha || !toSha) {
+			throw new Error(`Range not set: from=${fromSha}, to=${toSha}`);
 		}
 
-		const unreleasedCommits = await this.getCommitsInRange(
-			await EntityTag.getBaseTagSha(),
-			this.toSha,
+		const packageVersionEntity = new EntityVersion(this.packageName);
+
+		// Use the provided from SHA, or auto-detect if not provided
+		const baseTagSha = fromSha;
+		const unreleasedCommits = await packageVersionEntity.getCommitsInRange(baseTagSha, toSha);
+
+		// Get the current version from git tags (what git thinks the current version is)
+		let currentVersionFromGit: string;
+		const isTagName = /^[a-zA-Z0-9\-_.]+$/.test(baseTagSha) && !/^[a-f0-9]{40}$/i.test(baseTagSha);
+
+		if (isTagName) {
+			const versionData = await packageVersionEntity.getPackageVersionAtTag(
+				baseTagSha,
+				this.packageName,
+			);
+			currentVersionFromGit = versionData?.version || "0.0.0";
+		} else {
+			// baseTagSha is a commit hash, try to get the latest git tag version first
+			const latestVersion = await packageVersionEntity.getLatestPackageVersionInHistory();
+			if (latestVersion) {
+				currentVersionFromGit = latestVersion;
+			} else {
+				// No git tags exist, use current package.json version for first-time versioning
+				currentVersionFromGit = this.package.readVersion() || "0.0.0";
+			}
+		}
+
+		// Get the version from package.json (what's actually on disk)
+		const versionOnDisk = this.package.readVersion() || "0.0.0";
+
+		if (!currentVersionFromGit || !versionOnDisk) {
+			throw new Error(`Could not get versions for package ${this.packageName}`);
+		}
+
+		// Pass both versions to calculateVersionData for proper decision making
+		this.versionData = await packageVersionEntity.calculateVersionData(
+			versionOnDisk,
+			currentVersionFromGit,
+			unreleasedCommits,
 		);
 
-		const { version: currentVersion } = (await EntityTag.getPackageVersionAtTag(
-			await EntityTag.getBaseTagSha(),
-			this.packageName,
-		)) || { version: "0.0.0" };
-
-		if (!currentVersion) {
-			throw new Error(
-				`Could not get current version for package ${this.packageName} at tag ${await EntityTag.getBaseTagSha()}`,
-			);
+		const tagsInRange = await packageVersionEntity.getTagsInRangeForPackage(fromSha, toSha);
+		if (this.versionData.shouldBump) {
+			// Only add toSha to tags if it's actually a tag (not HEAD or a commit hash)
+			const isTag = await packageVersionEntity.packageTagExists(toSha);
+			if (isTag) {
+				tagsInRange.push({
+					tag: toSha,
+					previousTag: await packageVersionEntity.getBaseTagShaForPackage(),
+				});
+			}
 		}
-
-		const versionData = await this.calculateVersionData(currentVersion, unreleasedCommits);
-		const versionOnDisk = this.package.readVersion();
 
 		const changelogData: ChangelogData = new Map();
 
-		const tagsInRange = await EntityTag.getTagsInRange(this.fromSha, this.toSha);
-
-		const versionTags = tagsInRange;
-		if (versionData.shouldBump) {
-			versionTags.push({
-				tag: this.toSha,
-				previousTag: await EntityTag.getBaseTagSha(),
-			});
-		}
-
-		for (const tag of versionTags) {
-			const commits = await this.getCommitsInRange(tag.previousTag as string, tag.tag);
+		// Handle existing tags in range
+		for (const tag of tagsInRange) {
+			const commits = await packageVersionEntity.getCommitsInRange(
+				tag.previousTag as string,
+				tag.tag,
+			);
 			const mergeCommits = commits.filter((commit) => commit.message.isMerge);
 			const orphanCommits = commits.filter(
 				(commit) =>
@@ -75,25 +98,73 @@ export class EntityChangelog {
 					),
 			);
 			const sortedCommits = [...mergeCommits, ...orphanCommits].sort(
-				(a, b) => new Date(a.info?.date || "0").getTime() - new Date(b.info?.date || "0").getTime(),
+				(a, b) => new Date(b.info?.date || "0").getTime() - new Date(a.info?.date || "0").getTime(),
 			);
 
-			const packageVersion = await EntityTag.getPackageVersionAtTag(tag.tag, this.packageName);
+			const packageVersion = await packageVersionEntity.getPackageVersionAtTag(
+				tag.tag,
+				this.packageName,
+			);
 			if (!packageVersion) {
 				throw new Error(
-					`Could not get version for tag ${tag.tag} in package ${this.packageName} in the range ${this.fromSha}..${this.toSha}`,
+					`Could not get version for tag ${tag.tag} in package ${this.packageName} in the range ${fromSha}..${toSha}`,
 				);
 			}
 
-			changelogData.set(this.versionMode ? packageVersion.version : "[Unreleased]", sortedCommits);
+			// Use target version if there's a version bump, otherwise use the tag version
+			const versionToUse = this.versionData.shouldBump
+				? this.versionData.targetVersion
+				: packageVersion.version;
+			changelogData.set(this.versionMode ? versionToUse : "[Unreleased]", sortedCommits);
+		}
+
+		// If we have a version bump and there are existing tags, also include commits from the last tag to HEAD
+		if (this.versionData.shouldBump && tagsInRange.length > 0) {
+			const lastTag = tagsInRange[tagsInRange.length - 1];
+			const commitsFromLastTag = await packageVersionEntity.getCommitsInRange(lastTag.tag, toSha);
+			const mergeCommits = commitsFromLastTag.filter((commit) => commit.message.isMerge);
+			const orphanCommits = commitsFromLastTag.filter(
+				(commit) =>
+					!commit.message.isMerge &&
+					!mergeCommits.some((mergeCommit) =>
+						mergeCommit.pr?.prCommits?.some(
+							(prCommit) => prCommit.info?.hash === commit.info?.hash,
+						),
+					),
+			);
+			const sortedCommits = [...mergeCommits, ...orphanCommits].sort(
+				(a, b) => new Date(b.info?.date || "0").getTime() - new Date(a.info?.date || "0").getTime(),
+			);
+
+			// Add commits from last tag to HEAD for the target version
+			changelogData.set(
+				this.versionMode ? this.versionData.targetVersion : "[Unreleased]",
+				sortedCommits,
+			);
+		}
+
+		// Handle first-time versioning: if no tags exist but we have commits, create changelog for target version
+		if (tagsInRange.length === 0 && unreleasedCommits.length > 0 && this.versionData.shouldBump) {
+			const mergeCommits = unreleasedCommits.filter((commit) => commit.message.isMerge);
+			const orphanCommits = unreleasedCommits.filter(
+				(commit) =>
+					!commit.message.isMerge &&
+					!mergeCommits.some((mergeCommit) =>
+						mergeCommit.pr?.prCommits?.some(
+							(prCommit) => prCommit.info?.hash === commit.info?.hash,
+						),
+					),
+			);
+			const sortedCommits = [...mergeCommits, ...orphanCommits].sort(
+				(a, b) => new Date(b.info?.date || "0").getTime() - new Date(a.info?.date || "0").getTime(),
+			);
+
+			// Use the target version for first-time versioning
+			const targetVersion = this.versionData.targetVersion;
+			changelogData.set(this.versionMode ? targetVersion : "[Unreleased]", sortedCommits);
 		}
 
 		this.changelogData = changelogData;
-		this.versionData = {
-			...versionData,
-			bumpType: versionOnDisk === versionData.targetVersion ? "synced" : versionData.bumpType,
-			shouldBump: versionOnDisk === versionData.targetVersion ? false : versionData.shouldBump,
-		};
 	}
 
 	getVersionData(): VersionData {
@@ -157,199 +228,5 @@ export class EntityChangelog {
 					: 0)
 			);
 		}, 0);
-	}
-
-	private async calculateVersionData(
-		currentVersion: string,
-		commits: ParsedCommitData[],
-	): Promise<VersionData> {
-		// If no commits, no version change needed
-		if (commits.length === 0) {
-			return {
-				currentVersion,
-				shouldBump: false,
-				targetVersion: currentVersion,
-				bumpType: "none",
-				reason: "No commits in range",
-			};
-		}
-
-		const bumpType = await this.determineBumpType(commits);
-		if (!bumpType) {
-			return {
-				currentVersion,
-				shouldBump: false,
-				targetVersion: currentVersion,
-				bumpType: "none",
-				reason: "All commits already documented in changelog",
-			};
-		}
-
-		const nextVersion = this.calculateNextVersion(currentVersion, bumpType);
-		const versionAlreadyExists = await EntityTag.packageVersionExistsInHistory(
-			this.packageName,
-			nextVersion,
-		);
-		if (versionAlreadyExists) {
-			return {
-				currentVersion,
-				shouldBump: false,
-				targetVersion: currentVersion,
-				bumpType: "none",
-				reason: `Version ${nextVersion} already exists in git tags`,
-			};
-		}
-
-		if (currentVersion === nextVersion) {
-			return {
-				currentVersion,
-				shouldBump: false,
-				targetVersion: currentVersion,
-				bumpType: "none",
-				reason: `Package version ${currentVersion} already matches next version ${nextVersion}`,
-			};
-		}
-
-		const latestPackageVersionInHistory = await EntityTag.getLatestPackageVersionInHistory(
-			this.packageName,
-		);
-		if (latestPackageVersionInHistory && latestPackageVersionInHistory !== currentVersion) {
-			throw new Error(
-				`Package version ${currentVersion} is behind git tag version ${latestPackageVersionInHistory}`,
-			);
-		}
-
-		// Normal version bump - if we have commits and the next version doesn't exist, we should bump
-		return {
-			currentVersion,
-			shouldBump: true,
-			targetVersion: nextVersion,
-			bumpType,
-			reason: `New ${bumpType} version bump to ${nextVersion}`,
-		};
-	}
-
-	private calculateNextVersion(currentVersion: string, bumpType: VersionBumpType): string {
-		const [major, minor, patch] = currentVersion.split(".").map(Number);
-		if (Number.isNaN(major) || Number.isNaN(minor) || Number.isNaN(patch)) {
-			throw new Error(`Invalid version: ${currentVersion}`);
-		}
-
-		switch (bumpType) {
-			case "major":
-				return `${major + 1}.0.0`;
-			case "minor":
-				return `${major}.${minor + 1}.0`;
-			case "patch":
-				return `${major}.${minor}.${patch + 1}`;
-			default:
-				throw new Error(`Invalid bump type: ${bumpType}`);
-		}
-	}
-
-	private async determineBumpType(
-		commits: ParsedCommitData[],
-	): Promise<"major" | "minor" | "patch" | undefined> {
-		// If we have commits and we're generating a changelog, we need to determine
-		// the bump type based on the commit content. The fact that commits might
-		// already be in the changelog doesn't matter - we're creating a new version.
-
-		// Determine the bump type based on commit content
-		let hasBreaking = false;
-		let hasFeature = false;
-		for (const commit of commits) {
-			if (commit.message.isBreaking) hasBreaking = true;
-			if (commit.message.type === "feat") hasFeature = true;
-		}
-
-		if (hasBreaking) return "major";
-		if (hasFeature) return "minor";
-		return "patch";
-	}
-
-	private async getCommitsInRange(from: string, to: string): Promise<ParsedCommitData[]> {
-		const gitRange = from === "0.0.0" ? to : `${from}..${to}`;
-
-		try {
-			let commitHashes: string[];
-
-			if (this.packageName === "root") {
-				// For root package, include ALL commits in the repository
-				const allHashes = await this.getGitLogLines(gitRange, {
-					path: ".",
-				});
-
-				const mergeHashes = await this.getGitLogLines(gitRange, {
-					merges: true,
-				});
-
-				commitHashes = [...new Set([...allHashes, ...mergeHashes])];
-			} else {
-				const packageHashes = await this.getGitLogLines(gitRange, {
-					path: this.package.getPath(),
-				});
-				const mergeHashes = await this.getGitLogLines(gitRange, {
-					merges: true,
-				});
-
-				const relevantMergeHashes: string[] = [];
-				for (const hash of mergeHashes) {
-					const prCommitsResult = await this.getGitLogLines(`${hash}^..${hash}^2`, {
-						path: this.package.getPath(),
-					});
-
-					if (prCommitsResult.length > 0) {
-						relevantMergeHashes.push(hash);
-					}
-				}
-
-				commitHashes = [...new Set([...packageHashes, ...relevantMergeHashes])];
-			}
-
-			const commits: ParsedCommitData[] = [];
-			for (const hash of commitHashes) {
-				const commit = await EntityCommit.parseByHash(hash);
-				commits.push(commit);
-			}
-
-			return commits;
-		} catch (error) {
-			console.warn("Failed to get commits in range:", error);
-			return [];
-		}
-	}
-
-	private async getGitLogLines(
-		range: string,
-		options: {
-			merges?: boolean;
-			path?: string;
-			exclude?: string[];
-		} = {},
-	): Promise<string[]> {
-		const args: string[] = [range, "--oneline", "--format=%H"];
-
-		if (options.merges) args.push("--merges");
-
-		// Handle exclude paths first (before path specification)
-		if (options.exclude && options.exclude.length > 0) {
-			for (const exclude of options.exclude) {
-				args.push("--not", "--", exclude);
-			}
-		}
-
-		// Add path specification last
-		if (options.path) {
-			args.push("--", options.path);
-		}
-
-		try {
-			const result = await $`git log ${args}`.quiet();
-			const hashes = result.text().trim().split("\n").filter(Boolean);
-			return hashes;
-		} catch (error) {
-			console.warn("Git log failed:", error);
-			return [];
-		}
 	}
 }

@@ -1,413 +1,496 @@
-import { describe, expect, it, mock } from "bun:test";
-import type { ComposeData, ServiceDefinition } from "./types";
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 
-// Mock the EntityPackages module before importing the class
-mock.module("../packages", () => ({
-	EntityPackages: {
-		getAllPackages: () => ["root", "app", "db"],
-	},
-}));
-
-// Import the class to test static methods
-const { EntityCompose } = await import("./compose");
-
-// Helper function to access the private parseDockerCompose function
-function callParseDockerCompose(input: string): ComposeData {
-	return (
-		EntityCompose as unknown as { parseDockerCompose: (input: string) => ComposeData }
-	).parseDockerCompose(input);
-}
+type CustomBunType = {
+	YAML: {
+		parse: (input: string) => Record<string, unknown>;
+	};
+	file: (path: string) => { text: () => string };
+};
 
 describe("EntityCompose", () => {
-	describe("static methods", () => {
-		describe("parsePortMappings", () => {
-			it("should parse port mappings correctly", () => {
-				const ports = ["3000:3000", "8080:80", "9000"];
-				const mappings = EntityCompose.parsePortMappings(ports);
+	// Store original Bun methods for restoration
+	let originalBunYaml: CustomBunType["YAML"];
+	let originalBunFile: CustomBunType["file"];
 
-				expect(mappings).toHaveLength(3);
-				expect(mappings[0]).toEqual({
-					host: 3000,
-					container: 3000,
-					protocol: "tcp",
-				});
-				expect(mappings[1]).toEqual({
-					host: 8080,
-					container: 80,
-					protocol: "tcp",
-				});
-				expect(mappings[2]).toEqual({
-					host: 9000,
-					container: 9000,
-					protocol: "tcp",
-				});
-			});
+	// Default YAML template that we can modify per test case
+	const defaultYaml = {
+		version: "3.8",
+		services: {
+			"test-service": {
+				image: "app:latest",
+				ports: ["3000:3000"],
+				environment: ["NODE_ENV=production", "PORT=3000"],
+				volumes: ["/app/data:/data"],
+				depends_on: ["db"],
+			},
+			db: {
+				image: "postgres:13",
+				ports: ["5432:5432"],
+				environment: ["POSTGRES_DB=myapp"],
+			},
+		} as Record<
+			string,
+			{
+				image?: string;
+				build?: string;
+				ports?: string[];
+				environment?: string[];
+				volumes?: string[];
+				depends_on?: string[];
+			}
+		>,
+		networks: { default: {} } as Record<string, unknown>,
+		volumes: { data: {} } as Record<string, unknown>,
+	};
 
-			it("should handle empty ports array", () => {
-				const mappings = EntityCompose.parsePortMappings([]);
-				expect(mappings).toHaveLength(0);
-			});
+	// Helper function to create modified YAML for specific test cases
+	const createTestYaml = (modifications: Partial<typeof defaultYaml>) => {
+		return { ...defaultYaml, ...modifications };
+	};
 
-			it("should handle single port without colon", () => {
-				const ports = ["9000"];
-				const mappings = EntityCompose.parsePortMappings(ports);
-
-				expect(mappings).toHaveLength(1);
-				expect(mappings[0]).toEqual({
-					host: 9000,
-					container: 9000,
-					protocol: "tcp",
-				});
-			});
-
-			it("should handle port with only host specified", () => {
-				const ports = ["3000:"];
-				const mappings = EntityCompose.parsePortMappings(ports);
-
-				expect(mappings).toHaveLength(1);
-				expect(mappings[0]).toEqual({
-					host: 3000,
-					container: 3000,
-					protocol: "tcp",
-				});
-			});
-		});
-
-		describe("parseEnvironment", () => {
-			it("should parse array environment variables", () => {
-				const env = ["NODE_ENV=development", "PORT=3000", "DEBUG=true"];
-				const result = EntityCompose.parseEnvironment(env);
-
-				expect(result).toEqual({
-					NODE_ENV: "development",
-					PORT: "3000",
-					DEBUG: "true",
-				});
-			});
-
-			it("should parse object environment variables", () => {
-				const env = {
-					NODE_ENV: "production",
-					PORT: "8080",
-				};
-				const result = EntityCompose.parseEnvironment(env);
-
-				expect(result).toEqual({
-					NODE_ENV: "production",
-					PORT: "8080",
-				});
-			});
-
-			it("should handle undefined environment", () => {
-				const result = EntityCompose.parseEnvironment(undefined);
-				expect(result).toEqual({});
-			});
-
-			it("should handle malformed array environment variables", () => {
-				const env = ["NODE_ENV=development", "INVALID", "PORT=3000"];
-				const result = EntityCompose.parseEnvironment(env);
-
-				expect(result).toEqual({
-					NODE_ENV: "development",
-					PORT: "3000",
-				});
-			});
-
-			it("should handle empty array environment variables", () => {
-				const env: string[] = [];
-				const result = EntityCompose.parseEnvironment(env);
-
-				expect(result).toEqual({});
-			});
-
-			it("should handle environment variables with equals in value", () => {
-				const env = ["DATABASE_URL=postgresql://user:pass@localhost:5432/db"];
-				const result = EntityCompose.parseEnvironment(env);
-
-				expect(result).toEqual({
-					DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
-				});
-			});
-		});
+	// Set up mocks before each test
+	beforeEach(async () => {
+		// Store original Bun methods
+		originalBunYaml = (Bun as unknown as CustomBunType).YAML;
+		originalBunFile = (Bun as unknown as CustomBunType).file;
 	});
 
-	describe("port mapping edge cases", () => {
-		it("should handle various port formats", () => {
-			const testCases = [
-				{ input: "3000:3000", expected: { host: 3000, container: 3000 } },
-				{ input: "8080:80", expected: { host: 8080, container: 80 } },
-				{ input: "9000", expected: { host: 9000, container: 9000 } },
-				{ input: "3000:", expected: { host: 3000, container: 3000 } },
-				{ input: ":3000", expected: { host: 3000, container: 3000 } },
-			];
-
-			testCases.forEach(({ input, expected }) => {
-				const mappings = EntityCompose.parsePortMappings([input]);
-				expect(mappings).toHaveLength(1);
-				expect(mappings[0].host).toBe(expected.host);
-				expect(mappings[0].container).toBe(expected.container);
-				expect(mappings[0].protocol).toBe("tcp");
-			});
-		});
-
-		it("should handle non-numeric port values gracefully", () => {
-			const ports = ["abc:def", "invalid", "123:abc"];
-			const mappings = EntityCompose.parsePortMappings(ports);
-
-			expect(mappings).toHaveLength(3);
-
-			// Non-numeric values result in NaN or undefined based on || logic
-			expect(mappings[0].host).toBeNaN();
-			expect(mappings[0].container).toBeNaN();
-			expect(mappings[1].host).toBeUndefined();
-			expect(mappings[1].container).toBeNaN();
-			expect(mappings[2].host).toBe(123);
-			expect(mappings[2].container).toBe(123);
-		});
+	// Restore mocks after each test
+	afterEach(() => {
+		// Restore original Bun methods
+		(Bun as unknown as CustomBunType).YAML = originalBunYaml;
+		(Bun as unknown as CustomBunType).file = originalBunFile;
 	});
 
-	describe("environment parsing edge cases", () => {
-		it("should handle empty string values", () => {
-			const env = ["KEY=", "EMPTY=", "VALUE=something"];
-			const result = EntityCompose.parseEnvironment(env);
+	// Store original methods to restore after tests
+	let originalEntityPackagesGetAllPackages: () => Promise<string[]>;
+	let originalEntityAffectedGetAffectedPackages: (
+		baseSha?: string,
+		to?: string,
+	) => Promise<string[]>;
 
-			expect(result).toEqual({
-				VALUE: "something",
-			});
+	// Common mock setup for dependencies - now with proper cleanup
+	const setupMocks = async () => {
+		// Import modules
+		const { EntityPackages } = await import("../packages");
+		const { EntityAffected } = await import("../affected");
+
+		// Store original methods if not already stored
+		if (!originalEntityPackagesGetAllPackages) {
+			originalEntityPackagesGetAllPackages = EntityPackages.getAllPackages;
+		}
+		if (!originalEntityAffectedGetAffectedPackages) {
+			originalEntityAffectedGetAffectedPackages = EntityAffected.getAffectedPackages;
+		}
+
+		// Mock EntityPackages.getAllPackages to avoid package.json errors
+		EntityPackages.getAllPackages = () => Promise.resolve(["root", "test-package"]);
+
+		// Mock EntityAffected.getAffectedPackages
+		EntityAffected.getAffectedPackages = () => Promise.resolve(["test-service", "db"]);
+
+		return { EntityPackages, EntityAffected };
+	};
+
+	// Cleanup function to restore original methods
+	const cleanupMocks = async () => {
+		if (originalEntityPackagesGetAllPackages) {
+			const { EntityPackages } = await import("../packages");
+			EntityPackages.getAllPackages = originalEntityPackagesGetAllPackages;
+		}
+		if (originalEntityAffectedGetAffectedPackages) {
+			const { EntityAffected } = await import("../affected");
+			EntityAffected.getAffectedPackages = originalEntityAffectedGetAffectedPackages;
+		}
+	};
+
+	// Common mock setup for Bun
+	const setupBunMocks = (
+		mockYamlParse: ReturnType<typeof mock>,
+		mockFileText: ReturnType<typeof mock>,
+	) => {
+		(Bun as unknown as CustomBunType).YAML = { parse: mockYamlParse };
+		(Bun as unknown as CustomBunType).file = mock(() => ({ text: mockFileText }));
+	};
+
+	it("should handle core functionality - parsing, validation, and basic operations", async () => {
+		await setupMocks();
+
+		// Create test YAML with an invalid service for validation testing
+		const testYaml = createTestYaml({
+			version: "3.9",
+			services: {
+				...defaultYaml.services,
+				"invalid-service": {
+					// Missing image and build - should fail validation
+				},
+			},
 		});
 
-		it("should handle keys without values", () => {
-			const env = ["KEY", "ANOTHER_KEY", "VALID_KEY=value"];
-			const result = EntityCompose.parseEnvironment(env);
+		const mockYamlParse = mock(() => testYaml);
 
-			expect(result).toEqual({
-				VALID_KEY: "value",
-			});
-		});
+		const mockFileText = mock(() => Promise.resolve("mock yaml content"));
+		setupBunMocks(mockYamlParse, mockFileText);
 
-		it("should handle mixed environment formats", () => {
-			const env = ["NODE_ENV=production", "DEBUG=true", "EMPTY=", "NO_VALUE", "COMPLEX=key=value"];
-			const result = EntityCompose.parseEnvironment(env);
+		const { EntityCompose } = await import("./compose");
 
-			expect(result).toEqual({
-				NODE_ENV: "production",
-				DEBUG: "true",
-				COMPLEX: "key",
-			});
-		});
+		// Test instance creation and validation
+		const entityCompose = new EntityCompose("docker-compose.yml");
+
+		const validation = await entityCompose.validate();
+		expect(validation.isValid).toBe(false);
+		expect(validation.errors).toHaveLength(1);
+		expect(validation.errors[0].code).toBe("NO_IMAGE_OR_BUILD");
+		expect(validation.errors[0].service).toBe("invalid-service");
+
+		// Test getCompose and caching behavior
+		const compose1 = await entityCompose.getCompose();
+		const compose2 = await entityCompose.getCompose();
+		expect(compose1).toBe(compose2); // Should return cached version
+		expect(compose1.version).toBe("3.9");
+		expect(Object.keys(compose1.services)).toHaveLength(3);
+
+		// Test getServices with comprehensive data
+		const services = await entityCompose.getServices();
+		expect(services).toHaveLength(3);
+
+		const testService = services.find((s) => s.name === "test-service");
+		expect(testService?.image).toBe("app:latest");
+		expect(testService?.ports).toHaveLength(1);
+		expect(testService?.ports[0].host).toBe(3000);
+		expect(testService?.dependencies).toEqual(["db"]);
+		expect(testService?.volumes).toEqual(["/app/data:/data"]);
+
+		const dbService = services.find((s) => s.name === "db");
+		expect(dbService?.image).toBe("postgres:13");
+		expect(dbService?.ports[0].host).toBe(5432);
+
+		// Cleanup mocks
+		await cleanupMocks();
 	});
-});
 
-describe("Docker Compose Parser", () => {
-	describe("parseDockerCompose", () => {
-		it("should parse docker-compose file with defaults", () => {
-			const input = `
+	it("should handle service operations - health, dependencies, URLs, and caching", async () => {
+		await setupMocks();
+
+		// Use default YAML for this test - it already has the dependencies we need
+		const mockYamlParse = mock(() => defaultYaml);
+
+		const mockFileText = mock(() => Promise.resolve("mock yaml content"));
+		setupBunMocks(mockYamlParse, mockFileText);
+
+		const { EntityCompose } = await import("./compose");
+		const entityCompose = new EntityCompose("docker-compose.yml");
+
+		// Test getServiceHealth (lines 79-81)
+		const health = await entityCompose.getServiceHealth();
+		expect(health).toHaveLength(2);
+		expect(health[0]).toEqual({
+			name: "test-service",
+			status: "healthy",
+			checks: 10,
+			failures: 0,
+			lastCheck: expect.any(Date),
+		});
+		expect(health[1]).toEqual({
+			name: "db",
+			status: "healthy",
+			checks: 10,
+			failures: 0,
+			lastCheck: expect.any(Date),
+		});
+
+		// Test getServiceDependencies
+		const dependencies = await entityCompose.getServiceDependencies();
+		expect(dependencies.services).toHaveLength(2);
+		expect(dependencies.dependencies).toEqual({
+			"test-service": ["db"],
+			db: [],
+		});
+
+		// Test getServiceUrls (lines 93-95)
+		const urls = await entityCompose.getServiceUrls();
+		expect(urls).toEqual({
+			"3000": "http://localhost:3000",
+			"5432": "http://localhost:5432",
+		});
+
+		// Test getPortMappings
+		const portMappings = await entityCompose.getPortMappings();
+		expect(portMappings).toHaveLength(2);
+		expect(portMappings[0]).toEqual({
+			host: 3000,
+			container: 3000,
+			protocol: "tcp",
+		});
+		expect(portMappings[1]).toEqual({
+			host: 5432,
+			container: 5432,
+			protocol: "tcp",
+		});
+
+		// Cleanup mocks
+		await cleanupMocks();
+	});
+
+	it("should handle static parsing methods with comprehensive edge cases", async () => {
+		await setupMocks();
+		const { EntityCompose } = await import("./compose");
+
+		// Test parsePortMappings with various scenarios
+		const portTestCases = [
+			"3000:3000", // Normal
+			"8080", // Host only
+			":80", // Container only
+			"0:3000", // Zero host port
+			"3000:0", // Zero container port
+			"65535:3000", // Max port number
+			"abc:3000", // Non-numeric host
+			"3000:def", // Non-numeric container
+			"", // Empty string
+		];
+
+		const result = EntityCompose.parsePortMappings(portTestCases);
+		expect(result).toHaveLength(9);
+
+		// Normal case
+		expect(result[0]).toEqual({ host: 3000, container: 3000, protocol: "tcp" });
+
+		// Host only
+		expect(result[1]).toEqual({ host: 8080, container: 8080, protocol: "tcp" });
+
+		// Container only - empty string becomes 0, then 0 ?? 80 = 0 (0 is not null/undefined)
+		expect(result[2]).toEqual({ host: 0, container: 80, protocol: "tcp" });
+
+		// Zero ports (should preserve 0, not treat as falsy)
+		expect(result[3]).toEqual({ host: 0, container: 3000, protocol: "tcp" });
+		expect(result[4]).toEqual({ host: 3000, container: 0, protocol: "tcp" });
+
+		// Max port
+		expect(result[5]).toEqual({ host: 65535, container: 3000, protocol: "tcp" });
+
+		// Non-numeric (should result in NaN)
+		expect(result[6].host).toBeNaN();
+		expect(result[7].container).toBeNaN();
+
+		// Empty string - Number("") returns 0 for both host and container
+		expect(result[8].host).toBe(0);
+		expect(result[8].container).toBe(0);
+		expect(result[8].protocol).toBe("tcp");
+
+		// Test parseEnvironment with various scenarios
+		const envTestCases = [
+			"NODE_ENV=production",
+			"PORT=3000",
+			"KEY1=value=with=equals",
+			"KEY2=", // Empty value
+			"KEY3", // No equals
+			"=VALUE", // No key
+			"", // Empty string
+			"KEY4=0", // Zero value
+			"KEY5=false", // Falsy value
+		];
+
+		const envResult = EntityCompose.parseEnvironment(envTestCases);
+		expect(envResult).toEqual({
+			NODE_ENV: "production",
+			PORT: "3000",
+			KEY1: "value=with=equals",
+			KEY2: "", // Empty values are included
+			KEY4: "0",
+			KEY5: "false",
+		});
+
+		// Test parseDockerCompose with comprehensive YAML
+		// Note: The static parseDockerCompose method uses Bun.YAML.parse directly
+		// So we need to mock it before calling the static method
+		const mockYamlParse = mock((input: string) => {
+			if (input.includes('version: "3.9"')) {
+				return createTestYaml({
+					version: "3.9",
+					services: {
+						app: {
+							image: "node:18",
+							ports: ["3000:3000", "8080:80"],
+							environment: [
+								"NODE_ENV=production",
+								"DATABASE_URL=postgresql://user:pass@db:5432/db",
+							],
+							volumes: ["/app/data:/data", "/app/logs:/logs"],
+							depends_on: ["db", "redis"],
+						},
+						db: {
+							image: "postgres:13",
+							ports: ["5432:5432"],
+							environment: ["POSTGRES_DB=myapp", "POSTGRES_PASSWORD=secret"],
+						},
+					},
+				});
+			}
+			return defaultYaml;
+		});
+
+		// Set up Bun mock for static method testing
+		(Bun as unknown as CustomBunType).YAML = { parse: mockYamlParse };
+
+		const yamlInput = `
+version: "3.9"
 services:
   app:
     image: node:18
-    ports:
-      - "3000:3000"
-`;
-			const result = callParseDockerCompose(input);
-
-			expect(result.version).toBe("3.8");
-			expect(result.services).toBeDefined();
-			expect(result.networks).toBeDefined();
-			expect(result.volumes).toBeDefined();
-			expect(result.validation.isValid).toBe(true);
-		});
-
-		it("should handle custom version", () => {
-			const input = `
-version: '3.9'
-services:
-  app:
-    image: node:18
-`;
-			const result = EntityCompose.parseDockerCompose(input);
-
-			expect(result.version).toBe("3.9");
-		});
-
-		it("should handle environment variables array format", () => {
-			const input = `
-services:
-  app:
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - API_KEY=secret123
-`;
-			const result = EntityCompose.parseDockerCompose(input);
-
-			const service = result.services.app as ServiceDefinition;
-			const environment = service.environment as Record<string, string>;
-
-			expect(environment).toBeDefined();
-			expect(environment.NODE_ENV).toBe("production");
-			expect(environment.PORT).toBe("3000");
-			expect(environment.API_KEY).toBe("secret123");
-		});
-
-		it("should handle environment variables object format", () => {
-			const input = `
-services:
-  app:
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-      API_KEY: secret123
-`;
-			const result = EntityCompose.parseDockerCompose(input);
-
-			const service = result.services.app as ServiceDefinition;
-			const environment = service.environment as Record<string, unknown>;
-
-			expect(environment).toBeDefined();
-			expect(environment.NODE_ENV).toBe("production");
-			expect(environment.PORT).toBe(3000);
-			expect(environment.API_KEY).toBe("secret123");
-		});
-
-		it("should handle ports array with string conversion", () => {
-			const input = `
-services:
-  app:
     ports:
       - "3000:3000"
       - "8080:80"
-      - "9000:9000"
-`;
-			const result = EntityCompose.parseDockerCompose(input);
-
-			const service = result.services.app as ServiceDefinition;
-			const ports = service.ports as string[];
-
-			expect(Array.isArray(ports)).toBe(true);
-			expect(ports).toHaveLength(3);
-			expect(ports[0]).toBe("3000:3000");
-			expect(ports[1]).toBe("8080:80");
-			expect(ports[2]).toBe("9000:9000");
-		});
-
-		it("should handle empty services, networks, and volumes", () => {
-			const input = `
-version: '3.8'
-`;
-			const result = EntityCompose.parseDockerCompose(input);
-
-			expect(result.services).toEqual({});
-			expect(result.networks).toEqual({});
-			expect(result.volumes).toEqual({});
-		});
-
-		it("should handle complex service configuration", () => {
-			const input = `
-services:
-  web:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
     environment:
-      - NGINX_HOST=localhost
-      - NGINX_PORT=80
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://user:pass@db:5432/db
     volumes:
-      - "./nginx.conf:/etc/nginx/nginx.conf"
-    depends_on:
-      - app
-    networks:
-      - frontend
-      - backend
-    restart: unless-stopped
-
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://localhost:5432/myapp
-    volumes:
-      - "./app:/app"
-      - "/app/node_modules"
+      - /app/data:/data
+      - /app/logs:/logs
     depends_on:
       - db
-    networks:
-      - backend
-
+      - redis
   db:
     image: postgres:13
+    ports:
+      - "5432:5432"
     environment:
-      POSTGRES_DB: myapp
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: secret
-    volumes:
-      - "postgres_data:/var/lib/postgresql/data"
-    networks:
-      - backend
-
+      - POSTGRES_DB=myapp
+      - POSTGRES_PASSWORD=secret
 networks:
-  frontend:
-    driver: bridge
-  backend:
-    driver: bridge
-
+  default:
 volumes:
-  postgres_data:
-    driver: local
+  data:
+  logs:
 `;
-			const result = EntityCompose.parseDockerCompose(input);
 
-			expect(result.services.web).toBeDefined();
-			expect(result.services.app).toBeDefined();
-			expect(result.services.db).toBeDefined();
+		const composeData = EntityCompose.parseDockerCompose(yamlInput);
+		expect(composeData.version).toBe("3.9");
+		expect(composeData.services.app).toBeDefined();
+		expect(composeData.services.app.image).toBe("node:18");
+		expect(composeData.services.app.ports).toEqual(["3000:3000", "8080:80"]);
+		expect(composeData.services.app.depends_on).toEqual(["db", "redis"]);
+		expect(composeData.services.db.image).toBe("postgres:13");
 
-			// Test web service
-			const web = result.services.web as ServiceDefinition;
-			expect(web.image).toBe("nginx:alpine");
-			expect(web.ports).toEqual(["80:80", "443:443"]);
-			expect(web.environment).toEqual({
-				NGINX_HOST: "localhost",
-				NGINX_PORT: "80",
-			});
-			expect(web.volumes).toEqual(["./nginx.conf:/etc/nginx/nginx.conf"]);
-			expect(web.depends_on).toEqual(["app"]);
-			expect(web.networks).toEqual(["frontend", "backend"]);
-			expect(web.restart).toBe("unless-stopped");
+		// Cleanup mocks
+		await cleanupMocks();
+	});
 
-			// Test app service
-			const app = result.services.app as ServiceDefinition;
-			expect(app.build).toBe(".");
-			expect(app.ports).toEqual(["3000:3000"]);
-			expect(app.environment).toEqual({
-				NODE_ENV: "production",
-				DATABASE_URL: "postgresql://localhost:5432/myapp",
-			});
+	it("should handle complex scenarios and error cases comprehensively", async () => {
+		await setupMocks();
 
-			// Test networks and volumes
-			expect(result.networks.frontend).toBeDefined();
-			expect(result.networks.backend).toBeDefined();
-			expect(result.volumes.postgres_data).toBeDefined();
+		// Create complex test YAML with multiple services and invalid ones for validation
+		const complexYaml = createTestYaml({
+			services: {
+				"web-app": {
+					image: "nginx:alpine",
+					ports: ["80:80", "443:443"],
+					environment: ["NGINX_HOST=localhost"],
+					volumes: ["/var/log/nginx:/var/log/nginx"],
+					depends_on: ["api", "db"],
+				},
+				api: {
+					build: ".",
+					ports: ["3000:3000"],
+					environment: ["NODE_ENV=production", "DB_HOST=db"],
+					depends_on: ["db"],
+				},
+				db: {
+					image: "postgres:13",
+					ports: ["5432:5432"],
+					environment: ["POSTGRES_DB=myapp"],
+					volumes: ["postgres_data:/var/lib/postgresql/data"],
+				},
+				redis: {
+					image: "redis:alpine",
+					ports: ["6379:6379"],
+				},
+				"invalid-service": {
+					// Missing image and build - should fail validation
+				},
+				"another-invalid": {
+					// Also missing image and build
+				},
+			},
+			networks: { default: { driver: "bridge" } },
+			volumes: { postgres_data: { driver: "local" } },
 		});
 
-		it("should handle environment variables with equals in value", () => {
-			const input = `
-services:
-  app:
-    environment:
-      - DATABASE_URL=postgresql://user:pass@host:5432/db?sslmode=require
-      - REDIS_URL=redis://localhost:6379/0
-      - API_KEY=key=value=123
-`;
-			const result = EntityCompose.parseDockerCompose(input);
+		const mockYamlParse = mock(() => complexYaml);
 
-			const service = result.services.app as ServiceDefinition;
-			const environment = service.environment as Record<string, string>;
+		const mockFileText = mock(() => Promise.resolve("mock yaml content"));
+		setupBunMocks(mockYamlParse, mockFileText);
 
-			expect(environment.DATABASE_URL).toBe("postgresql://user:pass@host:5432/db?sslmode=require");
-			expect(environment.REDIS_URL).toBe("redis://localhost:6379/0");
-			expect(environment.API_KEY).toBe("key=value=123");
+		const { EntityCompose } = await import("./compose");
+		const entityCompose = new EntityCompose("docker-compose.yml");
+
+		// Test validation with multiple invalid services
+		const validation = await entityCompose.validate();
+		expect(validation.isValid).toBe(false);
+		expect(validation.errors).toHaveLength(2);
+		expect(validation.errors.map((e: { code: string }) => e.code)).toEqual([
+			"NO_IMAGE_OR_BUILD",
+			"NO_IMAGE_OR_BUILD",
+		]);
+
+		// Test comprehensive service operations
+		const services = await entityCompose.getServices();
+		expect(services).toHaveLength(6);
+
+		// Test web-app service
+		const webApp = services.find((s) => s.name === "web-app");
+		expect(webApp?.image).toBe("nginx:alpine");
+		expect(webApp?.ports).toHaveLength(2);
+		expect(webApp?.dependencies).toEqual(["api", "db"]);
+
+		// Test API service
+		const api = services.find((s) => s.name === "api");
+		expect(api?.image).toBeUndefined(); // API service uses build, not image
+		expect(api?.ports[0].host).toBe(3000);
+		expect(api?.dependencies).toEqual(["db"]);
+
+		// Test database service
+		const db = services.find((s) => s.name === "db");
+		expect(db?.image).toBe("postgres:13");
+		expect(db?.ports[0].host).toBe(5432);
+
+		// Test Redis service
+		const redis = services.find((s) => s.name === "redis");
+		expect(redis?.image).toBe("redis:alpine");
+		expect(redis?.ports[0].host).toBe(6379);
+
+		// Test port mappings across all services
+		const allPortMappings = await entityCompose.getPortMappings();
+		expect(allPortMappings).toHaveLength(5); // 5 services with ports: web-app(2), api(1), db(1), redis(1)
+
+		const portNumbers = allPortMappings.map((p) => p.host).filter((p) => typeof p === "number");
+		expect(portNumbers).toEqual([80, 443, 3000, 5432, 6379]);
+
+		// Test service dependencies graph
+		const dependencies = await entityCompose.getServiceDependencies();
+		expect(dependencies.services).toHaveLength(6);
+		expect(dependencies.dependencies["web-app"]).toEqual(["api", "db"]);
+		expect(dependencies.dependencies.api).toEqual(["db"]);
+		expect(dependencies.dependencies.db).toEqual([]);
+		expect(dependencies.dependencies.redis).toEqual([]);
+
+		// Test service URLs
+		const urls = await entityCompose.getServiceUrls();
+		expect(urls).toEqual({
+			"80": "http://localhost:80",
+			"443": "http://localhost:443",
+			"3000": "http://localhost:3000",
+			"5432": "http://localhost:5432",
+			"6379": "http://localhost:6379",
 		});
+
+		// Test health status
+		const health = await entityCompose.getServiceHealth();
+		expect(health).toHaveLength(6);
+		expect(health.every((h) => h.status === "healthy")).toBe(true);
+		expect(health.every((h) => h.checks === 10)).toBe(true);
+		expect(health.every((h) => h.failures === 0)).toBe(true);
+
+		// Cleanup mocks
+		await cleanupMocks();
 	});
 });

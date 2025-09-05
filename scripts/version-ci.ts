@@ -42,7 +42,7 @@ export const versionCI = createScript(scriptConfig, async function main(args, xC
 
 	await configureGitAuth(args, xConsole);
 
-	const fromTag = await EntityTag.getBaseTagSha();
+	const fromTag = await EntityTag.getBaseCommitSha();
 	xConsole.info(`📝 Using base commit: ${colorify.blue(fromTag)}`);
 
 	xConsole.info("\n🔧 Preparing versions...");

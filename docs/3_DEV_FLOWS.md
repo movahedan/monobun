@@ -166,8 +166,10 @@ bun run scripts/version-prepare.ts
 bun run scripts/version-prepare.ts --dry-run
 # Manual version preparation
 bun run scripts/version-prepare.ts --package root
-# Apply version changes
+# Apply version changes to all packages
 bun run scripts/version-apply.ts
+# Apply version changes to specific package
+bun run scripts/version-apply.ts --package api
 ```
 
 ## 🚀 CI/CD Integration
@@ -227,6 +229,9 @@ The changelog system now provides comprehensive commit tracking:
 # Generate changelog for version range
 bun run scripts/version-prepare.ts --package root --from v0.0.2 --to HEAD
 
+# Generate changelog using version ranges (NEW!)
+bun run scripts/version-prepare.ts --package root --from-version 0.0.2 --to-version 0.1.0
+
 # Features:
 # - PR commit detection and grouping
 # - Individual commit inclusion in PR sections
@@ -266,6 +271,24 @@ bun test --watch
 
 # Test specific package
 bun test packages/my-package
+
+# Test intershell package (with proper isolation)
+bun test packages/intershell/src/entities/
+```
+
+### **Test Isolation & Mocking**
+
+> **Important**: This project uses function-level mocking to prevent cross-test interference. See [Bun Test Isolation Bug Solution](../planning/24_BUN_TEST_ISOLATION_BUG_SOLUTION.md) for detailed information about test isolation patterns and best practices.
+
+```bash
+# Run tests by folder (debugging tool for isolation issues)
+bun run @repo/test-preset/test-by-folder
+
+# Run specific test combinations
+bun test src/entities/affected/ src/entities/packages/
+
+# Run individual test files for debugging
+bun test src/entities/packages/packages.test.ts
 ```
 
 ### **Build Verification**
@@ -319,6 +342,7 @@ bun run commit:check --branch
 # Version management
 bun run version:prepare
 bun run version:apply
+bun run version:apply --package api  # Apply to specific package
 bun run version:ci
 
 # CI utilities
@@ -427,6 +451,21 @@ bun run check
 
 # Run tests to identify problems
 bun test
+```
+
+#### **Test Isolation Issues**
+```bash
+# If tests fail when run together but pass individually
+bun run @repo/test-preset/test-by-folder  # Run tests by folder to identify interference
+
+# Run individual test files for debugging
+bun test src/entities/packages/packages.test.ts
+
+# Check for mock interference
+bun test src/entities/affected/ src/entities/packages/
+
+# See detailed solution documentation
+# Reference: docs/planning/24_BUN_TEST_ISOLATION_BUG_SOLUTION.md
 ```
 
 #### **Build Failures**

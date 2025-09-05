@@ -29,6 +29,13 @@ import '@repo/test-preset/testing-library'; // React Testing Library setup
 import '@repo/test-preset/happydom'; // HappyDOM browser environment
 ```
 
+### Debugging Tools
+```bash
+# Test isolation debugging tool
+bun run @repo/test-preset/test-by-folder [path]
+bun run @repo/test-preset/test-by-folder src/entities/
+```
+
 ## Testing Stack
 
 ### Core Testing Framework
@@ -145,6 +152,55 @@ The test preset automatically configures:
 - Testing Library matchers
 - Common mocks and utilities
 - TypeScript support for tests
+
+## Debugging Tools
+
+### Test Isolation Debugging
+
+The `test-by-folder.ts` script helps identify cross-test interference issues:
+
+```bash
+# Run tests by folder to check for isolation issues
+bun run @repo/test-preset/test-by-folder
+
+# Test specific path
+bun run @repo/test-preset/test-by-folder src/entities/
+
+# Test specific package
+bun run @repo/test-preset/test-by-folder packages/intershell/src/entities/
+```
+
+**What it does:**
+- Runs each test folder individually
+- Identifies which folders pass in isolation but fail when run together
+- Provides clear output showing the isolation pattern
+- Helps pinpoint the source of cross-test interference
+
+**When to use:**
+- When tests pass individually but fail when run together
+- When debugging mock state interference
+- When investigating test isolation issues
+- When adding new test files that might interfere with existing ones
+
+**Example output:**
+```
+🔍 Running tests by folder to check for isolation issues in src/entities/...
+
+📁 Testing src/entities/affected/...
+✅ src/entities/affected/ - PASSED
+
+📁 Testing src/entities/packages/...
+❌ src/entities/packages/ - FAILED
+
+📊 SUMMARY:
+==================================================
+✅ Passed: 7
+❌ Failed: 1
+📁 Total: 8
+
+💡 If individual folders pass but 'bun test' fails,
+   this indicates cross-test interference (global mock state issues).
+```
 
 ## Best Practices
 

@@ -1,7 +1,6 @@
 {
-	"name": "@repo/test-preset",
-	"version": "0.0.4",
 	"private": true,
+	"name": "@repo/test-preset",
 	"type": "module",
 	"main": "./test-setup.ts",
 	"exports": {
@@ -9,7 +8,8 @@
 		"./mock-modules": "./mock-modules.ts",
 		"./mock-bun": "./mock-bun.ts",
 		"./testing-library": "./testing-library.ts",
-		"./happydom": "./happydom.ts"
+		"./happydom": "./happydom.ts",
+		"./test-by-folder": "./test-by-folder.ts"
 	},
 	"devDependencies": {
 		"@happy-dom/global-registrator": "18.0.1",

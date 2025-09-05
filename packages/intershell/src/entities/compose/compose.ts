@@ -223,8 +223,8 @@ export class EntityCompose {
 		return ports.map((port) => {
 			const [host, container] = port.split(":").map(Number);
 			return {
-				host: host || container,
-				container: container || host,
+				host: host ?? container,
+				container: container ?? host,
 				protocol: "tcp" as const,
 			};
 		});
@@ -236,9 +236,11 @@ export class EntityCompose {
 		if (Array.isArray(env)) {
 			const result: Record<string, string> = {};
 			for (const item of env) {
-				const [key, value] = item.split("=");
-				if (key && value) {
-					result[key] = value;
+				if (typeof item === "string" && item.includes("=")) {
+					const [key, ...valueParts] = item.split("=");
+					if (key && valueParts.length > 0) {
+						result[key] = valueParts.join("=");
+					}
 				}
 			}
 			return result;

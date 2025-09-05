@@ -1,8 +1,9 @@
 {
+	"private": false,
+	"version": "0.0.0",
 	"name": "api",
-	"version": "0.1.0",
+	"description": "REST API server built with Express.js and TypeScript",
 	"type": "module",
-	"private": true,
 	"scripts": {
 		"start": "bun dist/index.js",
 		"dev": "tsup src/index.ts --watch --onSuccess 'bun dist/index.js'",

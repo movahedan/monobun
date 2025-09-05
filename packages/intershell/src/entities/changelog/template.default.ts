@@ -1,16 +1,14 @@
 import { type ParsedCommitData, prCategories } from "../commit";
 import { entitiesConfig } from "../config/config";
-import { EntityTag } from "../tag";
 import { ChangelogTemplate } from "./template";
 
 const DEFAULT_BADGE_COLOR = "6B7280";
-const prefix = EntityTag.getPrefix();
 const validTypes = entitiesConfig.getConfig().commit.conventional.type?.list ?? [];
 
 export class DefaultChangelogTemplate extends ChangelogTemplate {
-	protected generateChangelogHeader(packageName: string): string {
+	protected generateChangelogHeader(): string {
 		return [
-			`## Changelog (${packageName})`,
+			`## Changelog (${this.packageName})`,
 			"",
 			"[![Keep a Changelog](https://img.shields.io/badge/changelog-Keep%20a%20Changelog%20v1.0.0-$E05735)](https://keepachangelog.com)",
 			"[![Semantic Versioning](https://img.shields.io/badge/semver-semantic%20versioning%20v2.0.0-%23E05735)](https://semver.org)",
@@ -23,7 +21,7 @@ export class DefaultChangelogTemplate extends ChangelogTemplate {
 	}
 
 	protected generateChangelogVersionHeader(version: string): string {
-		return ["", `## ${version === "[Unreleased]" ? "" : prefix}${version}`, ""].join("\n");
+		return ["", `## ${version === "[Unreleased]" ? "" : this.prefix}${version}`, ""].join("\n");
 	}
 
 	protected generateCommitSection(commit: ParsedCommitData, repoUrl: string): string {
@@ -64,7 +62,7 @@ export class DefaultChangelogTemplate extends ChangelogTemplate {
 			// Format: emoji branch-name category-title #PR-number commit-count
 			// Example: 🔄 refactor/test-versioning Code Quality & Refactoring #144 9 commits
 			"",
-			`### ${categoryEmoji} ${prBranchName?.fullName} ${prCategoryBadge} ${prNumberLink} ${commitCountBadge}`,
+			`### ${categoryEmoji} ${typeof prBranchName === "object" && prBranchName?.fullName ? prBranchName.fullName : typeof prBranchName === "string" ? prBranchName : "unknown-branch"} ${prCategoryBadge} ${prNumberLink} ${commitCountBadge}`,
 			"",
 			...prMessages,
 			"",
