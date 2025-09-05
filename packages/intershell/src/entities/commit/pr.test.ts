@@ -299,7 +299,7 @@ describe("EntityPr", () => {
 
 			const result = entityPr.getPrBranch({ message });
 
-			expect(result.name).toBe("feature-branch");
+			expect(result.name).toBe("origin/feature-branch");
 			expect(result.fullName).toBe("origin/feature-branch");
 		});
 

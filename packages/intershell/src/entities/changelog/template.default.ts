@@ -62,7 +62,7 @@ export class DefaultChangelogTemplate extends ChangelogTemplate {
 			// Format: emoji branch-name category-title #PR-number commit-count
 			// Example: 🔄 refactor/test-versioning Code Quality & Refactoring #144 9 commits
 			"",
-			`### ${categoryEmoji} ${typeof prBranchName === "object" && prBranchName?.fullName ? prBranchName.fullName : typeof prBranchName === "string" ? prBranchName : "unknown-branch"} ${prCategoryBadge} ${prNumberLink} ${commitCountBadge}`,
+			`### ${categoryEmoji} ${typeof prBranchName === "object" && prBranchName?.name ? prBranchName.name : typeof prBranchName === "string" ? prBranchName : "unknown-branch"} ${prCategoryBadge} ${prNumberLink} ${commitCountBadge}`,
 			"",
 			...prMessages,
 			"",

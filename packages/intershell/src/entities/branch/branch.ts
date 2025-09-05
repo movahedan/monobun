@@ -4,10 +4,38 @@ import type { ParsedBranch } from "./types";
 
 export class EntityBranch {
 	parseByName(branchName: string): ParsedBranch {
-		const [prefix, ...name] = branchName.split("/");
+		const config = entitiesConfig.getConfig().branch;
+		const validPrefixes = config.prefixes;
+
+		// Split the branch name by "/" to get all parts
+		const parts = branchName.split("/");
+
+		// Find the first valid prefix in the parts
+		let foundPrefixIndex = -1;
+		let foundPrefix = "";
+
+		for (let i = 0; i < parts.length; i++) {
+			if (validPrefixes.includes(parts[i])) {
+				foundPrefixIndex = i;
+				foundPrefix = parts[i];
+				break;
+			}
+		}
+
+		// If we found a valid prefix, use everything from that point as the name
+		if (foundPrefixIndex !== -1) {
+			const nameParts = parts.slice(foundPrefixIndex);
+			return {
+				prefix: foundPrefix,
+				name: nameParts.join("/"),
+				fullName: branchName,
+			};
+		}
+
+		// If no valid prefix found, use the entire name
 		return {
-			prefix,
-			name: prefix ? name.join("/") : branchName,
+			prefix: undefined,
+			name: branchName,
 			fullName: branchName,
 		};
 	}

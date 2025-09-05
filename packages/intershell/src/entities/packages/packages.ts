@@ -230,38 +230,17 @@ export class EntityPackages {
 	 * Validates all packages in the workspace
 	 * @returns Object containing validation results for all packages
 	 */
-	static async validateAllPackages(): Promise<{
-		readonly isValid: boolean;
-		readonly packages: Array<{
-			readonly name: string;
-			readonly errors: string[];
-		}>;
-		readonly totalErrors: number;
-	}> {
+	static async validateAllPackages(): Promise<string[]> {
 		const allPackages = await EntityPackages.getAllPackages();
-		const validationResults: Array<{
-			readonly name: string;
-			readonly errors: string[];
-		}> = [];
-
-		let totalErrors = 0;
+		const errors: Array<string> = [];
 
 		for (const packageName of allPackages) {
 			const packageInstance = new EntityPackages(packageName);
-			const errors = packageInstance.validatePackage();
+			const packageErrors = packageInstance.validatePackage();
 
-			validationResults.push({
-				name: packageName,
-				errors,
-			});
-
-			totalErrors += errors.length;
+			errors.push(...packageErrors);
 		}
 
-		return {
-			isValid: totalErrors === 0,
-			packages: validationResults,
-			totalErrors,
-		};
+		return errors;
 	}
 }

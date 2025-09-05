@@ -60,7 +60,7 @@ describe("EntityBranch", () => {
 				input: "feature/user-authentication",
 				expected: {
 					prefix: "feature",
-					name: "user-authentication",
+					name: "feature/user-authentication",
 					fullName: "feature/user-authentication",
 				},
 			},
@@ -69,7 +69,7 @@ describe("EntityBranch", () => {
 				input: "feature/auth/user-authentication",
 				expected: {
 					prefix: "feature",
-					name: "auth/user-authentication",
+					name: "feature/auth/user-authentication",
 					fullName: "feature/auth/user-authentication",
 				},
 			},
@@ -78,7 +78,7 @@ describe("EntityBranch", () => {
 				input: "feature",
 				expected: {
 					prefix: "feature",
-					name: "",
+					name: "feature",
 					fullName: "feature",
 				},
 			},
@@ -86,8 +86,8 @@ describe("EntityBranch", () => {
 				name: "should parse branch name with no slashes",
 				input: "main",
 				expected: {
-					prefix: "main",
-					name: "",
+					prefix: undefined,
+					name: "main",
 					fullName: "main",
 				},
 			},
@@ -95,7 +95,7 @@ describe("EntityBranch", () => {
 				name: "should handle empty string",
 				input: "",
 				expected: {
-					prefix: "",
+					prefix: undefined,
 					name: "",
 					fullName: "",
 				},
@@ -243,12 +243,12 @@ describe("EntityBranch", () => {
 				{
 					name: "should reject branch name without prefix when prefixes are required",
 					input: "user-auth",
-					expected: "branch name should have a name",
+					expected: "branch name should have a prefix. valid prefixes: feature, bugfix, hotfix",
 				},
 				{
-					name: "should reject branch name with prefix but no name",
+					name: "should accept branch name with only prefix",
 					input: "feature",
-					expected: "branch name should have a name",
+					expected: true as const,
 				},
 			];
 
@@ -316,7 +316,7 @@ describe("EntityBranch", () => {
 					return new EntityBranch();
 				},
 				input: "a",
-				expected: "branch name should have a name",
+				expected: "branch name should have a prefix. valid prefixes: feature, bugfix, hotfix",
 			},
 			{
 				name: "should handle config with no character restrictions",

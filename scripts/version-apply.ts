@@ -43,51 +43,30 @@ const scriptConfig = {
 } as const satisfies ScriptConfig;
 
 export const versionApply = createScript(scriptConfig, async function main(args, xConsole) {
-	let packagesToProcess: string[] = [];
+	const packageName = args.package || "root";
+	xConsole.info(`📦 Processing package: ${colorify.blue(packageName)}`);
 
-	if (args.package) {
-		// Process single package
-		const packageName = args.package;
+	const packageInstance = new EntityPackages(packageName);
+	const version = packageInstance.readVersion();
+	const tagSeriesName = packageInstance.getTagSeriesName();
+	const tagName = `${tagSeriesName}${version}`;
 
-		// Validate that the specified package should be versioned
-		const packageInstance = new EntityPackages(packageName);
-		if (!packageInstance.shouldVersion()) {
-			throw new Error(
-				`Package "${packageName}" should not be versioned (private package). Only versioned packages can be processed.`,
-			);
-		}
-
-		packagesToProcess = [packageName];
-		xConsole.info(`📦 Processing single package: ${colorify.blue(packageName)}`);
-	} else {
-		// Process all versioned packages
-		packagesToProcess = await EntityPackages.getVersionedPackages();
-		xConsole.info(
-			`📦 Processing ${packagesToProcess.length} versioned packages: ${packagesToProcess.join(", ")}`,
+	if (!tagSeriesName) {
+		throw new Error(
+			`Tag series name not found for ${packageName}, this package should not be versioned (private package). Only versioned packages can be processed.`,
 		);
 	}
 
 	if (args["dry-run"]) {
 		xConsole.log(colorify.yellow("🔍 Dry run mode - would execute:"));
-		xConsole.log(colorify.gray("  • Commit version changes for all versioned packages"));
-
-		// Show what tags would be created for each package
-		for (const packageName of packagesToProcess) {
-			const packageInstance = new EntityPackages(packageName);
-			const version = packageInstance.readVersion();
-			const tagSeriesName = packageInstance.getTagSeriesName();
-			const tagName = tagSeriesName ? `${tagSeriesName}${version}` : `v${version}`;
-			xConsole.log(colorify.gray(`  • Create tag ${tagName} for ${packageName}`));
-		}
-
+		xConsole.log(colorify.gray(`  • Commit version changes for package ${packageName}`));
+		xConsole.log(colorify.gray(`  • Create tag ${tagName} for ${packageName}`));
 		if (!args["no-push"]) {
 			xConsole.log(colorify.gray("  • Push commit changes to remote"));
 			xConsole.log(colorify.gray("  • Push tags to remote"));
 		}
 		return;
 	}
-
-	xConsole.info("💾 Committing version changes...");
 
 	xConsole.log("📁 Adding all changes...");
 	await $`git add .`;
@@ -100,11 +79,67 @@ export const versionApply = createScript(scriptConfig, async function main(args,
 	}
 
 	await commitVersionChanges(xConsole);
-	await createTagsForPackages(packagesToProcess, args, xConsole);
+	await createTagsForPackage(packageName, args, xConsole);
 	await pushChanges(args, xConsole);
 
 	xConsole.log(colorify.green("✅ Version apply operation completed successfully!"));
 });
+
+if (import.meta.main) {
+	versionApply.run();
+}
+
+async function commitVersionChanges(xConsole: typeof console): Promise<void> {
+	const commitMessage = await Bun.file(".git/COMMIT_EDITMSG").text();
+
+	xConsole.log("📝 Commit message:");
+	xConsole.log(commitMessage);
+
+	await $`git commit -m "${commitMessage}"`;
+
+	xConsole.log(colorify.green("✅ Successfully committed version changes"));
+	const commitHash = await $`git rev-parse --short HEAD`.text();
+	xConsole.log(`🏷️ Commit hash: ${commitHash.trim()}`);
+}
+
+async function createTagsForPackage(
+	packageName: string,
+	args: InferArgs<typeof scriptConfig>,
+	xConsole: typeof console,
+): Promise<void> {
+	const packageInstance = new EntityPackages(packageName);
+	const version = packageInstance.readVersion();
+	if (!version) {
+		throw new Error(`Version not found for ${packageName}`);
+	}
+	const versionEntity = new EntityVersion(packageName);
+
+	// Check if tag already exists
+	const tagExists = await versionEntity.packageTagExists(version);
+	if (tagExists) {
+		const prefix = await versionEntity.getTagPrefix();
+		const tagName = `${prefix}${version}`;
+		xConsole.log(`⏭️ Tag already exists: ${tagName}`);
+		return;
+	}
+
+	xConsole.info(`🏷️ Creating tag for ${packageName}: ${version}`);
+
+	try {
+		await versionEntity.createPackageTag(
+			version,
+			args.message || `Release ${packageName} version ${version}`,
+		);
+
+		const prefix = await versionEntity.getTagPrefix();
+		const tagName = `${prefix}${version}`;
+		xConsole.log(`✅ Created tag: ${tagName}`);
+	} catch (error) {
+		throw new Error(
+			`Failed to create tag for ${packageName}: ${error instanceof Error ? error.message : String(error)}`,
+		);
+	}
+}
 
 async function pushChanges(
 	args: InferArgs<typeof scriptConfig>,
@@ -129,62 +164,4 @@ async function pushChanges(
 			`Failed to push commit changes to remote: ${error instanceof Error ? error.message : String(error)}`,
 		);
 	}
-}
-
-async function createTagsForPackages(
-	packagesToProcess: string[],
-	args: InferArgs<typeof scriptConfig>,
-	xConsole: typeof console,
-): Promise<void> {
-	for (const packageName of packagesToProcess) {
-		const packageInstance = new EntityPackages(packageName);
-		const version = packageInstance.readVersion();
-		if (!version) {
-			throw new Error(`Version not found for ${packageName}`);
-		}
-		const versionEntity = new EntityVersion(packageName);
-
-		// Check if tag already exists
-		const tagExists = await versionEntity.packageTagExists(version);
-		if (tagExists) {
-			const prefix = await versionEntity.getTagPrefix();
-			const tagName = `${prefix}${version}`;
-			xConsole.log(`⏭️ Tag already exists: ${tagName}`);
-			continue;
-		}
-
-		xConsole.info(`🏷️ Creating tag for ${packageName}: ${version}`);
-
-		try {
-			await versionEntity.createPackageTag(
-				version,
-				args.message || `Release ${packageName} version ${version}`,
-			);
-
-			const prefix = await versionEntity.getTagPrefix();
-			const tagName = `${prefix}${version}`;
-			xConsole.log(`✅ Created tag: ${tagName}`);
-		} catch (error) {
-			throw new Error(
-				`Failed to create tag for ${packageName}: ${error instanceof Error ? error.message : String(error)}`,
-			);
-		}
-	}
-}
-
-async function commitVersionChanges(xConsole: typeof console): Promise<void> {
-	const commitMessage = await Bun.file(".git/COMMIT_EDITMSG").text();
-
-	xConsole.log("📝 Commit message:");
-	xConsole.log(commitMessage);
-
-	await $`git commit -m "${commitMessage}"`;
-
-	xConsole.log(colorify.green("✅ Successfully committed version changes"));
-	const commitHash = await $`git rev-parse --short HEAD`.text();
-	xConsole.log(`🏷️ Commit hash: ${commitHash.trim()}`);
-}
-
-if (import.meta.main) {
-	versionApply.run();
 }
