@@ -85,6 +85,26 @@
 			]
 		},
 		{
+			"matchPackageNames": [
+				"typescript"
+			],
+			"groupName": "TypeScript monorepo",
+			"groupSlug": "typescript-monorepo",
+			"matchUpdateTypes": [
+				"major"
+			],
+			"enabled": true,
+			"dependencyDashboardApproval": true,
+			"prCreation": "not-pending",
+			"minimumReleaseAge": "3 days",
+			"prBodyNotes": [
+				"This is a major update of TypeScript. Please review the [TypeScript release notes](https://devblogs.microsoft.com/typescript/) for breaking changes and migration guides."
+			],
+			"matchFileNames": [
+				"**/package.json"
+			]
+		},
+		{
 			"matchDepTypes": [
 				"devDependencies"
 			],
