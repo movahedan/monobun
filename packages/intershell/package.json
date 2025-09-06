@@ -30,7 +30,7 @@
 		"@biomejs/biome": "2.1.2",
 		"lefthook": "1.12.3",
 		"turbo": "2.5.6",
-		"typescript": "5.8.3"
+		"typescript": "5.9.2"
 	},
 	"keywords": [
 		"cli",
