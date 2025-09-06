@@ -198,7 +198,7 @@ export const defaultConfig = {
 		name: {
 			minLength: 1,
 			maxLength: 100,
-			allowedCharacters: /^[a-zA-Z0-9\-_/]+$/,
+			allowedCharacters: /^[a-zA-Z0-9\-_/.]+$/,
 			noConsecutiveSeparators: true,
 			noLeadingTrailingSeparators: true,
 		},
