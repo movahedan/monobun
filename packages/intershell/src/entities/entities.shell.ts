@@ -38,6 +38,8 @@ export const entitiesShell: EntitiesShell = {
 	gitMergeBaseIsAncestor: (ancestor: string, descendant: string) =>
 		$`git merge-base --is-ancestor ${ancestor} ${descendant}`.quiet().nothrow(),
 
+	gitCheckout: (tagName: string) => $`git checkout ${tagName}`.quiet().nothrow(),
+
 	turboRunBuild: (args: string[]) =>
 		$`bunx turbo run build ${args.join(" ")} --dry-run=json`.nothrow(),
 

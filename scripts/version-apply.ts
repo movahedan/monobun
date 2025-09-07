@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { colorify, createScript, type InferArgs, type ScriptConfig } from "@repo/intershell/core";
-import { EntityPackages, EntityVersion } from "@repo/intershell/entities";
+import { EntityPackages, EntityTagPackage } from "@repo/intershell/entities";
 import { $ } from "bun";
 
 const scriptConfig = {
@@ -112,12 +112,12 @@ async function createTagsForPackage(
 	if (!version) {
 		throw new Error(`Version not found for ${packageName}`);
 	}
-	const versionEntity = new EntityVersion(packageName);
+	const tagPackage = new EntityTagPackage(packageName);
 
 	// Check if tag already exists
-	const tagExists = await versionEntity.packageTagExists(version);
+	const tagExists = await tagPackage.packageTagExists(version);
 	if (tagExists) {
-		const prefix = await versionEntity.getTagPrefix();
+		const prefix = await tagPackage.getTagPrefix();
 		const tagName = `${prefix}${version}`;
 		xConsole.log(`⏭️ Tag already exists: ${tagName}`);
 		return;
@@ -126,12 +126,12 @@ async function createTagsForPackage(
 	xConsole.info(`🏷️ Creating tag for ${packageName}: ${version}`);
 
 	try {
-		await versionEntity.createPackageTag(
+		await tagPackage.createPackageTag(
 			version,
 			args.message || `Release ${packageName} version ${version}`,
 		);
 
-		const prefix = await versionEntity.getTagPrefix();
+		const prefix = await tagPackage.getTagPrefix();
 		const tagName = `${prefix}${version}`;
 		xConsole.log(`✅ Created tag: ${tagName}`);
 	} catch (error) {

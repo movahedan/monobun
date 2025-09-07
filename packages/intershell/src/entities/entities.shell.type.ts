@@ -27,6 +27,8 @@ export type EntitiesShell = {
 
 	gitMergeBaseIsAncestor: (ancestor: string, descendant: string) => ReturnType<typeof $>;
 
+	gitCheckout: (tagName: string) => ReturnType<typeof $>;
+
 	turboRunBuild: (args: string[]) => ReturnType<typeof $>;
 
 	runBiomeCheck: (filePath: string) => ReturnType<typeof $>;
