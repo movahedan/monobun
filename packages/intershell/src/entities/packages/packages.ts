@@ -1,7 +1,7 @@
 import { entitiesConfig } from "../config/config";
 import { entitiesShell } from "../entities.shell";
 import { packagesShell } from "./packages.shell";
-import type { PackageJson } from "./types";
+import type { PackageJson, TsConfig } from "./types";
 
 export class EntityPackages {
 	private readonly packageName: string;
@@ -9,6 +9,13 @@ export class EntityPackages {
 	constructor(packageName: string) {
 		this.packageName = packageName;
 		this.packageJson = this.readJson();
+	}
+
+	getName(): string {
+		return this.packageName;
+	}
+	isRoot(): boolean {
+		return this.getName() === "root";
 	}
 
 	getPath(): string {
@@ -48,6 +55,20 @@ export class EntityPackages {
 		packageJson.version = version;
 		this.packageJson = packageJson;
 		await this.writeJson(packageJson);
+	}
+
+	getTsconfigPath(): string {
+		return `${this.getPath()}/tsconfig.json`;
+	}
+	readTsconfig(): TsConfig {
+		const tsconfigPath = this.getTsconfigPath();
+		const content = packagesShell.readFileAsTextSync(tsconfigPath);
+		return JSON.parse(content);
+	}
+	async writeTsconfig(content: string): Promise<void> {
+		const tsconfigPath = this.getTsconfigPath();
+		await packagesShell.writeFileAsText(tsconfigPath, content);
+		await entitiesShell.runBiomeCheck(tsconfigPath);
 	}
 
 	getChangelogPath(): string {

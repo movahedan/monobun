@@ -90,6 +90,20 @@ export const packagesShell = {
 	},
 
 	/**
+	 * Reads a file as text synchronously
+	 */
+	readFileAsTextSync: (filePath: string): string => {
+		return readFileSync(filePath, "utf8");
+	},
+
+	/**
+	 * Writes content to a file as text
+	 */
+	writeFileAsText: async (filePath: string, content: string): Promise<void> => {
+		await write(filePath, content);
+	},
+
+	/**
 	 * Gets the workspace root directory
 	 */
 	getWorkspaceRoot: async (): Promise<string> => {
