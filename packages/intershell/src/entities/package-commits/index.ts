@@ -1,2 +1,2 @@
-export * from "./commit-package";
 export * from "./dependency-analyzer";
+export * from "./package-commits";

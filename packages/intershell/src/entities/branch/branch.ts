@@ -1,6 +1,6 @@
-import { entitiesConfig } from "../config/config";
 import { entitiesShell } from "../entities.shell";
-import type { ParsedBranch } from "./types";
+import { entitiesConfig } from "../intershell-config/intershell-config";
+import type { ParsedBranch } from "./branch.types";
 
 export class EntityBranch {
 	parseByName(branchName: string): ParsedBranch {

@@ -1,6 +1,6 @@
 import type { ParsedCommitData } from "../commit";
-import { EntityPackages } from "../packages";
-import type { ChangelogData } from "./types";
+import { EntityPackage } from "../package";
+import type { ChangelogData } from "./package-changelog.types";
 
 export interface TemplateEngine {
 	generateContent(data: ChangelogData): string;
@@ -9,7 +9,7 @@ export interface TemplateEngine {
 }
 export type TemplateEngineData = ChangelogData;
 
-const repoUrl = EntityPackages.getRepoUrl();
+const repoUrl = EntityPackage.getRepoUrl();
 
 export class ChangelogTemplate implements TemplateEngine {
 	readonly packageName: string;

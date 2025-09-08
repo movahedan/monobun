@@ -1,8 +1,8 @@
-import { entitiesConfig } from "../config/config";
-import type { IConfig } from "../config/types";
 import { entitiesShell } from "../entities.shell";
+import { entitiesConfig } from "../intershell-config/intershell-config";
+import type { IConfig } from "../intershell-config/intershell-config.types";
+import type { CommitMessageData, ParsedCommitData } from "./commit.types";
 import { EntityPr } from "./pr";
-import type { CommitMessageData, ParsedCommitData } from "./types";
 
 const conventionalCommitRegex = /^([a-z]+)(\([a-zA-Z0-9@\-,\s/]+\))?(!)?:\s(.+)/;
 const depScopes = ["deps", "dependencies", "dep", "renovate", "dependabot"];

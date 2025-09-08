@@ -1,15 +1,15 @@
 import type { ParsedCommitData } from "../commit";
 import { EntityCommit } from "../commit";
 import { entitiesShell } from "../entities.shell";
-import { EntityPackages } from "../packages";
+import { EntityPackage } from "../package";
 import { EntityDependencyAnalyzer } from "./dependency-analyzer";
 
-export class EntityCommitPackage {
-	private package: EntityPackages;
+export class EntityPackageCommits {
+	private package: EntityPackage;
 	private commit: EntityCommit;
 	private dependencyAnalyzer: EntityDependencyAnalyzer;
 
-	constructor(packageInstance: EntityPackages) {
+	constructor(packageInstance: EntityPackage) {
 		this.package = packageInstance;
 		this.commit = new EntityCommit();
 		this.dependencyAnalyzer = new EntityDependencyAnalyzer(this.package);
@@ -126,7 +126,7 @@ export class EntityCommitPackage {
 		// Check if commit affects any dependencies
 		const affectedDependencies: string[] = [];
 		for (const dep of packageDeps) {
-			const depPackage = new EntityPackages(dep);
+			const depPackage = new EntityPackage(dep);
 			const depPath = depPackage.getPath();
 			if (commit.files.some((file) => file.startsWith(depPath))) {
 				affectedDependencies.push(dep);

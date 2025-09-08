@@ -1,5 +1,5 @@
 import { type ParsedCommitData, prCategories } from "../commit";
-import { entitiesConfig } from "../config/config";
+import { entitiesConfig } from "../intershell-config/intershell-config";
 import { ChangelogTemplate } from "./template";
 
 const DEFAULT_BADGE_COLOR = "6B7280";

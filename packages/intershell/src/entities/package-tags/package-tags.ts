@@ -1,16 +1,19 @@
-import { EntityCommitPackage } from "../commit-package";
 import { entitiesShell } from "../entities.shell";
-import { EntityPackages } from "../packages";
+import { EntityPackage } from "../package";
+import { EntityPackageCommits } from "../package-commits";
+import type {
+	EntityGitTagVersion,
+	EntityPackageVersionHistory,
+} from "../package-version/package-version.types";
 import { EntityTag } from "../tag";
-import type { EntityGitTagVersion, EntityPackageVersionHistory } from "../version/types";
 
-export class EntityTagPackage {
-	private package: EntityPackages;
-	private packageCommits: EntityCommitPackage;
+export class EntityPackageTags {
+	private package: EntityPackage;
+	private packageCommits: EntityPackageCommits;
 
-	constructor(packageInstance: EntityPackages) {
+	constructor(packageInstance: EntityPackage) {
 		this.package = packageInstance;
-		this.packageCommits = new EntityCommitPackage(this.package);
+		this.packageCommits = new EntityPackageCommits(this.package);
 	}
 
 	async getTagPrefix(): Promise<string> {
@@ -173,9 +176,9 @@ export class EntityTagPackage {
 				packageName = "root";
 			} else if (prefix.endsWith("-v")) {
 				// Get all packages and find the one that matches this tag prefix
-				const allPackages = await EntityPackages.getAllPackages();
+				const allPackages = await EntityPackage.getAllPackages();
 				const matchingPackage = allPackages.find((pkg) => {
-					const packageInstance = new EntityPackages(pkg);
+					const packageInstance = new EntityPackage(pkg);
 					return packageInstance.getTagSeriesName() === prefix;
 				});
 
@@ -191,7 +194,7 @@ export class EntityTagPackage {
 			}
 
 			// Check if this package should be versioned
-			const packageInstance = new EntityPackages(packageName);
+			const packageInstance = new EntityPackage(packageName);
 			if (!packageInstance.shouldVersion()) {
 				throw new Error(`Package "${packageName}" should not be versioned (private package)`);
 			}

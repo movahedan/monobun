@@ -1,9 +1,9 @@
-import { entitiesConfig } from "../config/config";
 import { entitiesShell } from "../entities.shell";
-import { packagesShell } from "./packages.shell";
-import type { PackageJson, TsConfig } from "./types";
+import { entitiesConfig } from "../intershell-config/intershell-config";
+import { packagesShell } from "./package.shell";
+import type { PackageJson, TsConfig } from "./package.types";
 
-export class EntityPackages {
+export class EntityPackage {
 	private readonly packageName: string;
 	private packageJson: PackageJson | undefined;
 	constructor(packageName: string) {
@@ -149,7 +149,7 @@ export class EntityPackages {
 	}
 
 	static getRepoUrl(): string {
-		const rootPackageJson = new EntityPackages("root").readJson();
+		const rootPackageJson = new EntityPackage("root").readJson();
 		return typeof rootPackageJson.repository === "string"
 			? rootPackageJson.repository
 			: rootPackageJson.repository?.url || "";
@@ -182,7 +182,7 @@ export class EntityPackages {
 		// Filter packages that have valid package.json files
 		const filteredPackages = await Promise.all(
 			[...apps, ...pkgs].map(async (pkg) => {
-				const packageInstance = new EntityPackages(pkg);
+				const packageInstance = new EntityPackage(pkg);
 				const packageJsonPath = packageInstance.getJsonPath();
 
 				try {
@@ -216,11 +216,11 @@ export class EntityPackages {
 	 * @returns Array of package names that should be versioned
 	 */
 	static async getVersionedPackages(): Promise<string[]> {
-		const allPackages = await EntityPackages.getAllPackages();
+		const allPackages = await EntityPackage.getAllPackages();
 		const versionedPackages: string[] = [];
 
 		for (const packageName of allPackages) {
-			const packageInstance = new EntityPackages(packageName);
+			const packageInstance = new EntityPackage(packageName);
 			if (packageInstance.shouldVersion()) {
 				versionedPackages.push(packageName);
 			}
@@ -234,11 +234,11 @@ export class EntityPackages {
 	 * @returns Array of package names that should NOT be versioned
 	 */
 	static async getUnversionedPackages(): Promise<string[]> {
-		const allPackages = await EntityPackages.getAllPackages();
+		const allPackages = await EntityPackage.getAllPackages();
 		const unversionedPackages: string[] = [];
 
 		for (const packageName of allPackages) {
-			const packageInstance = new EntityPackages(packageName);
+			const packageInstance = new EntityPackage(packageName);
 			if (!packageInstance.shouldVersion()) {
 				unversionedPackages.push(packageName);
 			}
@@ -252,11 +252,11 @@ export class EntityPackages {
 	 * @returns Object containing validation results for all packages
 	 */
 	static async validateAllPackages(): Promise<string[]> {
-		const allPackages = await EntityPackages.getAllPackages();
+		const allPackages = await EntityPackage.getAllPackages();
 		const errors: Array<string> = [];
 
 		for (const packageName of allPackages) {
-			const packageInstance = new EntityPackages(packageName);
+			const packageInstance = new EntityPackage(packageName);
 			const packageErrors = packageInstance.validatePackage();
 
 			errors.push(...packageErrors);

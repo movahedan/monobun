@@ -1,16 +1,16 @@
 import { describe, expect, test } from "bun:test";
-import { EntityPackages } from "../packages";
+import { EntityPackage } from "../package";
 import { EntityDependencyAnalyzer } from "./dependency-analyzer";
 
 describe("EntityDependencyAnalyzer", () => {
 	test("should create instance", () => {
-		const packageInstance = new EntityPackages("root");
+		const packageInstance = new EntityPackage("root");
 		const analyzer = new EntityDependencyAnalyzer(packageInstance);
 		expect(analyzer).toBeDefined();
 	});
 
 	test("should get package dependencies at ref", async () => {
-		const packageInstance = new EntityPackages("root");
+		const packageInstance = new EntityPackage("root");
 		const analyzer = new EntityDependencyAnalyzer(packageInstance);
 
 		// This will return empty array since we can't mock git operations easily
@@ -19,7 +19,7 @@ describe("EntityDependencyAnalyzer", () => {
 	});
 
 	test("should handle dependencies", async () => {
-		const packageInstance = new EntityPackages("root");
+		const packageInstance = new EntityPackage("root");
 		const analyzer = new EntityDependencyAnalyzer(packageInstance);
 
 		const deps = await analyzer.getPackageDependenciesAtRef("HEAD");

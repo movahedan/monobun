@@ -1,12 +1,12 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { entitiesShell } from "../entities.shell";
-import { EntityPackages, type TsConfig, type TsConfigPaths } from "../packages";
+import { EntityPackage, type TsConfig, type TsConfigPaths } from "../package";
 
 export class EntityDependencyAnalyzer {
-	private readonly package: EntityPackages;
+	private readonly package: EntityPackage;
 
-	constructor(packageInstance: EntityPackages) {
+	constructor(packageInstance: EntityPackage) {
 		this.package = packageInstance;
 	}
 
@@ -17,7 +17,7 @@ export class EntityDependencyAnalyzer {
 	async getPackageDependenciesAtRef(reference: string): Promise<string[]> {
 		try {
 			// Get all internal packages in the monorepo
-			const allPackages = await EntityPackages.getAllPackages();
+			const allPackages = await EntityPackage.getAllPackages();
 			const internalPackageNames = allPackages.map((pkg) => pkg.replace("@repo/", ""));
 
 			// Get package.json dependencies

@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { defaultConfig } from "./default";
-import type { CustomConfigJson, IConfig } from "./types";
+import { defaultConfig } from "./intershell-config.default";
+import type { CustomConfigJson, IConfig } from "./intershell-config.types";
 
 class Config {
 	private config: IConfig;

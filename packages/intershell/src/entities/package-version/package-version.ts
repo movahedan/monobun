@@ -1,18 +1,21 @@
 import type { ParsedCommitData } from "../commit";
-import type { EntityCommitPackage } from "../commit-package";
-import type { EntityPackages } from "../packages";
-import type { EntityTagPackage } from "../tag-package";
-import type { EntityVersionBumpType, EntityVersionData } from "./types";
+import type { EntityPackage } from "../package";
+import type { EntityPackageCommits } from "../package-commits";
+import type { EntityPackageTags } from "../package-tags";
+import type {
+	EntityPackageVersionBumpType,
+	EntityPackageVersionData,
+} from "./package-version.types";
 
-export class EntityVersion {
-	private package: EntityPackages;
-	private packageTags: EntityTagPackage;
-	private packageCommits: EntityCommitPackage;
+export class EntityPackageVersion {
+	private package: EntityPackage;
+	private packageTags: EntityPackageTags;
+	private packageCommits: EntityPackageCommits;
 
 	constructor(
-		packageInstance: EntityPackages,
-		packageCommits: EntityCommitPackage,
-		packageTags: EntityTagPackage,
+		packageInstance: EntityPackage,
+		packageCommits: EntityPackageCommits,
+		packageTags: EntityPackageTags,
 	) {
 		this.package = packageInstance;
 		this.packageCommits = packageCommits;
@@ -23,7 +26,7 @@ export class EntityVersion {
 		versionOnDisk: string,
 		currentVersion: string,
 		commits: ParsedCommitData[],
-	): Promise<EntityVersionData> {
+	): Promise<EntityPackageVersionData> {
 		// Check if version on disk is higher than the current version (early validation)
 		const currentVersionComparison = this.packageTags.compareVersions(
 			versionOnDisk,
@@ -127,7 +130,10 @@ export class EntityVersion {
 		};
 	}
 
-	private calculateNextVersion(currentVersion: string, bumpType: EntityVersionBumpType): string {
+	private calculateNextVersion(
+		currentVersion: string,
+		bumpType: EntityPackageVersionBumpType,
+	): string {
 		const versionParts = currentVersion.split(".").map(Number);
 
 		if (versionParts.length !== 3 || versionParts.some(Number.isNaN)) {
@@ -151,7 +157,9 @@ export class EntityVersion {
 	}
 
 	// Version bump calculation
-	private async calculateBumpType(commits: ParsedCommitData[]): Promise<EntityVersionBumpType> {
+	private async calculateBumpType(
+		commits: ParsedCommitData[],
+	): Promise<EntityPackageVersionBumpType> {
 		if (commits.length === 0) {
 			return "none";
 		}
@@ -175,7 +183,9 @@ export class EntityVersion {
 		return "patch";
 	}
 
-	private async calculateRootBumpType(commits: ParsedCommitData[]): Promise<EntityVersionBumpType> {
+	private async calculateRootBumpType(
+		commits: ParsedCommitData[],
+	): Promise<EntityPackageVersionBumpType> {
 		// Check for app-level breaking changes first (should be minor for root)
 		const hasAppBreaking = commits.some(
 			(commit) =>

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import type { $ } from "bun";
-import type { ParsedCommitData } from "./types";
+import type { ParsedCommitData } from "./commit.types";
 
 const { EntityCommit } = await import("./commit");
 

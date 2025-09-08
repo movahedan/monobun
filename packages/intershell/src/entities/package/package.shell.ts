@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { file, write } from "bun";
 import { entitiesShell } from "../entities.shell";
-import type { PackageJson } from "./types";
+import type { PackageJson } from "./package.types";
 
 export const packagesShell = {
 	/**

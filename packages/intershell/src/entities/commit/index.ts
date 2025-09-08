@@ -1,2 +1,2 @@
 export * from "./commit";
-export * from "./types";
+export * from "./commit.types";

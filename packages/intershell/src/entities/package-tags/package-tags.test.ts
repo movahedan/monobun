@@ -1,23 +1,23 @@
 import { describe, expect, test } from "bun:test";
-import { EntityPackages } from "../packages";
-import { EntityTagPackage } from "./tag-package";
+import { EntityPackage } from "../package";
+import { EntityPackageTags } from "./package-tags";
 
-describe("EntityTagPackage", () => {
+describe("EntityPackageTags", () => {
 	test("should create instance", () => {
-		const packageInstance = new EntityPackages("api");
-		const tagPackage = new EntityTagPackage(packageInstance);
+		const packageInstance = new EntityPackage("api");
+		const tagPackage = new EntityPackageTags(packageInstance);
 		expect(tagPackage).toBeDefined();
 	});
 
 	test("should create root instance", () => {
-		const packageInstance = new EntityPackages("root");
-		const tagPackage = new EntityTagPackage(packageInstance);
+		const packageInstance = new EntityPackage("root");
+		const tagPackage = new EntityPackageTags(packageInstance);
 		expect(tagPackage).toBeDefined();
 	});
 
 	test("should detect tag prefix for root package", () => {
-		const packageInstance = new EntityPackages("root");
-		const tagPackage = new EntityTagPackage(packageInstance);
+		const packageInstance = new EntityPackage("root");
+		const tagPackage = new EntityPackageTags(packageInstance);
 
 		expect(tagPackage.detectTagPrefix("v1.0.0")).toBe("v");
 		expect(tagPackage.detectTagPrefix("v2.1.3")).toBe("v");
@@ -25,8 +25,8 @@ describe("EntityTagPackage", () => {
 	});
 
 	test("should detect tag prefix for package-specific tags", () => {
-		const packageInstance = new EntityPackages("api");
-		const tagPackage = new EntityTagPackage(packageInstance);
+		const packageInstance = new EntityPackage("api");
+		const tagPackage = new EntityPackageTags(packageInstance);
 
 		expect(tagPackage.detectTagPrefix("api-v1.0.0")).toBe("api-v");
 		expect(tagPackage.detectTagPrefix("intershell-v2.1.3")).toBe("intershell-v");
@@ -34,8 +34,8 @@ describe("EntityTagPackage", () => {
 	});
 
 	test("should return undefined for invalid tag formats", () => {
-		const packageInstance = new EntityPackages("api");
-		const tagPackage = new EntityTagPackage(packageInstance);
+		const packageInstance = new EntityPackage("api");
+		const tagPackage = new EntityPackageTags(packageInstance);
 
 		expect(tagPackage.detectTagPrefix("1.0.0")).toBeUndefined();
 		expect(tagPackage.detectTagPrefix("invalid")).toBeUndefined();
@@ -43,8 +43,8 @@ describe("EntityTagPackage", () => {
 	});
 
 	test("should compare versions correctly", () => {
-		const packageInstance = new EntityPackages("api");
-		const tagPackage = new EntityTagPackage(packageInstance);
+		const packageInstance = new EntityPackage("api");
+		const tagPackage = new EntityPackageTags(packageInstance);
 
 		expect(tagPackage.compareVersions("1.0.0", "1.0.1")).toBe(-1);
 		expect(tagPackage.compareVersions("1.0.1", "1.0.0")).toBe(1);
@@ -54,8 +54,8 @@ describe("EntityTagPackage", () => {
 	});
 
 	test("should handle version comparison with different lengths", () => {
-		const packageInstance = new EntityPackages("api");
-		const tagPackage = new EntityTagPackage(packageInstance);
+		const packageInstance = new EntityPackage("api");
+		const tagPackage = new EntityPackageTags(packageInstance);
 
 		expect(tagPackage.compareVersions("1.0", "1.0.0")).toBe(0);
 		expect(tagPackage.compareVersions("1.0.0", "1.0")).toBe(0);
@@ -63,8 +63,8 @@ describe("EntityTagPackage", () => {
 	});
 
 	test("should handle version comparison edge cases", () => {
-		const packageInstance = new EntityPackages("api");
-		const tagPackage = new EntityTagPackage(packageInstance);
+		const packageInstance = new EntityPackage("api");
+		const tagPackage = new EntityPackageTags(packageInstance);
 
 		expect(tagPackage.compareVersions("0.0.0", "0.0.1")).toBe(-1);
 		expect(tagPackage.compareVersions("0.1.0", "0.0.9")).toBe(1);

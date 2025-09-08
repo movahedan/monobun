@@ -1,5 +1,5 @@
 import { EntityAffected } from "../affected";
-import { EntityPackages } from "../packages";
+import { EntityPackage } from "../package";
 import type {
 	ComposeData,
 	ComposeValidationResult,
@@ -11,7 +11,7 @@ import type {
 	ServiceHealth,
 	ServiceInfo,
 	VolumeDefinition,
-} from "./types";
+} from "./compose.types";
 
 type TemporaryBunYamlTypeSinceThisIsNotTypedYet = {
 	YAML: {
@@ -19,7 +19,7 @@ type TemporaryBunYamlTypeSinceThisIsNotTypedYet = {
 	};
 };
 
-const allPackages = await EntityPackages.getAllPackages();
+const allPackages = await EntityPackage.getAllPackages();
 
 export class EntityCompose {
 	private readonly composePath: string;
