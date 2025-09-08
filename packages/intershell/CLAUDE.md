@@ -51,6 +51,10 @@ The entity system provides robust, type-safe components for monorepo operations:
 - **EntityAffected**: Affected package detection for CI/CD optimization
 - **EntityTag**: Git tag operations and version management
 - **EntityPackages**: Package management and operations
+- **EntityVersion**: Version calculation, bump type determination, version history tracking
+- **EntityTagPackage**: Tag-related operations with package-specific logic
+- **EntityCommitPackage**: Commit analysis and dependency filtering
+- **EntityDependencyAnalyzer**: Intelligent package dependency analysis with tsconfig support
 
 ### Core Utilities (Production Ready)
 - **colorify**: Enhanced terminal colors with RGB, HSL, gradients
@@ -77,9 +81,11 @@ const versionBump = EntityCommit.suggestVersionBump(['feat', 'fix']);
 ### Current Usage in Monorepo
 The entities are actively used in:
 - `scripts/commit-check.ts` - Staged file validation
-- `scripts/version-prepare.ts` - Version bump detection
-- `scripts/version-apply.ts` - Changelog generation
+- `scripts/version-prepare.ts` - Version bump detection with dependency analysis
+- `scripts/version-apply.ts` - Changelog generation with smart filtering
 - CI/CD workflows for affected package detection
+- Dependency-aware version bumping and changelog generation
+- Cross-package impact detection for version management
 
 ## Interactive Framework Status
 
