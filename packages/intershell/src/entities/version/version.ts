@@ -1,17 +1,22 @@
 import type { ParsedCommitData } from "../commit";
-import { EntityCommitPackage } from "../commit-package";
-import { EntityTagPackage } from "../tag-package";
+import type { EntityCommitPackage } from "../commit-package";
+import type { EntityPackages } from "../packages";
+import type { EntityTagPackage } from "../tag-package";
 import type { EntityVersionBumpType, EntityVersionData } from "./types";
 
 export class EntityVersion {
-	packageName: string;
-	private tagPackage: EntityTagPackage;
-	private commitPackage: EntityCommitPackage;
+	private package: EntityPackages;
+	private packageTags: EntityTagPackage;
+	private packageCommits: EntityCommitPackage;
 
-	constructor(packageName: string) {
-		this.packageName = packageName;
-		this.tagPackage = new EntityTagPackage(packageName);
-		this.commitPackage = new EntityCommitPackage(packageName);
+	constructor(
+		packageInstance: EntityPackages,
+		packageCommits: EntityCommitPackage,
+		packageTags: EntityTagPackage,
+	) {
+		this.package = packageInstance;
+		this.packageCommits = packageCommits;
+		this.packageTags = packageTags;
 	}
 
 	async calculateVersionData(
@@ -20,7 +25,10 @@ export class EntityVersion {
 		commits: ParsedCommitData[],
 	): Promise<EntityVersionData> {
 		// Check if version on disk is higher than the current version (early validation)
-		const currentVersionComparison = this.tagPackage.compareVersions(versionOnDisk, currentVersion);
+		const currentVersionComparison = this.packageTags.compareVersions(
+			versionOnDisk,
+			currentVersion,
+		);
 		if (currentVersionComparison > 0) {
 			throw new Error(
 				`Package version on disk (${versionOnDisk}) is higher than current git tag version (${currentVersion}). ` +
@@ -62,7 +70,7 @@ export class EntityVersion {
 		}
 
 		const nextVersion = this.calculateNextVersion(currentVersion, bumpType);
-		const versionAlreadyExists = await this.tagPackage.packageVersionExistsInHistory(nextVersion);
+		const versionAlreadyExists = await this.packageTags.packageVersionExistsInHistory(nextVersion);
 		if (versionAlreadyExists) {
 			return {
 				currentVersion,
@@ -83,10 +91,10 @@ export class EntityVersion {
 			};
 		}
 
-		const latestPackageVersionInHistory = await this.tagPackage.getLatestPackageVersionInHistory();
+		const latestPackageVersionInHistory = await this.packageTags.getLatestPackageVersionInHistory();
 		if (latestPackageVersionInHistory && latestPackageVersionInHistory !== currentVersion) {
 			// Check if current version is actually behind the git tag version
-			const versionComparison = this.tagPackage.compareVersions(
+			const versionComparison = this.packageTags.compareVersions(
 				currentVersion,
 				latestPackageVersionInHistory,
 			);
@@ -149,7 +157,7 @@ export class EntityVersion {
 		}
 
 		// Root package has special bump logic
-		if (this.packageName === "root") {
+		if (this.package.isRoot()) {
 			return await this.calculateRootBumpType(commits);
 		}
 
@@ -197,40 +205,18 @@ export class EntityVersion {
 			return "minor";
 		}
 
-		// Check for dependency changes
-		const hasDependencyChanges = await this.hasDependencyChanges();
+		// Check for dependency changes using the new commit analysis
+		const hasDependencyChanges = await Promise.all(
+			commits.map(async (commit) => {
+				const affected = await this.packageCommits.getCommitAffectedPackages(commit);
+				return affected.direct !== null || affected.dependencies.length > 0;
+			}),
+		).then((results) => results.some(Boolean));
+
 		if (hasDependencyChanges) {
 			return "patch";
 		}
 
 		return "patch";
-	}
-
-	/**
-	 * Check if commits have dependency-related changes for this package
-	 */
-	private async hasDependencyChanges(): Promise<boolean> {
-		try {
-			const latestTag = await this.tagPackage.getLatestPackageVersionInHistory();
-			if (!latestTag) return true;
-
-			const commits = await this.commitPackage.getCommitsInRange(latestTag, "HEAD");
-
-			if (this.packageName === "root") {
-				// For root, check if any commits affect internal packages
-				return commits.some(
-					(commit) =>
-						commit.files?.some(
-							(file) => file.startsWith("packages/") || file.startsWith("apps/"),
-						) ?? false,
-				);
-			}
-
-			// For regular packages, check if commits affect dependencies
-			const dependencies = await this.commitPackage.getDependenciesAtTag(latestTag);
-			return commits.some((commit) => this.commitPackage.affectsDependencies(commit, dependencies));
-		} catch {
-			return true;
-		}
 	}
 }

@@ -1,24 +1,26 @@
+import { EntityCommitPackage } from "../commit-package";
 import { entitiesShell } from "../entities.shell";
 import { EntityPackages } from "../packages";
 import { EntityTag } from "../tag";
 import type { EntityGitTagVersion, EntityPackageVersionHistory } from "../version/types";
 
 export class EntityTagPackage {
-	packageName: string;
+	private package: EntityPackages;
+	private packageCommits: EntityCommitPackage;
 
-	constructor(packageName: string) {
-		this.packageName = packageName;
+	constructor(packageInstance: EntityPackages) {
+		this.package = packageInstance;
+		this.packageCommits = new EntityCommitPackage(this.package);
 	}
 
 	async getTagPrefix(): Promise<string> {
-		const packageInstance = new EntityPackages(this.packageName);
-		return packageInstance.getTagSeriesName() || "v";
+		return this.package.getTagSeriesName() || "v";
 	}
 
 	async createPackageTag(version: string, message?: string): Promise<void> {
 		const prefix = await this.getTagPrefix();
 		const tagName = `${prefix}${version}`;
-		const tagMessage = message || `Release ${this.packageName} version ${version}`;
+		const tagMessage = message || `Release ${this.package.getName()} version ${version}`;
 
 		// Validate the tag prefix for this package before creating the tag
 		this.validateTagPrefixForPackage(tagName);
@@ -44,9 +46,7 @@ export class EntityTagPackage {
 				return await EntityTag.getTagSha(latestTag);
 			}
 			// For first-time versioning, find the first commit where this specific package was introduced
-			const { EntityCommitPackage } = await import("../commit-package");
-			const commitPackage = new EntityCommitPackage(this.packageName);
-			return await commitPackage.getFirstCommitForPackage();
+			return await this.packageCommits.getFirstCommitForPackage();
 		}
 
 		// Check if it's already a valid reference
@@ -98,7 +98,7 @@ export class EntityTagPackage {
 
 			for (const tag of tags) {
 				try {
-					const versionData = await this.getPackageVersionAtTag(tag, this.packageName);
+					const versionData = await this.getPackageVersionAtTag(tag);
 					if (versionData) {
 						versions.push(versionData);
 					}
@@ -111,13 +111,13 @@ export class EntityTagPackage {
 			versions.sort((a, b) => this.compareVersions(b.version, a.version));
 
 			return {
-				packageName: this.packageName,
+				packageName: this.package.getName(),
 				versions,
 			};
 		} catch (error) {
 			console.warn("Failed to get git tags:", error);
 			return {
-				packageName: this.packageName,
+				packageName: this.package.getName(),
 				versions: [],
 			};
 		}
@@ -133,13 +133,9 @@ export class EntityTagPackage {
 		return history.versions.some((v) => v.version === version);
 	}
 
-	async getPackageVersionAtTag(
-		tagName: string,
-		packageName: string,
-	): Promise<EntityGitTagVersion | null> {
+	async getPackageVersionAtTag(tagName: string): Promise<EntityGitTagVersion | null> {
 		try {
-			const packageInstance = new EntityPackages(packageName);
-			const packageJsonPath = packageInstance.getJsonPath().replace(/^\.\//, "");
+			const packageJsonPath = this.package.getJsonPath().replace(/^\.\//, "");
 
 			const result = await entitiesShell.gitShowPackageJsonAtTag(tagName, packageJsonPath);
 			if (result.exitCode !== 0) {
