@@ -72,7 +72,7 @@
 		"typescript": "5.9.2",
 		"react": "19.1.1",
 		"react-dom": "19.1.1",
-		"vite": "7.1.4"
+		"vite": "7.1.5"
 	},
 	"author": "Soheil Movahedan",
 	"license": "MIT",
