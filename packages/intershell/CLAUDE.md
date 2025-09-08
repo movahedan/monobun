@@ -24,14 +24,17 @@ packages/intershell/
 │   │   ├── types.ts         # Core type definitions
 │   │   └── index.ts         # Core exports
 │   ├── entities/            # Entity-driven business logic (WORKING)
-│   │   ├── commit/          # Commit parsing and validation
-│   │   ├── changelog/       # Changelog generation
-│   │   ├── package-json/    # Package.json operations
-│   │   ├── workspace/       # Workspace management
-│   │   ├── compose/         # Docker Compose parsing
 │   │   ├── affected/        # Affected package detection
+│   │   ├── branch/          # Git branch operations
+│   │   ├── commit/          # Commit parsing and validation
+│   │   ├── compose/         # Docker Compose parsing
+│   │   ├── intershell-config/ # Configuration management
+│   │   ├── package/         # Package management and operations
+│   │   ├── package-changelog/ # Changelog generation
+│   │   ├── package-commits/ # Commit analysis and dependency filtering
+│   │   ├── package-tags/    # Tag-related operations
+│   │   ├── package-version/ # Version calculation and management
 │   │   ├── tag/             # Git tag operations
-│   │   ├── packages/        # Package management
 │   │   └── index.ts         # Entity exports
 │   └── interactive/         # Interactive CLI framework (IN DEVELOPMENT)
 ├── package.json
@@ -43,18 +46,17 @@ packages/intershell/
 ### Entity System (Production Ready)
 The entity system provides robust, type-safe components for monorepo operations:
 
-- **EntityCommit**: Commit parsing, validation, conventional commit support, staged file checking
-- **EntityChangelog**: Changelog generation, version detection, Keep a Changelog format
-- **EntityPackageJson**: Package.json operations, version management
-- **EntityWorkspace**: Workspace package discovery and dependency analysis
-- **EntityCompose**: Docker Compose parsing and service health monitoring
 - **EntityAffected**: Affected package detection for CI/CD optimization
+- **EntityBranch**: Git branch operations and management
+- **EntityCommit**: Commit parsing, validation, conventional commit support, staged file checking
+- **EntityCompose**: Docker Compose parsing and service health monitoring
+- **EntityIntershellConfig**: Configuration management and validation
+- **EntityPackage**: Package management and operations
+- **EntityPackageChangelog**: Changelog generation, version detection, Keep a Changelog format
+- **EntityPackageCommits**: Commit analysis and dependency filtering with intelligent dependency analysis
+- **EntityPackageTags**: Tag-related operations with package-specific logic
+- **EntityPackageVersion**: Version calculation, bump type determination, version history tracking
 - **EntityTag**: Git tag operations and version management
-- **EntityPackages**: Package management and operations
-- **EntityVersion**: Version calculation, bump type determination, version history tracking
-- **EntityTagPackage**: Tag-related operations with package-specific logic
-- **EntityCommitPackage**: Commit analysis and dependency filtering
-- **EntityDependencyAnalyzer**: Intelligent package dependency analysis with tsconfig support
 
 ### Core Utilities (Production Ready)
 - **colorify**: Enhanced terminal colors with RGB, HSL, gradients
@@ -80,12 +82,13 @@ const versionBump = EntityCommit.suggestVersionBump(['feat', 'fix']);
 
 ### Current Usage in Monorepo
 The entities are actively used in:
-- `scripts/commit-check.ts` - Staged file validation
-- `scripts/version-prepare.ts` - Version bump detection with dependency analysis
-- `scripts/version-apply.ts` - Changelog generation with smart filtering
-- CI/CD workflows for affected package detection
-- Dependency-aware version bumping and changelog generation
-- Cross-package impact detection for version management
+- `scripts/commit-check.ts` - Staged file validation using EntityCommit
+- `scripts/version-prepare.ts` - Version bump detection with EntityPackageCommits dependency analysis
+- `scripts/version-apply.ts` - Changelog generation using EntityPackageChangelog
+- CI/CD workflows for affected package detection using EntityAffected
+- Dependency-aware version bumping using EntityPackageVersion
+- Cross-package impact detection using EntityPackageCommits
+- Configuration management using EntityIntershellConfig
 
 ## Interactive Framework Status
 

@@ -27,7 +27,7 @@ This document consolidates all remaining work from the completed dependency anal
 ### **2. Selective Versioning Implementation** - ✅ COMPLETED
 - **Package classification system** based on `private` field
 - **Multiple tag series support** (root: `v*`, intershell: `intershell-v*`)
-- **EntityVersion and EntityTag refactoring** with clean separation of concerns
+- **EntityPackageVersion and EntityTag refactoring** with clean separation of concerns
 - **Version preparation scripts** updated for new architecture
 - **Comprehensive validation system** with config-based rules
 

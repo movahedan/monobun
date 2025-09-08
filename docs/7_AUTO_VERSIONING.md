@@ -74,11 +74,23 @@ Our versioning system consists of 3 main scripts with an entity-based architectu
 - Categorizes commits by type and scope
 - Extracts PR information and metadata
 
-#### **EntityChangelog**
+#### **EntityPackageChangelog**
 - Generates Keep a Changelog format
 - Merges new changes with existing changelog
 - Formats commits with badges and links
 - Maintains version history
+
+#### **EntityPackageVersion**
+- Calculates version bumps based on commit analysis
+- Determines appropriate version increment (patch, minor, major)
+- Manages version history and tracking
+- Provides version comparison utilities
+
+#### **EntityPackageCommits**
+- Analyzes commits for package-specific changes
+- Filters commits based on package dependencies
+- Provides intelligent commit filtering for changelog generation
+- Cross-package impact detection
 
 ## 🚀 Individual Scripts
 

@@ -44,14 +44,17 @@ InterShell is a modern, type-safe CLI framework that provides a clean separation
 │   │   ├── cli.ts              # Interactive CLI implementation
 │   │   └── plugin/             # Plugin system
 │   └── entities/               # 🏛️ Core business logic
-│       ├── commit/             # Commit parsing and validation
-│       ├── changelog/          # Changelog generation
-│       ├── package-json/       # Package.json operations
-│       ├── workspace/          # Workspace management
-│       ├── compose/            # Docker Compose parsing
 │       ├── affected/           # Affected package detection
-│       ├── tag/                # Git tag operations
-│       └── packages/           # Package management
+│       ├── branch/             # Git branch operations
+│       ├── commit/             # Commit parsing and validation
+│       ├── compose/            # Docker Compose parsing
+│       ├── intershell-config/  # Configuration management
+│       ├── package/            # Package management and operations
+│       ├── package-changelog/  # Changelog generation
+│       ├── package-commits/    # Commit analysis and dependency filtering
+│       ├── package-tags/       # Tag-related operations
+│       ├── package-version/    # Version calculation and management
+│       └── tag/                # Git tag operations
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -209,37 +212,59 @@ The entity system provides reusable, type-safe components for common operations:
 
 ### **Core Entities**
 
+#### `EntityAffected`
+- Affected package detection with dependencies
+- Change impact analysis
+- CI/CD integration support
+
+#### `EntityBranch`
+- Git branch operations and management
+- Branch validation and switching
+- Branch information and metadata
+
 #### `EntityCommit`
 - Commit parsing, validation, and analysis
 - Conventional commit format support
 - PR categorization and metadata extraction
 - Enhanced PR commit detection
 
-#### `EntityChangelog`
-- Changelog generation and merging
-- Keep a Changelog format compliance
-- Version-aware content management
-- PR commit grouping and organization
-
-#### `EntityPackageJson`
-- Package.json operations and version management
-- Automated version bumping
-- Changelog file management
-
-#### `EntityWorkspace`
-- Workspace package discovery and validation
-- Package path resolution
-- Dependency graph analysis
-
 #### `EntityCompose`
 - Docker Compose parsing and service health
 - Service port mapping
 - Health check monitoring
 
-#### `EntityAffected`
-- Affected package detection with dependencies
-- Change impact analysis
-- CI/CD integration support
+#### `EntityIntershellConfig`
+- Configuration management and validation
+- Config loading and default values
+- Settings validation and enforcement
+
+#### `EntityPackage`
+- Package management and operations
+- Package discovery and validation
+- Package information and metadata
+
+#### `EntityPackageChangelog`
+- Changelog generation and merging
+- Keep a Changelog format compliance
+- Version-aware content management
+- PR commit grouping and organization
+
+#### `EntityPackageCommits`
+- Commit analysis and dependency filtering
+- Smart commit filtering based on package dependencies
+- Cross-package impact detection
+- Intelligent dependency analysis
+
+#### `EntityPackageTags`
+- Tag-related operations with package-specific logic
+- Package-specific tag management
+- Tag validation and operations
+
+#### `EntityPackageVersion`
+- Version calculation and management
+- Version bump detection and calculation
+- Version history tracking
+- Automated version bumping
 
 #### `EntityTag`
 - Git tag operations and management
@@ -428,27 +453,27 @@ const violations = EntityBranch.checkBranchRules(branchName, rules);
 Intelligent version management based on commit analysis:
 
 ```typescript
-// Using EntityChangelog for version bump detection
-import { EntityChangelog } from '@repo/intershell/entities/changelog';
+// Using EntityPackageVersion for version bump detection
+import { EntityPackageVersion } from '@repo/intershell/entities/package-version';
 
 // Analyze commit history for version bumps
 const commits = await EntityCommit.getCommitsSinceLastTag();
-const versionBump = EntityChangelog.detectVersionBump(commits);
+const versionBump = EntityPackageVersion.detectVersionBump(commits);
 
 // Automatically determine next version
 const currentVersion = '1.2.3';
-const nextVersion = EntityChangelog.calculateNextVersion(currentVersion, versionBump);
+const nextVersion = EntityPackageVersion.calculateNextVersion(currentVersion, versionBump);
 ```
 
 #### **4. Changelog Auto-Generation**
 Comprehensive changelog creation with PR integration:
 
 ```typescript
-// Using EntityChangelog for automated changelog generation
-import { EntityChangelog } from '@repo/intershell/entities/changelog';
+// Using EntityPackageChangelog for automated changelog generation
+import { EntityPackageChangelog } from '@repo/intershell/entities/package-changelog';
 
 // Generate changelog from commit range
-const changelog = await EntityChangelog.generateChangelog({
+const changelog = await EntityPackageChangelog.generateChangelog({
   from: 'v1.2.0',
   to: 'HEAD',
   includePrCommits: true,
@@ -456,7 +481,7 @@ const changelog = await EntityChangelog.generateChangelog({
 });
 
 // Merge with existing changelog
-const mergedChangelog = await EntityChangelog.mergeChangelogs(
+const mergedChangelog = await EntityPackageChangelog.mergeChangelogs(
   existingChangelog,
   newChangelog
 );
@@ -490,8 +515,8 @@ The current entity system provides a modular, type-safe foundation:
 These entities are actively used in:
 
 - **Commit Validation**: `scripts/commit-check.ts` uses `EntityCommit` for comprehensive staged file validation with configurable rules
-- **Version Management**: `scripts/version-prepare.ts` uses `EntityChangelog` for version bump detection
-- **Changelog Generation**: `scripts/version-apply.ts` uses `EntityChangelog` for changelog updates
+- **Version Management**: `scripts/version-prepare.ts` uses `EntityPackageVersion` and `EntityPackageCommits` for version bump detection
+- **Changelog Generation**: `scripts/version-apply.ts` uses `EntityPackageChangelog` for changelog updates
 - **CI/CD Integration**: GitHub Actions workflows use entities for affected package detection
 - **Development Scripts**: All development scripts use entities for common operations
 
@@ -600,8 +625,8 @@ bun test packages/intershell/src/entities/packages/packages.test.ts
 The InterShell entities are currently being used in production scripts:
 
 - **Commit Validation**: `bun run commit:check` - Uses `EntityCommit` for comprehensive staged file validation with configurable rules
-- **Version Management**: `bun run version:prepare` - Uses `EntityChangelog` and `EntityTag` for version bump detection
-- **Changelog Generation**: `bun run version:apply` - Uses `EntityChangelog` and `EntityTag` for changelog updates
+- **Version Management**: `bun run version:prepare` - Uses `EntityPackageVersion`, `EntityPackageCommits`, and `EntityTag` for version bump detection
+- **Changelog Generation**: `bun run version:apply` - Uses `EntityPackageChangelog` and `EntityTag` for changelog updates
 - **Development Setup**: `bun run dev:setup` - Uses `EntityCompose` for Docker service management
 
 ## 🔍 Staged File Validation

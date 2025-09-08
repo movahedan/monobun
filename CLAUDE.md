@@ -115,13 +115,17 @@ The repository uses a custom CLI framework called **InterShell** located in `pac
 
 ### Current InterShell Features (Production Ready)
 The InterShell system provides comprehensive entity-based functionality:
-- **Staged File Checking**: Comprehensive validation of staged files with configurable rules
-- **Branch Linting**: Advanced branch name validation and enforcement
-- **Version Bump Automation**: Intelligent version management based on commit analysis
-- **Changelog Auto-Generation**: Comprehensive changelog creation with PR integration
-- **Dependency Analyzer**: Smart commit filtering based on package dependencies
-- **Cross-Package Impact Detection**: Changes to dependencies trigger appropriate version bumps
-- **Enhanced Changelog Quality**: Only relevant commits appear in changelogs
+- **EntityAffected**: Affected package detection for CI/CD optimization
+- **EntityBranch**: Git branch operations and management
+- **EntityCommit**: Staged file checking, commit parsing, validation, and conventional commit support
+- **EntityCompose**: Docker Compose parsing and service health monitoring
+- **EntityIntershellConfig**: Configuration management and validation
+- **EntityPackage**: Package management and operations
+- **EntityPackageChangelog**: Changelog auto-generation with PR integration and Keep a Changelog format
+- **EntityPackageCommits**: Smart commit filtering based on package dependencies with intelligent dependency analysis
+- **EntityPackageTags**: Tag-related operations with package-specific logic
+- **EntityPackageVersion**: Intelligent version management and bump automation based on commit analysis
+- **EntityTag**: Git tag operations and version management
 
 ### Development Workflow
 1. **Docker-First**: Recommended to use DevContainer for consistent environment
