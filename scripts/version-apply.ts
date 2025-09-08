@@ -112,12 +112,12 @@ async function createTagsForPackage(
 	if (!version) {
 		throw new Error(`Version not found for ${packageName}`);
 	}
-	const tagPackage = new EntityTagPackage(packageName);
+	const packageTags = new EntityTagPackage(packageInstance);
 
 	// Check if tag already exists
-	const tagExists = await tagPackage.packageTagExists(version);
+	const tagExists = await packageTags.packageTagExists(version);
 	if (tagExists) {
-		const prefix = await tagPackage.getTagPrefix();
+		const prefix = await packageTags.getTagPrefix();
 		const tagName = `${prefix}${version}`;
 		xConsole.log(`⏭️ Tag already exists: ${tagName}`);
 		return;
@@ -126,12 +126,12 @@ async function createTagsForPackage(
 	xConsole.info(`🏷️ Creating tag for ${packageName}: ${version}`);
 
 	try {
-		await tagPackage.createPackageTag(
+		await packageTags.createPackageTag(
 			version,
 			args.message || `Release ${packageName} version ${version}`,
 		);
 
-		const prefix = await tagPackage.getTagPrefix();
+		const prefix = await packageTags.getTagPrefix();
 		const tagName = `${prefix}${version}`;
 		xConsole.log(`✅ Created tag: ${tagName}`);
 	} catch (error) {

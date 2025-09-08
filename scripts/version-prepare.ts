@@ -75,13 +75,24 @@ export const versionPrepare = createScript(
 	async function main(args, xConsole) {
 		const packageName = args.package || "root";
 
-		await validatePackages(xConsole);
+		xConsole.info("🔍 Validating package configurations...");
+		const validationResult = await EntityPackages.validateAllPackages();
+		if (validationResult.length > 0) {
+			xConsole.error(colorify.red("❌ Package validation failed!"));
+			xConsole.error(colorify.red(`Found ${validationResult.length} validation errors:`));
+			for (const error of validationResult) {
+				xConsole.error(colorify.red(`  📦 ${error}`));
+			}
+			throw new Error(`Package validation failed with ${validationResult.length} errors`);
+		}
+		xConsole.info(colorify.green("✅ All packages passed validation"));
+
 		const allVersionedPackages = await EntityPackages.getVersionedPackages();
-		const packageJson = new EntityPackages(packageName);
-		const tagPackage = new EntityTagPackage(packageName);
-		const commitPackage = new EntityCommitPackage(packageName);
-		const versionEntity = new EntityVersion(packageName);
-		const prefix = packageJson.getTagSeriesName();
+		const packageInstance = new EntityPackages(packageName);
+		const packageTags = new EntityTagPackage(packageInstance);
+		const packageCommits = new EntityCommitPackage(packageInstance);
+		const packageVersion = new EntityVersion(packageInstance, packageCommits, packageTags);
+		const prefix = packageInstance.getTagSeriesName();
 
 		if (!allVersionedPackages.includes(packageName)) {
 			throw new Error(
@@ -97,7 +108,7 @@ export const versionPrepare = createScript(
 		xConsole.info(`🚀 Starting version preparation for package ${colorify.blue(packageName)}`);
 		const { fromCommit, toCommit } = await resolveCommitRange(
 			{
-				packageName,
+				packageTags,
 				from: args.from,
 				to: args.to,
 				fromVersion: args["from-version"],
@@ -107,16 +118,16 @@ export const versionPrepare = createScript(
 		);
 
 		const from =
-			args.from || args["from-version"] ? fromCommit : await tagPackage.getBaseTagShaForPackage();
+			args.from || args["from-version"] ? fromCommit : await packageTags.getBaseTagShaForPackage();
 
 		xConsole.info(
 			`📝 Generating changelog from ${colorify.blue(from)} to ${colorify.blue(toCommit)}`,
 		);
 
 		// Get commits and version data using EntityVersion
-		const commits = await commitPackage.getCommitsInRange(from, toCommit);
-		const versionData = await versionEntity.calculateVersionData(
-			packageJson.readVersion() || "0.0.0",
+		const commits = await packageCommits.getCommitsInRange(from, toCommit);
+		const versionData = await packageVersion.calculateVersionData(
+			packageInstance.readVersion() || "0.0.0",
 			"0.0.0", // This will be determined by EntityVersion internally
 			commits,
 		);
@@ -125,7 +136,10 @@ export const versionPrepare = createScript(
 
 		// Create changelog with commits
 		const template = new DefaultChangelogTemplate(packageName, prefix);
-		const changelog = new EntityChangelog(packageName, commits, { template, versionMode: true });
+		const changelog = new EntityChangelog(packageInstance, commits, {
+			template,
+			versionMode: true,
+		});
 		const changelogContent = changelog.generateMergedChangelog();
 
 		if (commitCount === 0) {
@@ -142,16 +156,16 @@ export const versionPrepare = createScript(
 		}
 
 		xConsole.log(
-			`🔄 Updating package version from ${versionData.currentVersion} to ${versionData.targetVersion} in ${packageJson.getJsonPath()}`,
+			`🔄 Updating package version from ${versionData.currentVersion} to ${versionData.targetVersion} in ${packageInstance.getJsonPath()}`,
 		);
-		await packageJson.writeVersion(versionData.targetVersion);
+		await packageInstance.writeVersion(versionData.targetVersion);
 		await $`bun install`;
-		await packageJson.writeChangelog(changelogContent);
+		await packageInstance.writeChangelog(changelogContent);
 
 		const tagName = `${prefix}${versionData.targetVersion}`;
-		const versionCommitMessage = `release(${packageName}): ${tagName} [${versionData.bumpType}] (${versionData.currentVersion} => ${versionData.targetVersion})\n\n📝 Commits processed: ${commitCount}\n📝 Changelog updated: (${packageJson.getChangelogPath()})`;
+		const versionCommitMessage = `release(${packageName}): ${tagName} [${versionData.bumpType}] (${versionData.currentVersion} => ${versionData.targetVersion})\n\n📝 Commits processed: ${commitCount}\n📝 Changelog updated: (${packageInstance.getChangelogPath()})`;
 		xConsole.log(
-			`📦 (${colorify.yellow(versionData.currentVersion)} => ${colorify.green(versionData.targetVersion)}) ${colorify.blue(packageName)}: ${versionData.bumpType} (${colorify.green(packageJson.getChangelogPath())})`,
+			`📦 (${colorify.yellow(versionData.currentVersion)} => ${colorify.green(versionData.targetVersion)}) ${colorify.blue(packageName)}: ${versionData.bumpType} (${colorify.green(packageInstance.getChangelogPath())})`,
 		);
 		await Bun.write(".git/COMMIT_EDITMSG", versionCommitMessage);
 		xConsole.log(
@@ -188,23 +202,22 @@ if (import.meta.main) {
 /**
  * Resolves from/to commits, handling version-to-tag conversion when needed
  */
+interface ResolveCommitRangeOptions {
+	packageTags: EntityTagPackage;
+	from?: string;
+	to?: string;
+	fromVersion?: string;
+	toVersion?: string;
+}
 async function resolveCommitRange(
-	{
-		packageName,
-		from,
-		to,
-		fromVersion,
-		toVersion,
-	}: { packageName: string; from?: string; to?: string; fromVersion?: string; toVersion?: string },
+	{ packageTags, from, to, fromVersion, toVersion }: ResolveCommitRangeOptions,
 	xConsole: typeof console,
 ): Promise<{ fromCommit: string; toCommit: string }> {
-	const tagPackage = new EntityTagPackage(packageName);
-
 	let fromCommit: string;
 	let toCommit: string;
 	// Handle --from-version conversion
 	if (fromVersion) {
-		const fromTag = `${await tagPackage.getTagPrefix()}${fromVersion}`;
+		const fromTag = `${await packageTags.getTagPrefix()}${fromVersion}`;
 		xConsole.info(`📝 Converting --from-version ${fromVersion} to tag: ${fromTag}`);
 		fromCommit = await EntityTag.getBaseCommitSha(fromTag);
 	} else if (from) {
@@ -212,12 +225,12 @@ async function resolveCommitRange(
 	} else {
 		// No --from specified, let EntityTagPackage auto-find the correct base SHA
 		// This will use the latest tag if it exists, or fall back to first commit for first-time versioning
-		fromCommit = await tagPackage.getBaseTagShaForPackage();
+		fromCommit = await packageTags.getBaseTagShaForPackage();
 	}
 
 	// Handle --to-version conversion
 	if (toVersion) {
-		const toTag = `${await tagPackage.getTagPrefix()}${toVersion}`;
+		const toTag = `${await packageTags.getTagPrefix()}${toVersion}`;
 		xConsole.info(`📝 Converting --to-version ${toVersion} to tag: ${toTag}`);
 		toCommit = await EntityTag.getBaseCommitSha(toTag);
 	} else {
@@ -225,18 +238,4 @@ async function resolveCommitRange(
 	}
 
 	return { fromCommit, toCommit };
-}
-
-async function validatePackages(xConsole: typeof console): Promise<void> {
-	xConsole.info("🔍 Validating package configurations...");
-	const validationResult = await EntityPackages.validateAllPackages();
-	if (validationResult.length > 0) {
-		xConsole.error(colorify.red("❌ Package validation failed!"));
-		xConsole.error(colorify.red(`Found ${validationResult.length} validation errors:`));
-		for (const error of validationResult) {
-			xConsole.error(colorify.red(`  📦 ${error}`));
-		}
-		throw new Error(`Package validation failed with ${validationResult.length} errors`);
-	}
-	xConsole.info(colorify.green("✅ All packages passed validation"));
 }
