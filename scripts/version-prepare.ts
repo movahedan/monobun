@@ -4,13 +4,13 @@ import fs from "node:fs";
 import { colorify, createScript } from "@repo/intershell/core";
 import {
 	DefaultChangelogTemplate,
-	EntityChangelog,
-	EntityCommitPackage,
 	EntityCompose,
-	EntityPackages,
+	EntityPackage,
+	EntityPackageChangelog,
+	EntityPackageCommits,
+	EntityPackageTags,
+	EntityPackageVersion,
 	EntityTag,
-	EntityTagPackage,
-	EntityVersion,
 } from "@repo/intershell/entities";
 import { $ } from "bun";
 
@@ -76,7 +76,7 @@ export const versionPrepare = createScript(
 		const packageName = args.package || "root";
 
 		xConsole.info("🔍 Validating package configurations...");
-		const validationResult = await EntityPackages.validateAllPackages();
+		const validationResult = await EntityPackage.validateAllPackages();
 		if (validationResult.length > 0) {
 			xConsole.error(colorify.red("❌ Package validation failed!"));
 			xConsole.error(colorify.red(`Found ${validationResult.length} validation errors:`));
@@ -87,11 +87,11 @@ export const versionPrepare = createScript(
 		}
 		xConsole.info(colorify.green("✅ All packages passed validation"));
 
-		const allVersionedPackages = await EntityPackages.getVersionedPackages();
-		const packageInstance = new EntityPackages(packageName);
-		const packageTags = new EntityTagPackage(packageInstance);
-		const packageCommits = new EntityCommitPackage(packageInstance);
-		const packageVersion = new EntityVersion(packageInstance, packageCommits, packageTags);
+		const allVersionedPackages = await EntityPackage.getVersionedPackages();
+		const packageInstance = new EntityPackage(packageName);
+		const packageTags = new EntityPackageTags(packageInstance);
+		const packageCommits = new EntityPackageCommits(packageInstance);
+		const packageVersion = new EntityPackageVersion(packageInstance, packageCommits, packageTags);
 		const prefix = packageInstance.getTagSeriesName();
 
 		if (!allVersionedPackages.includes(packageName)) {
@@ -124,11 +124,11 @@ export const versionPrepare = createScript(
 			`📝 Generating changelog from ${colorify.blue(from)} to ${colorify.blue(toCommit)}`,
 		);
 
-		// Get commits and version data using EntityVersion
+		// Get commits and version data using EntityPackageVersion
 		const commits = await packageCommits.getCommitsInRange(from, toCommit);
 		const versionData = await packageVersion.calculateVersionData(
 			packageInstance.readVersion() || "0.0.0",
-			"0.0.0", // This will be determined by EntityVersion internally
+			"0.0.0", // This will be determined by EntityPackageVersion internally
 			commits,
 		);
 
@@ -136,7 +136,7 @@ export const versionPrepare = createScript(
 
 		// Create changelog with commits
 		const template = new DefaultChangelogTemplate(packageName, prefix);
-		const changelog = new EntityChangelog(packageInstance, commits, {
+		const changelog = new EntityPackageChangelog(packageInstance, commits, {
 			template,
 			versionMode: true,
 		});
@@ -203,7 +203,7 @@ if (import.meta.main) {
  * Resolves from/to commits, handling version-to-tag conversion when needed
  */
 interface ResolveCommitRangeOptions {
-	packageTags: EntityTagPackage;
+	packageTags: EntityPackageTags;
 	from?: string;
 	to?: string;
 	fromVersion?: string;
@@ -223,7 +223,7 @@ async function resolveCommitRange(
 	} else if (from) {
 		fromCommit = await EntityTag.getBaseCommitSha(from);
 	} else {
-		// No --from specified, let EntityTagPackage auto-find the correct base SHA
+		// No --from specified, let EntityPackageTags auto-find the correct base SHA
 		// This will use the latest tag if it exists, or fall back to first commit for first-time versioning
 		fromCommit = await packageTags.getBaseTagShaForPackage();
 	}

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { colorify, createScript, type InferArgs, type ScriptConfig } from "@repo/intershell/core";
-import { EntityPackages, EntityTagPackage } from "@repo/intershell/entities";
+import { EntityPackage, EntityPackageTags } from "@repo/intershell/entities";
 import { $ } from "bun";
 
 const scriptConfig = {
@@ -46,7 +46,7 @@ export const versionApply = createScript(scriptConfig, async function main(args,
 	const packageName = args.package || "root";
 	xConsole.info(`📦 Processing package: ${colorify.blue(packageName)}`);
 
-	const packageInstance = new EntityPackages(packageName);
+	const packageInstance = new EntityPackage(packageName);
 	const version = packageInstance.readVersion();
 	const tagSeriesName = packageInstance.getTagSeriesName();
 	const tagName = `${tagSeriesName}${version}`;
@@ -107,12 +107,12 @@ async function createTagsForPackage(
 	args: InferArgs<typeof scriptConfig>,
 	xConsole: typeof console,
 ): Promise<void> {
-	const packageInstance = new EntityPackages(packageName);
+	const packageInstance = new EntityPackage(packageName);
 	const version = packageInstance.readVersion();
 	if (!version) {
 		throw new Error(`Version not found for ${packageName}`);
 	}
-	const packageTags = new EntityTagPackage(packageInstance);
+	const packageTags = new EntityPackageTags(packageInstance);
 
 	// Check if tag already exists
 	const tagExists = await packageTags.packageTagExists(version);
