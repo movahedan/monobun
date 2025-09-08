@@ -1,10 +1,9 @@
 import type { ParsedCommitData } from "../commit";
-import { EntityPackages } from "../packages";
+import type { EntityPackages } from "../packages";
 import type { TemplateEngine } from "./template";
 import type { ChangelogData, VersionData } from "./types";
 
 export class EntityChangelog {
-	private packageName: string;
 	private package: EntityPackages;
 	private template: TemplateEngine;
 	private versionMode: boolean;
@@ -13,12 +12,11 @@ export class EntityChangelog {
 	private versionData: VersionData | undefined;
 
 	constructor(
-		packageName: string,
+		packageInstance: EntityPackages,
 		commits: ParsedCommitData[],
 		options: { template: TemplateEngine; versionMode?: boolean },
 	) {
-		this.packageName = packageName;
-		this.package = new EntityPackages(this.packageName);
+		this.package = packageInstance;
 		this.template = options.template;
 		this.versionMode = options.versionMode ?? true;
 		this.changelogData = this.getChangelogData(commits);
