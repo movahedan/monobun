@@ -14,11 +14,12 @@ export class EntityPackageChangelog {
 	constructor(
 		packageInstance: EntityPackage,
 		commits: ParsedCommitData[],
-		options: { template: TemplateEngine; versionMode?: boolean },
+		options: { template: TemplateEngine; versionMode?: boolean; versionData?: VersionData },
 	) {
 		this.package = packageInstance;
 		this.template = options.template;
 		this.versionMode = options.versionMode ?? true;
+		this.versionData = options.versionData;
 		this.changelogData = this.getChangelogData(commits);
 	}
 

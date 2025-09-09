@@ -18,18 +18,17 @@ export class EntityDependencyAnalyzer {
 		try {
 			// Get all internal packages in the monorepo
 			const allPackages = await EntityPackage.getAllPackages();
-			const internalPackageNames = allPackages.map((pkg) => pkg.replace("@repo/", ""));
 
 			// Get package.json dependencies
 			const packageJsonDeps = await this.getPackageJsonDependencies(reference);
 
 			// Get tsconfig dependencies
-			const tsconfigDeps = await this.getTsConfigDependencies();
+			const tsconfigDeps = await this.getTsConfigDependencies(reference);
 
 			// Combine and filter for internal dependencies only
 			const allDeps = [...new Set([...packageJsonDeps, ...tsconfigDeps])];
 
-			return allDeps.filter((dep) => internalPackageNames.includes(dep));
+			return allDeps.filter((dep) => allPackages.includes(dep));
 		} catch {
 			return [];
 		}
@@ -72,10 +71,10 @@ export class EntityDependencyAnalyzer {
 	/**
 	 * Get tsconfig dependencies by resolving paths to actual internal packages
 	 */
-	private async getTsConfigDependencies(): Promise<string[]> {
+	private async getTsConfigDependencies(reference: string): Promise<string[]> {
 		try {
 			const packagePath = this.package.getPath();
-			const tsconfigPaths = await this.getTsConfigPaths();
+			const tsconfigPaths = await this.getTsConfigPaths(reference);
 
 			const deps: string[] = [];
 
@@ -112,7 +111,7 @@ export class EntityDependencyAnalyzer {
 		const appsMatch = absolutePath.match(/\/apps\/([^/]+)/);
 
 		if (packagesMatch) {
-			return packagesMatch[1];
+			return `@repo/${packagesMatch[1]}`;
 		}
 
 		if (appsMatch) {
@@ -123,17 +122,34 @@ export class EntityDependencyAnalyzer {
 	}
 
 	/**
-	 * Get TypeScript configuration paths for a package
+	 * Get TypeScript configuration paths for a package at a specific git reference
 	 */
-	private async getTsConfigPaths(): Promise<TsConfigPaths> {
+	private async getTsConfigPaths(reference: string): Promise<TsConfigPaths> {
 		try {
-			const tsconfig = this.package.readTsconfig();
-
-			// Resolve extended configs
+			const tsconfig = await this.readTsconfigAtRef(reference);
 			const resolvedConfig = await this.resolveExtendedTsConfig(tsconfig, this.package.getPath());
 
 			return resolvedConfig.compilerOptions?.paths || {};
 		} catch {
+			return {};
+		}
+	}
+
+	/**
+	 * Read tsconfig.json at a specific git reference
+	 */
+	private async readTsconfigAtRef(reference: string): Promise<TsConfig> {
+		try {
+			const result = await entitiesShell.gitShow(`${reference}:${this.package.getTsconfigPath()}`);
+			if (result.exitCode !== 0) {
+				// If tsconfig.json doesn't exist at this reference, return empty config
+				return {};
+			}
+
+			const content = result.text();
+			return JSON.parse(content);
+		} catch {
+			// If parsing fails, return empty config
 			return {};
 		}
 	}

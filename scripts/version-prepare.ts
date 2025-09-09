@@ -126,23 +126,18 @@ export const versionPrepare = createScript(
 
 		// Get commits and version data using EntityPackageVersion
 		const commits = await packageCommits.getCommitsInRange(from, toCommit);
-		const versionData = await packageVersion.calculateVersionData(
-			packageInstance.readVersion() || "0.0.0",
-			"0.0.0", // This will be determined by EntityPackageVersion internally
-			commits,
-		);
-
-		const commitCount = commits.length;
+		const versionData = await packageVersion.calculateVersionData(commits);
 
 		// Create changelog with commits
 		const template = new DefaultChangelogTemplate(packageName, prefix);
 		const changelog = new EntityPackageChangelog(packageInstance, commits, {
 			template,
+			versionData,
 			versionMode: true,
 		});
 		const changelogContent = changelog.generateMergedChangelog();
 
-		if (commitCount === 0) {
+		if (commits.length === 0) {
 			xConsole.log(colorify.yellow(`📦 ${packageName}: ${colorify.yellow("No commits found")}`));
 			return;
 		}
@@ -163,7 +158,7 @@ export const versionPrepare = createScript(
 		await packageInstance.writeChangelog(changelogContent);
 
 		const tagName = `${prefix}${versionData.targetVersion}`;
-		const versionCommitMessage = `release(${packageName}): ${tagName} [${versionData.bumpType}] (${versionData.currentVersion} => ${versionData.targetVersion})\n\n📝 Commits processed: ${commitCount}\n📝 Changelog updated: (${packageInstance.getChangelogPath()})`;
+		const versionCommitMessage = `release(${packageName}): ${tagName} [${versionData.bumpType}] (${versionData.currentVersion} => ${versionData.targetVersion})\n\n📝 Commits processed: ${commits.length}\n📝 Changelog updated: (${packageInstance.getChangelogPath()})`;
 		xConsole.log(
 			`📦 (${colorify.yellow(versionData.currentVersion)} => ${colorify.green(versionData.targetVersion)}) ${colorify.blue(packageName)}: ${versionData.bumpType} (${colorify.green(packageInstance.getChangelogPath())})`,
 		);

@@ -14,8 +14,8 @@ const getIsDependency = (message: string) =>
 export class EntityCommit {
 	private readonly config: IConfig;
 
-	constructor() {
-		this.config = entitiesConfig.getConfig();
+	constructor(config?: IConfig) {
+		this.config = config || entitiesConfig.getConfig();
 	}
 
 	static parseByMessage(message: string): CommitMessageData {
@@ -182,6 +182,9 @@ export class EntityCommit {
 				filesResult.exitCode === 0 ? filesResult.text().trim().split("\n").filter(Boolean) : [];
 
 			const message = EntityCommit.parseByMessage(`${subject}\n${bodyLines.join("\n")}`);
+			const config = this.config || entitiesConfig.getConfig();
+			const parseByHash = this.parseByHash.bind(this);
+
 			return {
 				message,
 				info: {
@@ -190,7 +193,7 @@ export class EntityCommit {
 					date: date || undefined,
 				},
 				pr: message.isMerge
-					? await new EntityPr(this.config).getPRInfo(this.parseByHash.bind(this), hash, message)
+					? await new EntityPr(config).getPRInfo(parseByHash, hash, message)
 					: undefined,
 				files,
 			};

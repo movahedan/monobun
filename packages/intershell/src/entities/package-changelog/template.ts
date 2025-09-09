@@ -65,8 +65,8 @@ export class ChangelogTemplate implements TemplateEngine {
 				if (line.includes("[Unreleased]")) {
 					cleanVersion = "[Unreleased]";
 				} else {
-					// Extract version from "## v1.2.3" format
-					const versionMatch = line.match(/## (v?\d+\.\d+\.\d+)/);
+					// Extract version from "## v1.2.3" or "## intershell-v1.2.3" format
+					const versionMatch = line.match(new RegExp(`## (${this.prefix}\\d+\\.\\d+\\.\\d+)`));
 					if (versionMatch) {
 						cleanVersion = versionMatch[1].replace(this.prefix, "");
 					}

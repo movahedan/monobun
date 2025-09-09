@@ -22,11 +22,10 @@ export class EntityPackageVersion {
 		this.packageTags = packageTags;
 	}
 
-	async calculateVersionData(
-		versionOnDisk: string,
-		currentVersion: string,
-		commits: ParsedCommitData[],
-	): Promise<EntityPackageVersionData> {
+	async calculateVersionData(commits: ParsedCommitData[]): Promise<EntityPackageVersionData> {
+		const versionOnDisk = this.package.readVersion() || "0.0.0";
+		const currentVersion = (await this.packageTags.getLatestPackageVersionInHistory()) || "0.0.0";
+
 		// Check if version on disk is higher than the current version (early validation)
 		const currentVersionComparison = this.packageTags.compareVersions(
 			versionOnDisk,

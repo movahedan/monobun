@@ -81,7 +81,9 @@ export class EntityPackageCommits {
 			const commitHashes = await this.filterMergeCommitsByPackage(allHashes, mergeHashes);
 
 			// Parse all commits
-			const allCommits = await Promise.all(commitHashes.map(this.commit.parseByHash));
+			const allCommits = await Promise.all(
+				commitHashes.map((hash) => this.commit.parseByHash(hash)),
+			);
 
 			// Filter commits based on package dependencies at each commit
 			const relevantCommits: ParsedCommitData[] = [];
@@ -121,7 +123,9 @@ export class EntityPackageCommits {
 
 		// Check if commit affects this package directly
 		const packagePath = this.package.getPath();
-		const affectsDirect = commit.files.some((file) => file.startsWith(packagePath));
+		const affectsDirect = this.package.isRoot()
+			? commit.files.length > 0 // For root package, any file change affects it
+			: commit.files.some((file) => file.startsWith(packagePath));
 
 		// Check if commit affects any dependencies
 		const affectedDependencies: string[] = [];
