@@ -3,7 +3,7 @@
 	"private": false,
 	"name": "root",
 	"description": "A monorepo for Turbo and Bun",
-	"version": "0.2.0",
+	"version": "0.2.2",
 	"workspaces": [
 		"apps/*",
 		"packages/*"
