@@ -1,8 +1,8 @@
-import { entitiesConfig } from "../config/config";
 import { entitiesShell } from "../entities.shell";
-import type { ParsedTag, TagValidationResult } from "./types";
+import { entitiesConfig } from "../intershell-config/intershell-config";
+import type { ParsedTag, TagValidationResult } from "./tag.types";
 
-export * from "./types";
+export * from "./tag.types";
 
 export const EntityTag = {
 	parseByName(tagName: string): ParsedTag {

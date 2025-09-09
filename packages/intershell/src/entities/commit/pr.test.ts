@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import type { $ } from "bun";
-import type { IConfig } from "../config/types";
+import type { IConfig } from "../intershell-config/intershell-config.types";
 import { createMockCommit } from "./commit.test";
-import type { ParsedCommitData } from "./types";
+import type { ParsedCommitData } from "./commit.types";
 
 const { EntityPr } = await import("./pr");
 

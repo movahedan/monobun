@@ -3,19 +3,19 @@ import { describe, expect, mock, test } from "bun:test";
 describe("Config", () => {
 	// Common mock setup for dependencies
 	const setupMocks = async () => {
-		// Mock EntityPackages methods
-		const { EntityPackages } = await import("../packages");
-		EntityPackages.prototype.readJson = mock(() => ({
+		// Mock EntityPackage methods
+		const { EntityPackage } = await import("../package");
+		EntityPackage.prototype.readJson = mock(() => ({
 			name: "test-package",
 			version: "1.0.0",
 		}));
 
-		return { EntityPackages };
+		return { EntityPackage };
 	};
 
 	test.skip("should have default commit configuration", async () => {
 		await setupMocks();
-		const { entitiesConfig } = await import("./config");
+		const { entitiesConfig } = await import("./intershell-config");
 		const config = entitiesConfig.getConfig();
 
 		expect(config.commit.conventional.type?.list).toBeDefined();
@@ -26,7 +26,7 @@ describe("Config", () => {
 
 	test.skip("should have default branch configuration", async () => {
 		await setupMocks();
-		const { entitiesConfig } = await import("./config");
+		const { entitiesConfig } = await import("./intershell-config");
 		const config = entitiesConfig.getConfig();
 
 		expect(config.branch.defaultBranch).toBe("main");
@@ -46,7 +46,7 @@ describe("Config", () => {
 
 	test.skip("should have default tag configuration", async () => {
 		await setupMocks();
-		const { entitiesConfig } = await import("./config");
+		const { entitiesConfig } = await import("./intershell-config");
 		const config = entitiesConfig.getConfig();
 
 		expect(config.tag.name.enabled).toBe(true);
@@ -58,7 +58,7 @@ describe("Config", () => {
 
 	test.skip("should merge custom commit configuration", async () => {
 		await setupMocks();
-		const { entitiesConfig } = await import("./config");
+		const { entitiesConfig } = await import("./intershell-config");
 
 		// Mock custom config as a JSON string (as expected by PackageJson interface)
 		const customConfig = {
@@ -81,9 +81,9 @@ describe("Config", () => {
 			},
 		};
 
-		// Mock EntityPackages to return custom config
-		const { EntityPackages } = await import("../packages");
-		EntityPackages.prototype.readJson = mock(() => ({
+		// Mock EntityPackage to return custom config
+		const { EntityPackage } = await import("../package");
+		EntityPackage.prototype.readJson = mock(() => ({
 			name: "test-package",
 			version: "1.0.0",
 			intershell: {
@@ -98,7 +98,7 @@ describe("Config", () => {
 
 	test("should validate branch name regex pattern", async () => {
 		await setupMocks();
-		const { entitiesConfig } = await import("./config");
+		const { entitiesConfig } = await import("./intershell-config");
 		const config = entitiesConfig.getConfig();
 		const allowedCharacters = config.branch.name.allowedCharacters;
 

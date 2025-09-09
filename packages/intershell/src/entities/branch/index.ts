@@ -1,2 +1,2 @@
 export * from "./branch";
-export * from "./types";
+export * from "./branch.types";

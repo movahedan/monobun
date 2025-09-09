@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import type { $ } from "bun";
-import type { IConfig } from "../config/types";
+import type { IConfig } from "../intershell-config/intershell-config.types";
 import { EntityBranch } from "./branch";
-import type { ParsedBranch } from "./types";
+import type { ParsedBranch } from "./branch.types";
 
 // Mock the entitiesConfig module
 const mockEntitiesConfig = {

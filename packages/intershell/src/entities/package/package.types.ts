@@ -21,6 +21,23 @@ export interface PackageJson {
 	[key: string]: unknown;
 }
 
+export interface TsConfigPaths {
+	readonly [key: string]: string[];
+}
+
+export interface TsConfig {
+	readonly extends?: string;
+	readonly compilerOptions?: {
+		readonly baseUrl?: string;
+		readonly paths?: TsConfigPaths;
+		readonly rootDir?: string;
+		readonly outDir?: string;
+		readonly references?: Array<{ readonly path: string }>;
+	};
+	readonly include?: string[];
+	readonly exclude?: string[];
+}
+
 export interface RepositoryInfo {
 	type: string;
 	url: string;

@@ -1,5 +1,5 @@
-import type { ParsedBranch } from "../branch/types";
-import type { PRCategory } from "../config/types";
+import type { ParsedBranch } from "../branch/branch.types";
+import type { PRCategory } from "../intershell-config/intershell-config.types";
 
 export type CommitMessageData =
 	| {

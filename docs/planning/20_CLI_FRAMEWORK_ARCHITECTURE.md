@@ -118,7 +118,7 @@ The InterShell package currently provides a robust foundation that powers severa
 
 #### **3. Current Integration Points**
 - **Commit Validation**: `scripts/commit-check.ts` uses `EntityCommit` for staged file validation with configurable rules
-- **Version Management**: `scripts/version-prepare.ts` uses `EntityChangelog`
+- **Version Management**: `scripts/version-prepare.ts` uses `EntityPackageVersion` and `EntityPackageCommits`
 - **CI/CD Integration**: GitHub Actions workflows use entities for affected package detection
 - **Development Scripts**: All development scripts use entities for common operations
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { colorify, createScript, type InferArgs, type ScriptConfig } from "@repo/intershell/core";
-import { EntityPackages, EntityVersion } from "@repo/intershell/entities";
+import { EntityPackage, EntityPackageTags } from "@repo/intershell/entities";
 import { $ } from "bun";
 
 const scriptConfig = {
@@ -46,7 +46,7 @@ export const versionApply = createScript(scriptConfig, async function main(args,
 	const packageName = args.package || "root";
 	xConsole.info(`📦 Processing package: ${colorify.blue(packageName)}`);
 
-	const packageInstance = new EntityPackages(packageName);
+	const packageInstance = new EntityPackage(packageName);
 	const version = packageInstance.readVersion();
 	const tagSeriesName = packageInstance.getTagSeriesName();
 	const tagName = `${tagSeriesName}${version}`;
@@ -107,17 +107,17 @@ async function createTagsForPackage(
 	args: InferArgs<typeof scriptConfig>,
 	xConsole: typeof console,
 ): Promise<void> {
-	const packageInstance = new EntityPackages(packageName);
+	const packageInstance = new EntityPackage(packageName);
 	const version = packageInstance.readVersion();
 	if (!version) {
 		throw new Error(`Version not found for ${packageName}`);
 	}
-	const versionEntity = new EntityVersion(packageName);
+	const packageTags = new EntityPackageTags(packageInstance);
 
 	// Check if tag already exists
-	const tagExists = await versionEntity.packageTagExists(version);
+	const tagExists = await packageTags.packageTagExists(version);
 	if (tagExists) {
-		const prefix = await versionEntity.getTagPrefix();
+		const prefix = await packageTags.getTagPrefix();
 		const tagName = `${prefix}${version}`;
 		xConsole.log(`⏭️ Tag already exists: ${tagName}`);
 		return;
@@ -126,12 +126,12 @@ async function createTagsForPackage(
 	xConsole.info(`🏷️ Creating tag for ${packageName}: ${version}`);
 
 	try {
-		await versionEntity.createPackageTag(
+		await packageTags.createPackageTag(
 			version,
 			args.message || `Release ${packageName} version ${version}`,
 		);
 
-		const prefix = await versionEntity.getTagPrefix();
+		const prefix = await packageTags.getTagPrefix();
 		const tagName = `${prefix}${version}`;
 		xConsole.log(`✅ Created tag: ${tagName}`);
 	} catch (error) {

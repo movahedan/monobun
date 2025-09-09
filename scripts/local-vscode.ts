@@ -3,7 +3,7 @@
 import { exists, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { createScript, type ScriptConfig } from "@repo/intershell/core";
-import { EntityPackages } from "@repo/intershell/entities";
+import { EntityPackage } from "@repo/intershell/entities";
 import { $ } from "bun";
 
 const syncVscodeConfigScriptConfig = {
@@ -25,7 +25,7 @@ export const syncVscodeConfigScript = createScript(
 	async function main(args, xConsole) {
 		xConsole.log("🔄 Syncing VS Code configuration from devcontainer.json...");
 
-		const scopes = await EntityPackages.getAllPackages();
+		const scopes = await EntityPackage.getAllPackages();
 		xConsole.log(`📋 Generated scopes: ${scopes.join(", ")}`);
 
 		const {

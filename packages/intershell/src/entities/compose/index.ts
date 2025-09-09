@@ -1,2 +1,2 @@
 export * from "./compose";
-export * from "./types";
+export * from "./compose.types";

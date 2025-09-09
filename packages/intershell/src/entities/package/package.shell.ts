@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { file, write } from "bun";
 import { entitiesShell } from "../entities.shell";
-import type { PackageJson } from "./types";
+import type { PackageJson } from "./package.types";
 
 export const packagesShell = {
 	/**
@@ -87,6 +87,20 @@ export const packagesShell = {
 	readFileAsText: async (filePath: string): Promise<string> => {
 		const fs = await import("node:fs/promises");
 		return await fs.readFile(filePath, "utf-8");
+	},
+
+	/**
+	 * Reads a file as text synchronously
+	 */
+	readFileAsTextSync: (filePath: string): string => {
+		return readFileSync(filePath, "utf8");
+	},
+
+	/**
+	 * Writes content to a file as text
+	 */
+	writeFileAsText: async (filePath: string, content: string): Promise<void> => {
+		await write(filePath, content);
 	},
 
 	/**

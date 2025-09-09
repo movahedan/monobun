@@ -62,7 +62,7 @@ The entity system provides reusable, type-safe components for common operations:
 - Conventional commit format support
 - PR categorization and metadata extraction
 
-#### `EntityChangelog`
+#### `EntityPackageChangelog`
 - Changelog generation and merging
 - Keep a Changelog format compliance
 - Version-aware content management

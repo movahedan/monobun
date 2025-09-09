@@ -1,10 +1,10 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: Mock types require any for flexibility */
 import { afterEach, beforeEach, describe, expect, it, type Mock, mock } from "bun:test";
 import type { $ } from "bun";
-import { EntityPackages } from "./packages";
-import type { PackageJson } from "./types";
+import { EntityPackage } from "./package";
+import type { PackageJson } from "./package.types";
 
-export type EntityPackagesMock = Mock<
+export type EntityPackageMock = Mock<
 	() => Partial<{
 		getPath: ReturnType<typeof mock>;
 		getJsonPath: ReturnType<typeof mock>;
@@ -26,13 +26,13 @@ export type EntityPackagesMock = Mock<
 	}>
 >;
 
-export function mockEntityPackages(entityPackages: EntityPackagesMock) {
+export function mockEntityPackage(EntityPackage: EntityPackageMock) {
 	// Return the mock object directly instead of using mock.module
-	return entityPackages;
+	return EntityPackage;
 }
 
-describe("EntityPackages", () => {
-	let packages: InstanceType<typeof EntityPackages>;
+describe("EntityPackage", () => {
+	let packages: InstanceType<typeof EntityPackage>;
 	const mockPackageName = "test-package";
 
 	const mockPackageJson = (overrides: Partial<PackageJson> = {}): PackageJson => ({
@@ -73,7 +73,7 @@ describe("EntityPackages", () => {
 
 	beforeEach(async () => {
 		// Import fresh modules to avoid interference
-		const { packagesShell } = await import("./packages.shell");
+		const { packagesShell } = await import("./package.shell");
 		const { entitiesShell } = await import("../entities.shell");
 
 		// Store original methods if not already stored
@@ -164,12 +164,12 @@ describe("EntityPackages", () => {
 		// Original methods are now stored globally above
 
 		// Create instance after mocking
-		packages = new EntityPackages(mockPackageName);
+		packages = new EntityPackage(mockPackageName);
 	});
 
 	afterEach(async () => {
 		// Restore original methods
-		const { packagesShell } = await import("./packages.shell");
+		const { packagesShell } = await import("./package.shell");
 		const { entitiesShell } = await import("../entities.shell");
 
 		if (originalPackagesShellReadJsonFile) {
@@ -206,28 +206,28 @@ describe("EntityPackages", () => {
 
 	describe("constructor", () => {
 		it("should create instance with package name", () => {
-			packages = new EntityPackages(mockPackageName);
-			expect(packages).toBeInstanceOf(EntityPackages);
+			packages = new EntityPackage(mockPackageName);
+			expect(packages).toBeInstanceOf(EntityPackage);
 		});
 
 		it("should read package.json on construction", () => {
-			packages = new EntityPackages(mockPackageName);
-			expect(packages).toBeInstanceOf(EntityPackages);
+			packages = new EntityPackage(mockPackageName);
+			expect(packages).toBeInstanceOf(EntityPackage);
 		});
 	});
 
 	describe("getPath", () => {
 		beforeEach(() => {
-			packages = new EntityPackages(mockPackageName);
+			packages = new EntityPackage(mockPackageName);
 		});
 
 		it("should return root path for root package", () => {
-			const rootPackages = new EntityPackages("root");
+			const rootPackages = new EntityPackage("root");
 			expect(rootPackages.getPath()).toBe(".");
 		});
 
 		it("should return packages path for @repo packages", () => {
-			const repoPackages = new EntityPackages("@repo/test-package");
+			const repoPackages = new EntityPackage("@repo/test-package");
 			expect(repoPackages.getPath()).toBe("packages/test-package");
 		});
 
@@ -238,7 +238,7 @@ describe("EntityPackages", () => {
 
 	describe("getJsonPath", () => {
 		beforeEach(() => {
-			packages = new EntityPackages(mockPackageName);
+			packages = new EntityPackage(mockPackageName);
 		});
 
 		it("should return correct package.json path", () => {
@@ -246,19 +246,19 @@ describe("EntityPackages", () => {
 		});
 
 		it("should return correct path for root package", () => {
-			const rootPackages = new EntityPackages("root");
+			const rootPackages = new EntityPackage("root");
 			expect(rootPackages.getJsonPath()).toBe("./package.json");
 		});
 
 		it("should return correct path for @repo package", () => {
-			const repoPackages = new EntityPackages("@repo/test-package");
+			const repoPackages = new EntityPackage("@repo/test-package");
 			expect(repoPackages.getJsonPath()).toBe("packages/test-package/package.json");
 		});
 	});
 
 	describe.skip("readJson", () => {
 		beforeEach(() => {
-			packages = new EntityPackages(mockPackageName);
+			packages = new EntityPackage(mockPackageName);
 		});
 
 		it("should return cached package.json if available", () => {
@@ -276,13 +276,13 @@ describe("EntityPackages", () => {
 
 		it("should throw error when file read fails", async () => {
 			// Create a fresh mock for this test
-			const { packagesShell } = await import("./packages.shell");
+			const { packagesShell } = await import("./package.shell");
 			packagesShell.readJsonFile = mock(() => {
 				throw new Error("File read failed");
 			});
 
 			expect(() => {
-				new EntityPackages("error-package");
+				new EntityPackage("error-package");
 			}).toThrow(
 				"Package not found error-package at apps/error-package/package.json: Error: File read failed",
 			);
@@ -295,7 +295,7 @@ describe("EntityPackages", () => {
 			});
 
 			expect(() => {
-				new EntityPackages("invalid-json-package");
+				new EntityPackage("invalid-json-package");
 			}).toThrow(
 				"Package not found invalid-json-package at apps/invalid-json-package/package.json: Error: Invalid JSON",
 			);
@@ -304,7 +304,7 @@ describe("EntityPackages", () => {
 
 	describe.skip("writeJson", () => {
 		beforeEach(() => {
-			packages = new EntityPackages(mockPackageName);
+			packages = new EntityPackage(mockPackageName);
 		});
 
 		it("should write package.json and run biome check", async () => {
@@ -327,7 +327,7 @@ describe("EntityPackages", () => {
 
 	describe("readVersion", () => {
 		beforeEach(() => {
-			packages = new EntityPackages(mockPackageName);
+			packages = new EntityPackage(mockPackageName);
 		});
 
 		it("should return version from package.json", () => {
@@ -338,7 +338,7 @@ describe("EntityPackages", () => {
 
 	describe.skip("writeVersion", () => {
 		beforeEach(() => {
-			packages = new EntityPackages(mockPackageName);
+			packages = new EntityPackage(mockPackageName);
 		});
 
 		it("should update version and write package.json", async () => {
@@ -354,7 +354,7 @@ describe("EntityPackages", () => {
 
 	describe("getChangelogPath", () => {
 		beforeEach(() => {
-			packages = new EntityPackages(mockPackageName);
+			packages = new EntityPackage(mockPackageName);
 		});
 
 		it("should return correct changelog path", () => {
@@ -364,7 +364,7 @@ describe("EntityPackages", () => {
 
 	describe("readChangelog", () => {
 		beforeEach(() => {
-			packages = new EntityPackages(mockPackageName);
+			packages = new EntityPackage(mockPackageName);
 		});
 
 		it("should read changelog content", () => {
@@ -376,7 +376,7 @@ describe("EntityPackages", () => {
 				return "";
 			});
 
-			const changelogPackages = new EntityPackages("test-package");
+			const changelogPackages = new EntityPackage("test-package");
 			const result = changelogPackages.readChangelog();
 			expect(result).toBe("# Test Changelog\n\n## 1.0.0\n- Initial release");
 		});
@@ -385,7 +385,7 @@ describe("EntityPackages", () => {
 			// Update the mock for this specific test
 			mockPackagesShell.readChangelogFile.mockImplementationOnce(() => "");
 
-			const emptyChangelogPackages = new EntityPackages("test-package");
+			const emptyChangelogPackages = new EntityPackage("test-package");
 			const result = emptyChangelogPackages.readChangelog();
 			expect(result).toBe("");
 		});
@@ -398,7 +398,7 @@ describe("EntityPackages", () => {
 
 	describe("writeChangelog", () => {
 		beforeEach(() => {
-			packages = new EntityPackages(mockPackageName);
+			packages = new EntityPackage(mockPackageName);
 		});
 
 		it("should write changelog when file exists", async () => {
@@ -416,7 +416,7 @@ describe("EntityPackages", () => {
 
 	describe("validatePackage", () => {
 		beforeEach(() => {
-			packages = new EntityPackages(mockPackageName);
+			packages = new EntityPackage(mockPackageName);
 		});
 
 		it.skip("should return valid result for valid package", () => {
@@ -430,7 +430,7 @@ describe("EntityPackages", () => {
 				mockPackageJson({ version: "invalid-version" }),
 			);
 
-			const invalidPackages = new EntityPackages("invalid-version-package");
+			const invalidPackages = new EntityPackage("invalid-version-package");
 			const result = invalidPackages.validatePackage();
 			expect(result).toHaveLength(1);
 			expect(result[0]).toContain(
@@ -445,7 +445,7 @@ describe("EntityPackages", () => {
 			// Mock packagesShell to return package without description for this test
 			mockPackagesShell.readJsonFile.mockImplementationOnce(() => packageJson);
 
-			const noDescPackages = new EntityPackages("no-description-package");
+			const noDescPackages = new EntityPackage("no-description-package");
 			const result = noDescPackages.validatePackage();
 			expect(result).toHaveLength(1);
 			expect(result[0]).toContain(
@@ -460,7 +460,7 @@ describe("EntityPackages", () => {
 			// Mock packagesShell to return package with multiple issues for this test
 			mockPackagesShell.readJsonFile.mockImplementationOnce(() => packageJson);
 
-			const multiIssuePackages = new EntityPackages("multi-issue-package");
+			const multiIssuePackages = new EntityPackage("multi-issue-package");
 			const result = multiIssuePackages.validatePackage();
 			expect(result).toHaveLength(2);
 			expect(result).toEqual(
@@ -479,7 +479,7 @@ describe("EntityPackages", () => {
 				// Mock packagesShell to return valid version for this test
 				mockPackagesShell.readJsonFile.mockImplementationOnce(() => mockPackageJson({ version }));
 
-				const validPackages = new EntityPackages(`valid-${version}-package`);
+				const validPackages = new EntityPackage(`valid-${version}-package`);
 				const result = validPackages.validatePackage();
 				expect(result).toHaveLength(0);
 			});
@@ -488,7 +488,7 @@ describe("EntityPackages", () => {
 				// Mock packagesShell to return invalid version for this test
 				mockPackagesShell.readJsonFile.mockImplementationOnce(() => mockPackageJson({ version }));
 
-				const invalidPackages = new EntityPackages(`invalid-${version}-package`);
+				const invalidPackages = new EntityPackage(`invalid-${version}-package`);
 				const result = invalidPackages.validatePackage();
 				expect(result.length).toBeGreaterThan(0);
 			});
@@ -503,7 +503,7 @@ describe("EntityPackages", () => {
 					mockPackageJson({ private: false }),
 				);
 
-				const publicPackages = new EntityPackages("public-package");
+				const publicPackages = new EntityPackage("public-package");
 				expect(publicPackages.shouldVersion()).toBe(true);
 			});
 
@@ -514,7 +514,7 @@ describe("EntityPackages", () => {
 				// Mock packagesShell to return package without private field for this test
 				mockPackagesShell.readJsonFile.mockImplementationOnce(() => packageJson);
 
-				const defaultPackages = new EntityPackages("default-package");
+				const defaultPackages = new EntityPackage("default-package");
 				expect(defaultPackages.shouldVersion()).toBe(true);
 			});
 
@@ -524,7 +524,7 @@ describe("EntityPackages", () => {
 					mockPackageJson({ private: true }),
 				);
 
-				const privatePackages = new EntityPackages("private-package");
+				const privatePackages = new EntityPackage("private-package");
 				expect(privatePackages.shouldVersion()).toBe(false);
 			});
 		});
@@ -536,7 +536,7 @@ describe("EntityPackages", () => {
 					mockPackageJson({ name: "root", private: false }),
 				);
 
-				const rootPackages = new EntityPackages("root");
+				const rootPackages = new EntityPackage("root");
 				expect(rootPackages.getTagSeriesName()).toBe("v");
 			});
 
@@ -546,7 +546,7 @@ describe("EntityPackages", () => {
 					mockPackageJson({ name: "@repo/intershell", private: false }),
 				);
 
-				const intershellPackages = new EntityPackages("@repo/intershell");
+				const intershellPackages = new EntityPackage("@repo/intershell");
 				expect(intershellPackages.getTagSeriesName()).toBe("intershell-v");
 			});
 
@@ -556,7 +556,7 @@ describe("EntityPackages", () => {
 					mockPackageJson({ name: "my-app", private: false }),
 				);
 
-				const appPackages = new EntityPackages("my-app");
+				const appPackages = new EntityPackage("my-app");
 				expect(appPackages.getTagSeriesName()).toBe("my-app-v");
 			});
 
@@ -566,7 +566,7 @@ describe("EntityPackages", () => {
 					mockPackageJson({ private: true }),
 				);
 
-				const privatePackages = new EntityPackages("private-package");
+				const privatePackages = new EntityPackage("private-package");
 				expect(privatePackages.getTagSeriesName()).toBe(null);
 			});
 		});
@@ -583,7 +583,7 @@ describe("EntityPackages", () => {
 					}),
 				);
 
-				const result = EntityPackages.getRepoUrl();
+				const result = EntityPackage.getRepoUrl();
 				expect(result).toBe("https://github.com/user/repo.git");
 			});
 
@@ -599,7 +599,7 @@ describe("EntityPackages", () => {
 					}),
 				);
 
-				const result = EntityPackages.getRepoUrl();
+				const result = EntityPackage.getRepoUrl();
 				expect(result).toBe("https://github.com/user/repo.git");
 			});
 
@@ -610,7 +610,7 @@ describe("EntityPackages", () => {
 				// Mock packagesShell to return root package without repository for this test
 				mockPackagesShell.readJsonFile.mockImplementationOnce(() => packageJson);
 
-				const result = EntityPackages.getRepoUrl();
+				const result = EntityPackage.getRepoUrl();
 				expect(result).toBe("");
 			});
 
@@ -626,7 +626,7 @@ describe("EntityPackages", () => {
 					}),
 				);
 
-				const result = EntityPackages.getRepoUrl();
+				const result = EntityPackage.getRepoUrl();
 				expect(result).toBe("");
 			});
 
@@ -642,7 +642,7 @@ describe("EntityPackages", () => {
 					}),
 				);
 
-				const result = EntityPackages.getRepoUrl();
+				const result = EntityPackage.getRepoUrl();
 				expect(result).toBe("");
 			});
 
@@ -655,7 +655,7 @@ describe("EntityPackages", () => {
 					}),
 				);
 
-				const result = EntityPackages.getRepoUrl();
+				const result = EntityPackage.getRepoUrl();
 				expect(result).toBe("");
 			});
 
@@ -668,7 +668,7 @@ describe("EntityPackages", () => {
 					}),
 				);
 
-				const result = EntityPackages.getRepoUrl();
+				const result = EntityPackage.getRepoUrl();
 				expect(result).toBe("https://github.com/example/repo");
 			});
 		});
@@ -691,7 +691,7 @@ describe("EntityPackages", () => {
 					.mockResolvedValueOnce('{"name": "@repo/ui", "version": "1.0.0"}')
 					.mockResolvedValueOnce('{"name": "@repo/utils", "version": "1.0.0"}');
 
-				const result = await EntityPackages.getAllPackages();
+				const result = await EntityPackage.getAllPackages();
 
 				expect(result).toContain("root");
 				expect(result).toContain("test-app");
@@ -707,7 +707,7 @@ describe("EntityPackages", () => {
 					.mockResolvedValueOnce([]) // apps
 					.mockResolvedValueOnce([]); // packages
 
-				const result = await EntityPackages.getAllPackages();
+				const result = await EntityPackage.getAllPackages();
 				expect(result).toEqual(["root"]);
 			});
 
@@ -721,7 +721,7 @@ describe("EntityPackages", () => {
 					.mockResolvedValueOnce(false) // apps/invalid-app/package.json
 					.mockResolvedValueOnce(false); // packages/invalid-pkg/package.json
 
-				const result = await EntityPackages.getAllPackages();
+				const result = await EntityPackage.getAllPackages();
 				expect(result).toEqual(["root"]);
 			});
 		});
@@ -729,23 +729,23 @@ describe("EntityPackages", () => {
 
 	describe("edge cases and error handling", () => {
 		it("should handle package names with special characters", () => {
-			const specialPackages = new EntityPackages("test-package@1.0.0");
+			const specialPackages = new EntityPackage("test-package@1.0.0");
 			expect(specialPackages.getPath()).toBe("apps/test-package@1.0.0");
 		});
 
 		it("should handle empty package name", () => {
-			const emptyPackages = new EntityPackages("");
+			const emptyPackages = new EntityPackage("");
 			expect(emptyPackages.getPath()).toBe("apps/");
 		});
 
 		it("should handle very long package names", () => {
 			const longName = "a".repeat(1000);
-			const longPackages = new EntityPackages(longName);
+			const longPackages = new EntityPackage(longName);
 			expect(longPackages.getPath()).toBe(`apps/${longName}`);
 		});
 
 		it("should handle package names with spaces", () => {
-			const spacedPackages = new EntityPackages("test package");
+			const spacedPackages = new EntityPackage("test package");
 			expect(spacedPackages.getPath()).toBe("apps/test package");
 		});
 	});
@@ -764,7 +764,7 @@ describe("EntityPackages", () => {
 				.mockResolvedValueOnce('{"name": "test-app", "version": "1.0.0", "private": false}')
 				.mockResolvedValueOnce('{"name": "@repo/ui", "version": "1.0.0", "private": false}');
 
-			const result = await EntityPackages.getVersionedPackages();
+			const result = await EntityPackage.getVersionedPackages();
 			expect(Array.isArray(result)).toBe(true);
 			expect(result).toContain("test-app");
 			expect(result).toContain("@repo/ui");
@@ -797,7 +797,7 @@ describe("EntityPackages", () => {
 				.mockResolvedValueOnce('{"name": "test-app", "version": "1.0.0", "private": true}')
 				.mockResolvedValueOnce('{"name": "@repo/ui", "version": "1.0.0", "private": true}');
 
-			const result = await EntityPackages.getUnversionedPackages();
+			const result = await EntityPackage.getUnversionedPackages();
 			expect(Array.isArray(result)).toBe(true);
 			expect(result).toContain("test-app");
 			expect(result).toContain("@repo/ui");
@@ -818,7 +818,7 @@ describe("EntityPackages", () => {
 				.mockResolvedValueOnce('{"name": "test-app", "version": "1.0.0", "private": false}')
 				.mockResolvedValueOnce('{"name": "@repo/ui", "version": "1.0.0", "private": false}');
 
-			const result = await EntityPackages.validateAllPackages();
+			const result = await EntityPackage.validateAllPackages();
 			expect(Array.isArray(result)).toBe(true);
 			console.log(result);
 			expect(result).toHaveLength(3);

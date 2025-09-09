@@ -1,6 +1,6 @@
-import type { IConfig } from "./types";
+import type { IConfig } from "./intershell-config.types";
 
-export * from "./types";
+export * from "./intershell-config.types";
 
 export const defaultConfig = {
 	commit: {

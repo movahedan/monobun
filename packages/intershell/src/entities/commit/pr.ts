@@ -1,7 +1,7 @@
 import { EntityBranch, type ParsedBranch } from "../branch";
-import type { IConfig, PRCategory } from "../config/types";
 import { entitiesShell } from "../entities.shell";
-import type { ParsedCommitData, PRStats } from "./types";
+import type { IConfig, PRCategory } from "../intershell-config/intershell-config.types";
+import type { ParsedCommitData, PRStats } from "./commit.types";
 
 export class EntityPr {
 	private readonly defaultBranch: string | undefined;

@@ -63,7 +63,7 @@ describe("EntityCompose", () => {
 	});
 
 	// Store original methods to restore after tests
-	let originalEntityPackagesGetAllPackages: () => Promise<string[]>;
+	let originalEntityPackageGetAllPackages: () => Promise<string[]>;
 	let originalEntityAffectedGetAffectedPackages: (
 		baseSha?: string,
 		to?: string,
@@ -72,31 +72,31 @@ describe("EntityCompose", () => {
 	// Common mock setup for dependencies - now with proper cleanup
 	const setupMocks = async () => {
 		// Import modules
-		const { EntityPackages } = await import("../packages");
+		const { EntityPackage } = await import("../package");
 		const { EntityAffected } = await import("../affected");
 
 		// Store original methods if not already stored
-		if (!originalEntityPackagesGetAllPackages) {
-			originalEntityPackagesGetAllPackages = EntityPackages.getAllPackages;
+		if (!originalEntityPackageGetAllPackages) {
+			originalEntityPackageGetAllPackages = EntityPackage.getAllPackages;
 		}
 		if (!originalEntityAffectedGetAffectedPackages) {
 			originalEntityAffectedGetAffectedPackages = EntityAffected.getAffectedPackages;
 		}
 
-		// Mock EntityPackages.getAllPackages to avoid package.json errors
-		EntityPackages.getAllPackages = () => Promise.resolve(["root", "test-package"]);
+		// Mock EntityPackage.getAllPackages to avoid package.json errors
+		EntityPackage.getAllPackages = () => Promise.resolve(["root", "test-package"]);
 
 		// Mock EntityAffected.getAffectedPackages
 		EntityAffected.getAffectedPackages = () => Promise.resolve(["test-service", "db"]);
 
-		return { EntityPackages, EntityAffected };
+		return { EntityPackage, EntityAffected };
 	};
 
 	// Cleanup function to restore original methods
 	const cleanupMocks = async () => {
-		if (originalEntityPackagesGetAllPackages) {
-			const { EntityPackages } = await import("../packages");
-			EntityPackages.getAllPackages = originalEntityPackagesGetAllPackages;
+		if (originalEntityPackageGetAllPackages) {
+			const { EntityPackage } = await import("../package");
+			EntityPackage.getAllPackages = originalEntityPackageGetAllPackages;
 		}
 		if (originalEntityAffectedGetAffectedPackages) {
 			const { EntityAffected } = await import("../affected");
