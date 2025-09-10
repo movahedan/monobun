@@ -55,9 +55,9 @@ This document summarizes all completed work from the dependency analyzer, select
 
 ### **Phase 1: Advanced Features (Future)**
 
-#### **1.1 Semantic Versioning Enhancements**
-- **Predefined Version Tags**: Create a temp file to set pre-defined version bump type for each package
-- **Prerelease Support**: Alpha, beta, RC versions within each series
+#### **1.1 Semantic Versioning Enhancements** - ✅ COMPLETED
+- **Override Version Bump Types**: Added `--bump-type` option to `version-prepare` script for manual version control
+- **Prerelease Support**: Alpha, beta, RC versions within each series (Future)
 
 #### **1.2 Move Scripts to Intershell**
 - **Multi Command Feature**: A multi command feature for wrapshell - huge change!

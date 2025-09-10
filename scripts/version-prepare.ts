@@ -10,9 +10,12 @@ import {
 	EntityPackageCommits,
 	EntityPackageTags,
 	EntityPackageVersion,
+	type EntityPackageVersionBumpType,
 	EntityTag,
 } from "@repo/intershell/entities";
 import { $ } from "bun";
+
+const bumpTypeOptions = ["major", "minor", "patch", "none"] as EntityPackageVersionBumpType[];
 
 export const versionPrepare = createScript(
 	{
@@ -25,6 +28,8 @@ export const versionPrepare = createScript(
 			"bun run version-prepare.ts --from v1.0.0 --to HEAD",
 			"bun run version-prepare.ts --from-version 1.0.0 --to-version 1.2.0",
 			"bun run version-prepare.ts --package @repo/intershell --from-version 1.0.0",
+			"bun run version-prepare.ts --package root --bump-type major",
+			"bun run version-prepare.ts --bump-type patch",
 		],
 		options: [
 			{
@@ -69,6 +74,14 @@ export const versionPrepare = createScript(
 				required: false,
 				type: "string",
 				validator: createScript.validators.nonEmpty,
+			},
+			{
+				short: "-bt",
+				long: "--bump-type",
+				description: "Override version bump type (major, minor, patch, none)",
+				required: false,
+				type: "string",
+				validator: createScript.validators.enum(bumpTypeOptions),
 			},
 		],
 	} as const,
@@ -126,7 +139,8 @@ export const versionPrepare = createScript(
 
 		// Get commits and version data using EntityPackageVersion
 		const commits = await packageCommits.getCommitsInRange(from, toCommit);
-		const versionData = await packageVersion.calculateVersionData(commits);
+		const overrideBumpType = args["bump-type"] as "major" | "minor" | "patch" | "none" | undefined;
+		const versionData = await packageVersion.calculateVersionData(commits, overrideBumpType);
 
 		// Create changelog with commits
 		const template = new DefaultChangelogTemplate(packageName, prefix);

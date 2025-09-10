@@ -34,6 +34,8 @@ The Monobun monorepo uses a modern, automated versioning system that provides so
 ```bash
 # Prepare version and changelog
 bun run scripts/version-prepare.ts --package root
+# Override version bump type manually
+bun run scripts/version-prepare.ts --package root --bump-type major
 # Use version ranges for targeted changelog generation
 bun run scripts/version-prepare.ts --from-version 1.0.0 --to-version 1.2.0
 # Apply changes without pushing
@@ -250,6 +252,33 @@ git commit -m "release(api): api-v1.2.0 [minor]
 # No version bump
 git commit -m "docs: update API documentation"
 ```
+
+## 🎯 Manual Version Override
+
+Sometimes you need to override the automatic version bump calculation. Use the `--bump-type` option to manually specify the version bump type:
+
+### **Override Examples**
+
+```bash
+# Force a major version bump
+bun run scripts/version-prepare.ts --package root --bump-type major
+
+# Force a minor version bump  
+bun run scripts/version-prepare.ts --package api --bump-type minor
+
+# Force a patch version bump
+bun run scripts/version-prepare.ts --package ui --bump-type patch
+
+# Prevent any version bump
+bun run scripts/version-prepare.ts --package utils --bump-type none
+```
+
+### **When to Use Override**
+
+- **Major**: When you want to signal a breaking change regardless of commit messages
+- **Minor**: When you want to add new features without breaking changes
+- **Patch**: When you want to make bug fixes or small improvements
+- **None**: When you want to generate changelog without version changes
 
 ## 🚀 GitHub Actions Integration
 

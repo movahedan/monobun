@@ -114,4 +114,28 @@ describe("EntityPackageVersion", () => {
 		const versionData = await EntityPackageVersion.calculateVersionData(commits);
 		expect(versionData.bumpType).toBe("minor");
 	});
+
+	test("should use override bump type when provided", async () => {
+		const EntityPackageVersion = createEntityPackageVersion("api");
+
+		const commits: ParsedCommitData[] = [
+			{
+				message: { type: "feat", description: "add new feature", isBreaking: false },
+				files: ["src/feature.ts"],
+			} as ParsedCommitData,
+		];
+
+		// Test with major override (should override the automatic minor bump)
+		const versionDataMajor = await EntityPackageVersion.calculateVersionData(commits, "major");
+		expect(versionDataMajor.bumpType).toBe("major");
+
+		// Test with patch override (should override the automatic minor bump)
+		const versionDataPatch = await EntityPackageVersion.calculateVersionData(commits, "patch");
+		expect(versionDataPatch.bumpType).toBe("patch");
+
+		// Test with none override (should prevent version bump)
+		const versionDataNone = await EntityPackageVersion.calculateVersionData(commits, "none");
+		expect(versionDataNone.bumpType).toBe("none");
+		expect(versionDataNone.shouldBump).toBe(false);
+	});
 });
