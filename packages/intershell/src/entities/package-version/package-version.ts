@@ -22,7 +22,10 @@ export class EntityPackageVersion {
 		this.packageTags = packageTags;
 	}
 
-	async calculateVersionData(commits: ParsedCommitData[]): Promise<EntityPackageVersionData> {
+	async calculateVersionData(
+		commits: ParsedCommitData[],
+		overrideBumpType?: EntityPackageVersionBumpType,
+	): Promise<EntityPackageVersionData> {
 		const versionOnDisk = this.package.readVersion() || "0.0.0";
 		const currentVersion = (await this.packageTags.getLatestPackageVersionInHistory()) || "0.0.0";
 
@@ -60,7 +63,7 @@ export class EntityPackageVersion {
 			};
 		}
 
-		const bumpType = await this.calculateBumpType(commits);
+		const bumpType = overrideBumpType || (await this.calculateBumpType(commits));
 		if (bumpType === "none") {
 			return {
 				currentVersion,
