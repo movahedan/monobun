@@ -14,7 +14,7 @@
 	},
 	"dependencies": {
 		"@astrojs/tailwind": "6.0.2",
-		"@tailwindcss/typography": "0.5.16",
+		"@tailwindcss/typography": "0.5.18",
 		"astro": "4.16.19",
 		"lucide-astro": "0.536.0",
 		"marked": "16.1.2"
