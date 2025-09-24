@@ -63,7 +63,7 @@
 		"@biomejs/biome": "2.2.4",
 		"@repo/intershell": "workspace:*",
 		"lefthook": "1.12.4",
-		"turbo": "2.5.7",
+		"turbo": "2.5.8",
 		"typescript": "5.9.2"
 	},
 	"overrides": {
