@@ -29,7 +29,7 @@
 	"peerDependencies": {
 		"@biomejs/biome": "2.1.2",
 		"lefthook": "1.12.4",
-		"turbo": "2.5.7",
+		"turbo": "2.5.8",
 		"typescript": "5.9.2"
 	},
 	"keywords": [
