@@ -67,7 +67,7 @@
 		"typescript": "5.9.2"
 	},
 	"overrides": {
-		"@types/react": "19.1.14",
+		"@types/react": "19.1.15",
 		"@types/react-dom": "19.1.9",
 		"typescript": "5.9.2",
 		"react": "19.1.1",
