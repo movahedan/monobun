@@ -8,7 +8,7 @@
 		"./react-library.json": "./react-library.json"
 	},
 	"peerDependencies": {
-		"typescript": "5.9.2",
+		"typescript": "5.9.3",
 		"bun-types": "1.2.23"
 	}
 }
