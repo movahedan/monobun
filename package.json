@@ -64,12 +64,12 @@
 		"@repo/intershell": "workspace:*",
 		"lefthook": "1.12.4",
 		"turbo": "2.5.8",
-		"typescript": "5.9.2"
+		"typescript": "5.9.3"
 	},
 	"overrides": {
 		"@types/react": "19.1.16",
 		"@types/react-dom": "19.1.9",
-		"typescript": "5.9.2",
+		"typescript": "5.9.3",
 		"react": "19.1.1",
 		"react-dom": "19.1.1",
 		"vite": "7.1.7"
