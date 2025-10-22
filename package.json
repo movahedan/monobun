@@ -60,7 +60,7 @@
 		"ci:attach:service-ports": "bun run scripts/ci-attach-service-ports.ts"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.2.6",
+		"@biomejs/biome": "2.2.7",
 		"@repo/intershell": "workspace:*",
 		"lefthook": "1.12.4",
 		"turbo": "2.5.8",
