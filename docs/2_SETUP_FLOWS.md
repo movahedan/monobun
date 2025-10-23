@@ -91,7 +91,7 @@ The new setup system provides sophisticated user experience:
 The setup system uses modular, reusable components:
 
 ```
-📁 scripts/entities/
+📁 packages/intershell/src/entities/
 ├── compose.ts           # 🐳 Docker Compose parsing and validation
 ├── workspace.ts         # 🗂️ Workspace package discovery
 ├── package-json.ts      # 📦 Package.json operations
@@ -364,7 +364,7 @@ bun install
 
 # Permission issues
 sudo chown -R $USER:$USER .
-chmod +x scripts/*.ts
+# CLI commands are now available via package.json scripts
 
 # Cache issues
 bun run check:fix && bun run check:types --affected

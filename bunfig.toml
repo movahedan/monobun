@@ -30,6 +30,10 @@ exact = true
 [install.scopes]
 # Configure scopes if needed
 
+[install.registries]
+# Configure local workspace registry
+"@repo" = { url = "file:./packages" }
+
 [test]
 # Preload centralized test setup from test-preset package
 preload = ["./packages/test-preset/happydom.ts", "./packages/test-preset/testing-library.ts", "./packages/test-preset/test-setup.ts"]

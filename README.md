@@ -108,7 +108,7 @@ Everything you need to build rock-solid applications is right here! We've kept i
 
 ### **🛠️ Development Tools**
 [![Scripting Guide](https://img.shields.io/badge/🐚%20Scripting%20Guide-495057?style=for-the-badge)](./docs/4_INTERSHELL.md)
-[![Repository Scripts](https://img.shields.io/badge/🛠️%20Repository%20Scripts-495057?style=for-the-badge)](./scripts/README.md)
+[![CLI Commands](https://img.shields.io/badge/🛠️%20CLI%20Commands-495057?style=for-the-badge)](./packages/intershell/README.md)
 [![Docker & DevContainer](https://img.shields.io/badge/🐳%20Docker%20%26%20DevContainer-495057?style=for-the-badge)](./docs/5_DOCKER.md)
 [![Auto Versioning](https://img.shields.io/badge/🏷️%20Auto%20Versioning-495057?style=for-the-badge)](./docs/7_AUTO_VERSIONING.md)
 

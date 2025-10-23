@@ -59,10 +59,14 @@ This document summarizes all completed work from the dependency analyzer, select
 - **Override Version Bump Types**: Added `--bump-type` option to `version-prepare` script for manual version control
 - **Prerelease Support**: Alpha, beta, RC versions within each series (Future)
 
-#### **1.2 Move Scripts to Intershell**
-- **Multi Command Feature**: A multi command feature for wrapshell - huge change!
-- **Create Better Scripts**: Improve script quality and functionality
-- **Scripts Migration**: Move the scripts folder to intershell
+#### **1.2 OCLIF Migration** - ⏳ IN PROGRESS
+- **OCLIF Framework Integration**: Migrate all scripts to OCLIF-based multi-command CLI
+- **3+ Level Nested Commands**: Support for `intershell dev:setup:docker` style commands
+- **Type-Safe Command Options**: Full TypeScript support with IntelliSense
+- **Plugin System**: Extensible architecture for future enhancements
+- **Scripts Migration**: Move all 19 scripts from `scripts/` folder to `packages/intershell/src/commands/`
+- **Automatic Help Generation**: Built-in help for all commands and subcommands
+- **Detailed Plan**: See [OCLIF Migration Plan](./28_OCLIF_MIGRATION_PLAN.md) for complete implementation phases
 
 #### **1.3 Tag Series Expansion**
 - **Series Migration**: Convert unversioned packages to versioned

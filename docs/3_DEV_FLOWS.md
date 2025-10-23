@@ -161,15 +161,15 @@ bun run check:types
 
 ```bash
 # Prepare changes
-bun run scripts/version-prepare.ts
+bun run version:prepare
 # Preview changes
-bun run scripts/version-prepare.ts --dry-run
+bun run version:prepare --dry-run
 # Manual version preparation
-bun run scripts/version-prepare.ts --package root
+bun run version:prepare --package root
 # Apply version changes to all packages
-bun run scripts/version-apply.ts
+bun run version:apply
 # Apply version changes to specific package
-bun run scripts/version-apply.ts --package api
+bun run version:apply --package api
 ```
 
 ## 🚀 CI/CD Integration
@@ -183,12 +183,12 @@ Automatically validates changes and determines affected packages:
 - name: 🔍 - Get affected packages
   id: affected-packages
   run: |
-    bun run scripts/ci-attach-affected.ts --mode turbo --output-id affected-packages
+    bun run ci:attach:affected --mode turbo --output-id affected-packages
 
 - name: 🔍 - Get affected services
   id: affected-services
   run: |
-    bun run scripts/ci-attach-affected.ts --mode docker --output-id affected-services
+    bun run ci:attach:affected --mode docker --output-id affected-services
 ```
 
 #### **Version Workflow**
@@ -206,10 +206,10 @@ The system automatically detects which packages are affected by changes:
 
 ```bash
 # Get affected packages (Turbo mode)
-bun run scripts/ci-attach-affected.ts --mode turbo --output-id affected-packages
+bun run ci:attach:affected --mode turbo --output-id affected-packages
 
 # Get affected services (Docker mode)
-bun run scripts/ci-attach-affected.ts --mode docker --output-id affected-services
+bun run ci:attach:affected --mode docker --output-id affected-services
 ```
 
 ### **Service Port Management**
@@ -218,7 +218,7 @@ Automatically attaches service ports to GitHub Actions:
 
 ```bash
 # Attach service ports
-bun run scripts/ci-attach-service-ports.ts --output-id service-ports
+bun run ci:attach:service-ports --output-id service-ports
 ```
 
 ### **Changelog Generation** 🆕
@@ -227,10 +227,10 @@ The changelog system now provides comprehensive commit tracking:
 
 ```bash
 # Generate changelog for version range
-bun run scripts/version-prepare.ts --package root --from v0.0.2 --to HEAD
+bun run version:prepare --package root --from v0.0.2 --to HEAD
 
 # Generate changelog using version ranges (NEW!)
-bun run scripts/version-prepare.ts --package root --from-version 0.0.2 --to-version 0.1.0
+bun run version:prepare --package root --from-version 0.0.2 --to-version 0.1.0
 
 # Features:
 # - PR commit detection and grouping
@@ -347,8 +347,8 @@ bun run version:ci
 
 # CI utilities
 bun run ci:act
-bun run scripts/ci-attach-affected.ts
-bun run scripts/ci-attach-service-ports.ts
+bun run ci:attach:affected
+bun run ci:attach:service-ports
 ```
 
 ## 🐳 Docker & DevContainer
@@ -490,7 +490,7 @@ bun run dev:setup --skip-health-check
 bun run version:prepare --dry-run
 
 # Check affected packages
-bun run scripts/ci-attach-affected.ts --mode turbo
+bun run ci:attach:affected --mode turbo
 ```
 
 ### **Reset & Recovery**

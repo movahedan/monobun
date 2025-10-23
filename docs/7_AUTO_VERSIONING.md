@@ -33,15 +33,15 @@ The Monobun monorepo uses a modern, automated versioning system that provides so
 
 ```bash
 # Prepare version and changelog
-bun run scripts/version-prepare.ts --package root
+bun run version:prepare --package root
 # Override version bump type manually
-bun run scripts/version-prepare.ts --package root --bump-type major
+bun run version:prepare --package root --bump-type major
 # Use version ranges for targeted changelog generation
-bun run scripts/version-prepare.ts --from-version 1.0.0 --to-version 1.2.0
+bun run version:prepare --from-version 1.0.0 --to-version 1.2.0
 # Apply changes without pushing
-bun run scripts/version-apply.ts --no-push
+bun run version:apply --no-push
 # Preview complete workflow
-bun run scripts/version-ci.ts --dry-run
+bun run version:ci --dry-run
 ```
 
 ## 🏗️ System Architecture
@@ -49,7 +49,7 @@ bun run scripts/version-ci.ts --dry-run
 Our versioning system consists of 3 main scripts with an entity-based architecture:
 
 ```
-📁 scripts/
+📁 packages/intershell/src/commands/version/
 ├── version-ci.ts        # 🎯 Main orchestrator (complete CI flow)
 ├── version-prepare.ts   # 🔧 Version preparation and changelog generation
 └── version-apply.ts     # 🚀 Version application and git operations
@@ -102,19 +102,19 @@ Prepares version bumps and generates changelogs for packages.
 
 ```bash
 # Prepare all packages
-bun run scripts/version-prepare.ts
+bun run version:prepare
 
 # Prepare specific package
-bun run scripts/version-prepare.ts --package root
+bun run version:prepare --package root
 
 # Custom commit range
-bun run scripts/version-prepare.ts --from v1.0.0 --to HEAD
+bun run version:prepare --from v1.0.0 --to HEAD
 
 # Version-based ranges (automatically converts to appropriate tags)
-bun run scripts/version-prepare.ts --from-version 1.0.0 --to-version 1.2.0
+bun run version:prepare --from-version 1.0.0 --to-version 1.2.0
 
 # Package-specific version ranges
-bun run scripts/version-prepare.ts --package @repo/intershell --from-version 1.0.0
+bun run version:prepare --package @repo/intershell --from-version 1.0.0
 ```
 
 **Features:**
@@ -132,16 +132,16 @@ Applies version changes and creates git tags.
 
 ```bash
 # Apply with default message
-bun run scripts/version-apply.ts
+bun run version:apply
 
 # Apply to specific package only
-bun run scripts/version-apply.ts --package api
+bun run version:apply --package api
 
 # Custom tag message
-bun run scripts/version-apply.ts --message "Release version 1.2.3"
+bun run version:apply --message "Release version 1.2.3"
 
 # Don't push tag
-bun run scripts/version-apply.ts --no-push
+bun run version:apply --no-push
 ```
 
 **Features:**
@@ -155,7 +155,7 @@ bun run scripts/version-apply.ts --no-push
 
 ### 1. **Preparation Phase**
 ```bash
-bun run scripts/version-prepare.ts
+bun run version:prepare
 ```
 
 **What happens:**
@@ -171,10 +171,10 @@ Complete CI workflow for automated versioning.
 
 ```bash
 # Preview CI workflow
-bun run scripts/version-ci.ts --dry-run
+bun run version:ci --dry-run
 
 # Execute full workflow
-bun run scripts/version-ci.ts
+bun run version:ci
 ```
 
 **Features:**
@@ -187,7 +187,7 @@ bun run scripts/version-ci.ts
 
 ### 1. **Preparation Phase**
 ```bash
-bun run scripts/version-prepare.ts
+bun run version:prepare
 ```
 
 **What happens:**
@@ -198,7 +198,7 @@ bun run scripts/version-prepare.ts
 
 ### 2. **Application Phase**
 ```bash
-bun run scripts/version-apply.ts
+bun run version:apply
 ```
 
 **What happens:**
@@ -209,7 +209,7 @@ bun run scripts/version-apply.ts
 
 ### 3. **CI Integration**
 ```bash
-bun run scripts/version-ci.ts
+bun run version:ci
 ```
 
 **What happens:**
@@ -261,16 +261,16 @@ Sometimes you need to override the automatic version bump calculation. Use the `
 
 ```bash
 # Force a major version bump
-bun run scripts/version-prepare.ts --package root --bump-type major
+bun run version:prepare --package root --bump-type major
 
 # Force a minor version bump  
-bun run scripts/version-prepare.ts --package api --bump-type minor
+bun run version:prepare --package api --bump-type minor
 
 # Force a patch version bump
-bun run scripts/version-prepare.ts --package ui --bump-type patch
+bun run version:prepare --package ui --bump-type patch
 
 # Prevent any version bump
-bun run scripts/version-prepare.ts --package utils --bump-type none
+bun run version:prepare --package utils --bump-type none
 ```
 
 ### **When to Use Override**
@@ -290,12 +290,12 @@ The Check workflow automatically validates changes and determines affected packa
 - name: 🔍 - Get affected packages
   id: affected-packages
   run: |
-    bun run scripts/ci-attach-affected.ts --mode turbo --output-id affected-packages
+    bun run ci:attach:affected --mode turbo --output-id affected-packages
 
 - name: 🔍 - Get affected services
   id: affected-services
   run: |
-    bun run scripts/ci-attach-affected.ts --mode docker --output-id affected-services
+    bun run ci:attach:affected --mode docker --output-id affected-services
 ```
 
 ### **Version Workflow**
@@ -314,10 +314,10 @@ The system automatically detects which packages are affected by changes:
 
 ```bash
 # Get affected packages (Turbo mode)
-bun run scripts/ci-attach-affected.ts --mode turbo --output-id affected-packages
+bun run ci:attach:affected --mode turbo --output-id affected-packages
 
 # Get affected services (Docker mode)
-bun run scripts/ci-attach-affected.ts --mode docker --output-id affected-services
+bun run ci:attach:affected --mode docker --output-id affected-services
 ```
 
 ## 🛠️ Manual Operations
@@ -326,29 +326,29 @@ bun run scripts/ci-attach-affected.ts --mode docker --output-id affected-service
 
 ```bash
 # Prepare specific package
-bun run scripts/version-prepare.ts --package my-package
+bun run version:prepare --package my-package
 
 # Apply version changes to specific package
-bun run scripts/version-apply.ts --package my-package
+bun run version:apply --package my-package
 
 # Apply version changes with custom message
-bun run scripts/version-apply.ts --package my-package --message "Release version 1.2.3"
+bun run version:apply --package my-package --message "Release version 1.2.3"
 ```
 
 ### **Custom Commit Ranges**
 
 ```bash
 # Version from specific tag
-bun run scripts/version-prepare.ts --from v1.0.0 --to HEAD
+bun run version:prepare --from v1.0.0 --to HEAD
 
 # Version between commits
-bun run scripts/version-prepare.ts --from abc123 --to def456
+bun run version:prepare --from abc123 --to def456
 
 # Version-based ranges (NEW!)
-bun run scripts/version-prepare.ts --from-version 0.1.0 --to-version 0.2.0
+bun run version:prepare --from-version 0.1.0 --to-version 0.2.0
 
 # Package-specific version ranges (NEW!)
-bun run scripts/version-prepare.ts --package @repo/intershell --from-version 1.0.0 --to-version 1.1.0
+bun run version:prepare --package @repo/intershell --from-version 1.0.0 --to-version 1.1.0
 ```
 
 ### **🆕 Version Switch Benefits**
@@ -364,10 +364,10 @@ The new `--from-version` and `--to-version` switches provide several advantages:
 
 ```bash
 # Examples of automatic tag conversion
-bun run scripts/version-prepare.ts --from-version 1.0.0
+bun run version:prepare --from-version 1.0.0
 # → Converts to: v1.0.0 (for root package)
 
-bun run scripts/version-prepare.ts --package @repo/intershell --from-version 1.0.0  
+bun run version:prepare --package @repo/intershell --from-version 1.0.0  
 # → Converts to: intershell-v1.0.0 (for intershell package)
 ```
 
@@ -375,13 +375,13 @@ bun run scripts/version-prepare.ts --package @repo/intershell --from-version 1.0
 
 ```bash
 # Process specific package
-bun run scripts/version-prepare.ts --package root
+bun run version:prepare --package root
 
 # Process all packages
-bun run scripts/version-prepare.ts
+bun run version:prepare
 
 # Custom commit range
-bun run scripts/version-prepare.ts --from v1.0.0 --to HEAD
+bun run version:prepare --from v1.0.0 --to HEAD
 ```
 
 ## 📋 Best Practices
@@ -421,9 +421,9 @@ bun run scripts/version-prepare.ts --from v1.0.0 --to HEAD
 ```json
 {
   "scripts": {
-    "version:prepare": "bun run scripts/version-prepare.ts",
-    "version:apply": "bun run scripts/version-apply.ts",
-    "version:ci": "bun run scripts/version-ci.ts",
+    "version:prepare": "bun run version:prepare",
+    "version:apply": "bun run version:apply",
+    "version:ci": "bun run version:ci",
   }
 }
 ```
@@ -458,13 +458,13 @@ git config --global user.email "actions@github.com"
 
 ```bash
 # Process specific package for testing
-bun run scripts/version-prepare.ts --package root --dry-run
+bun run version:prepare --package root --dry-run
 
 # Process all packages to see full output
-bun run scripts/version-prepare.ts --dry-run
+bun run version:prepare --dry-run
 
 # Custom commit range for testing
-bun run scripts/version-prepare.ts --from HEAD~5 --to HEAD --dry-run
+bun run version:prepare --from HEAD~5 --to HEAD --dry-run
 ```
 
 ### **Rollback**

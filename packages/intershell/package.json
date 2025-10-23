@@ -7,9 +7,23 @@
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
+	"bin": {
+		"intershell": "./dist/index.js"
+	},
 	"exports": {
 		"./core": "./src/core/index.ts",
+		"./interactive": "./src/interactive/index.ts",
+		".": "./index.ts",
 		"./entities": "./src/entities/index.ts"
+	},
+	"oclif": {
+		"bin": "intershell",
+		"dirname": "intershell",
+		"commands": "./dist/commands",
+		"plugins": [
+			"@oclif/plugin-help",
+			"@oclif/plugin-version"
+		]
 	},
 	"files": [
 		"dist",
@@ -19,10 +33,11 @@
 	"packageManager": "bun@1.2.21",
 	"scripts": {
 		"check:types": "tsc --noEmit",
-		"build": "tsc",
-		"prebuild": "bun run ../../scripts/update-package-json.ts"
+		"build": "rm -rf dist && tsc && echo '#!/usr/bin/env bun' > dist/index.js.tmp && tail -n +2 dist/index.js >> dist/index.js.tmp && mv dist/index.js.tmp dist/index.js",
+		"postbuild": "bun run dist/index.js update-package-json"
 	},
 	"devDependencies": {
+		"@oclif/dev-cli": "1.26.10",
 		"@repo/test-preset": "workspace:*",
 		"@repo/typescript-config": "workspace:*"
 	},
@@ -45,5 +60,10 @@
 		"entities",
 		"commit-management",
 		"branch-validation"
-	]
+	],
+	"dependencies": {
+		"@oclif/core": "4.5.4",
+		"@oclif/plugin-help": "6.2.33",
+		"@oclif/plugin-version": "2.2.33"
+	}
 }
