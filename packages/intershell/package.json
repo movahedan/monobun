@@ -64,6 +64,6 @@
 	"dependencies": {
 		"@oclif/core": "4.5.4",
 		"@oclif/plugin-help": "6.2.33",
-		"@oclif/plugin-version": "2.2.33"
+		"@oclif/plugin-version": "2.2.36"
 	}
 }
