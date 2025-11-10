@@ -22,8 +22,8 @@
 	"devDependencies": {
 		"@astrojs/check": "0.9.5",
 		"@repo/typescript-config": "workspace:*",
-		"@tailwindcss/vite": "4.1.15",
-		"tailwindcss": "4.1.15",
+		"@tailwindcss/vite": "4.1.17",
+		"tailwindcss": "4.1.17",
 		"typescript": "5.9.3"
 	}
 }
