@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "root",
@@ -92,7 +93,7 @@
       },
       "dependencies": {
         "@oclif/core": "4.5.4",
-        "@oclif/plugin-help": "6.2.33",
+        "@oclif/plugin-help": "6.2.36",
         "@oclif/plugin-version": "2.2.33",
       },
       "devDependencies": {
@@ -431,7 +432,7 @@
 
     "@oclif/parser": ["@oclif/parser@3.8.17", "", { "dependencies": { "@oclif/errors": "^1.3.6", "@oclif/linewrap": "^1.0.0", "chalk": "^4.1.0", "tslib": "^2.6.2" } }, "sha512-l04iSd0xoh/16TGVpXb81Gg3z7tlQGrEup16BrVLsZBK6SEYpYHRJZnM32BwZrHI97ZSFfuSwVlzoo6HdsaK8A=="],
 
-    "@oclif/plugin-help": ["@oclif/plugin-help@6.2.33", "", { "dependencies": { "@oclif/core": "^4" } }, "sha512-9L07S61R0tuXrURdLcVtjF79Nbyv3qGplJ88DVskJBxShbROZl3hBG7W/CNltAK3cnMPlXV8K3kKh+C0N0p4xw=="],
+    "@oclif/plugin-help": ["@oclif/plugin-help@6.2.36", "", { "dependencies": { "@oclif/core": "^4" } }, "sha512-NBQIg5hEMhvdbi4mSrdqRGl5XJ0bqTAHq6vDCCCDXUcfVtdk3ZJbSxtRVWyVvo9E28vwqu6MZyHOJylevqcHbA=="],
 
     "@oclif/plugin-version": ["@oclif/plugin-version@2.2.33", "", { "dependencies": { "@oclif/core": "^4", "ansis": "^3.17.0" } }, "sha512-Yh535aui8wOyInAEqKH9qOdYY81LcI+Uq7YWfkTbEXeR3XfaZ094xw5WubDntvlC17nJA1kYrSsdadsT6jMdtw=="],
 
