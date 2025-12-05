@@ -1,4 +1,4 @@
-import { defaultConfig, type IConfig } from "@repo/intershell/entities";
+import { defaultConfig, type IConfig } from "intershell/entities";
 
 export default {
 	...defaultConfig,

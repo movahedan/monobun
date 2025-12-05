@@ -96,7 +96,6 @@
 					"admin",
 					"api",
 					"@repo/ui",
-					"@repo/intershell",
 					"@repo/utils",
 					"@repo/typescript-config",
 					"@repo/test-preset"

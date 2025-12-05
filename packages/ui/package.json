@@ -20,7 +20,7 @@
 		"check:types": "tsc --noEmit",
 		"dev": "bun run scripts/dev.ts",
 		"dev:storybook": "bunx --bun storybook dev --no-open",
-		"prebuild": "bun run ../../packages/intershell/dist/index.js update-package-json",
+		"prebuild": "intershell update-package-json",
 		"build:storybook": "bunx --bun storybook build -o dist-storybook",
 		"start": "bun run build:storybook && bunx --bun serve dist-storybook"
 	},

@@ -20,8 +20,7 @@
 			"!**/.next",
 			"!**/.vercel",
 			"!**/.act",
-			"!.act-event.json",
-			"!packages/intershell/src/interactive"
+			"!.act-event.json"
 		]
 	},
 	"formatter": {
