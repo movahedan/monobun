@@ -1,6 +1,13 @@
-# 🎮 InterShell: CLI Framework Architecture
+# 🗂️ Archived: InterShell Architecture (moved to external package)
 
-> **Comprehensive architecture and implementation guide for the InterShell CLI framework**
+> This document described the internal InterShell implementation when it lived in this monorepo. InterShell has been moved to its own repository and is consumed here as a published package. Internal implementation details in this document are no longer applicable.
+
+Recommended reading instead:
+- Development Flows: `docs/3_DEV_FLOWS.md`
+- Setup Flows: `docs/2_SETUP_FLOWS.md`
+- Auto Versioning: `docs/7_AUTO_VERSIONING.md`
+
+The rest of this document is retained for historical context only and should not be used for implementation guidance.
 
 ## 📋 Table of Contents
 

@@ -1,6 +1,6 @@
-# 🚀 InterShell CLI Framework
+# 🗂️ Archived: InterShell CLI Framework (moved to external package)
 
-> **Next generation CLI framework for building interactive command-line applications**
+> InterShell is now maintained in its own repository and consumed here as a published package. This document described the former internal implementation and is retained only for historical context. For current usage, refer to the repository scripts in this monorepo and the published package’s documentation.
 
 ## 📋 Table of Contents
 

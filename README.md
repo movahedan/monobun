@@ -18,11 +18,11 @@
 <br />
 <img src="https://img.shields.io/badge/Entity%20Driven-Advanced%20Control-00D4AA?style=for-the-badge&logo=turborepo&logoColor=white" alt="Entity Driven" />
 <img src="https://img.shields.io/badge/Smart%20Scripting-Optimized%20Workflows-8B5CF6?style=for-the-badge&logo=turborepo&logoColor=white" alt="Smart Scripting" />
-<img src="https://img.shields.io/badge/InterShell-CLI%20Framework-FF6B35?style=for-the-badge&logo=typescript&logoColor=white" alt="InterShell CLI Framework" />
+<!-- InterShell badge removed: now an external package -->
 
 > **Full monorepo control** with **entity-driven architecture**, **intelligent automation**, and **next-generation CLI framework**
 
-Take complete command of your monorepo! We've built powerful entity classes and smart scripting that just works. From lint-staged hooks and commit linters to interactive CLI tools, automated version management, and changelog generation - everything is custom-built and optimized. Plus, **InterShell CLI framework** provides page-based navigation, state management, and zero-dependency CLI development. No more fighting with tools and configs - you're in control, and everything is optimized for speed and simplicity.
+Take complete command of your monorepo! We've built powerful entity classes and smart scripting that just works. From lint-staged hooks and commit linters to CLI tools, automated version management, and changelog generation - everything is optimized for speed and simplicity.
 
 </div>
 
@@ -107,10 +107,8 @@ Everything you need to build rock-solid applications is right here! We've kept i
 [![Development Flows](https://img.shields.io/badge/🔧%20Development%20Flows-495057?style=for-the-badge)](./docs/3_DEV_FLOWS.md)
 
 ### **🛠️ Development Tools**
-[![Scripting Guide](https://img.shields.io/badge/🐚%20Scripting%20Guide-495057?style=for-the-badge)](./docs/4_INTERSHELL.md)
-[![CLI Commands](https://img.shields.io/badge/🛠️%20CLI%20Commands-495057?style=for-the-badge)](./packages/intershell/README.md)
-[![Docker & DevContainer](https://img.shields.io/badge/🐳%20Docker%20%26%20DevContainer-495057?style=for-the-badge)](./docs/5_DOCKER.md)
 [![Auto Versioning](https://img.shields.io/badge/🏷️%20Auto%20Versioning-495057?style=for-the-badge)](./docs/7_AUTO_VERSIONING.md)
+[![Docker & DevContainer](https://img.shields.io/badge/🐳%20Docker%20%26%20DevContainer-495057?style=for-the-badge)](./docs/5_DOCKER.md)
 
 ### **🤖 AI & Automation**
 [![Renovate Configuration](https://img.shields.io/badge/🔄%20Renovate-495057?style=for-the-badge)](./docs/6_RENOVATE.md)

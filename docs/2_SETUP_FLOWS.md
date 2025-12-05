@@ -88,15 +88,7 @@ The new setup system provides sophisticated user experience:
 
 ### **Entity-Based Architecture**
 
-The setup system uses modular, reusable components:
-
-```
-📁 packages/intershell/src/entities/
-├── compose.ts           # 🐳 Docker Compose parsing and validation
-├── workspace.ts         # 🗂️ Workspace package discovery
-├── package-json.ts      # 📦 Package.json operations
-└── affected.ts          # 🔍 Affected package detection
-```
+The setup system uses modular, reusable components for Docker orchestration, workspace/package discovery, package.json operations, and affected package detection.
 
 ## 🔧 Local Development Setup
 

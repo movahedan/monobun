@@ -88,19 +88,7 @@ bun run version:apply
 
 ### **Entity-Based Architecture**
 
-The script system uses modular, reusable components from the `@repo/intershell` package:
-
-```
-📁 packages/intershell/src/entities/
-├── commit/              # 📝 Commit parsing and validation
-├── changelog/           # 📋 Changelog generation
-├── package-json/        # 📦 Package.json operations
-├── workspace/           # 🗂️ Workspace management
-├── compose/             # 🐳 Docker Compose parsing
-├── affected/            # 🔍 Affected package detection
-├── tag/                 # 🏷️ Git tag operations
-└── packages/            # 📦 Package management
-```
+The script system uses modular, reusable components to implement commit/changelog/versioning, workspace/package utilities, and CI helpers.
 
 ## 🔧 Development Workflows
 
@@ -272,8 +260,8 @@ bun test --watch
 # Test specific package
 bun test packages/my-package
 
-# Test intershell package (with proper isolation)
-bun test packages/intershell/src/entities/
+# Test a specific area (with proper isolation)
+bun test packages/utils/src/
 ```
 
 ### **Test Isolation & Mocking**

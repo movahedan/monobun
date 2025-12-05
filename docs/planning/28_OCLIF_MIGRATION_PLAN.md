@@ -1,6 +1,6 @@
-# 🚀 OCLIF Migration Plan
+# 🗂️ Archived: OCLIF Migration Plan (internal InterShell)
 
-> **Migration of scripts folder to OCLIF-based multi-command CLI in intershell package**
+> This document covered migrating internal scripts into an internal InterShell package. InterShell now lives as an external published package and internal implementation details here are no longer applicable. Use the repository scripts as documented in the main docs.
 
 ## 📋 Table of Contents
 

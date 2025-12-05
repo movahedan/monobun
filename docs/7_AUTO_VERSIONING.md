@@ -46,21 +46,7 @@ bun run version:ci --dry-run
 
 ## 🏗️ System Architecture
 
-Our versioning system consists of 3 main scripts with an entity-based architecture:
-
-```
-📁 packages/intershell/src/commands/version/
-├── version-ci.ts        # 🎯 Main orchestrator (complete CI flow)
-├── version-prepare.ts   # 🔧 Version preparation and changelog generation
-└── version-apply.ts     # 🚀 Version application and git operations
-
-📁 packages/intershell/src/entities/
-├── changelog/           # 🏛️ Changelog generation and formatting
-├── commit/              # 📝 Commit parsing and validation
-├── package-json/        # 📦 Package.json operations
-├── tag/                 # 🏷️ Git tag management
-└── workspace/           # 🗂️ Workspace package discovery
-```
+The versioning flow is provided via repository scripts that orchestrate changelog generation, version bump calculation, and git tag management. Internals are abstracted behind the CLI and not tied to any internal package structure.
 
 ### Core Components
 
@@ -114,7 +100,7 @@ bun run version:prepare --from v1.0.0 --to HEAD
 bun run version:prepare --from-version 1.0.0 --to-version 1.2.0
 
 # Package-specific version ranges
-bun run version:prepare --package @repo/intershell --from-version 1.0.0
+bun run version:prepare --package ui --from-version 1.0.0
 ```
 
 **Features:**
@@ -348,7 +334,7 @@ bun run version:prepare --from abc123 --to def456
 bun run version:prepare --from-version 0.1.0 --to-version 0.2.0
 
 # Package-specific version ranges (NEW!)
-bun run version:prepare --package @repo/intershell --from-version 1.0.0 --to-version 1.1.0
+bun run version:prepare --package ui --from-version 1.0.0 --to-version 1.1.0
 ```
 
 ### **🆕 Version Switch Benefits**
@@ -358,7 +344,7 @@ The new `--from-version` and `--to-version` switches provide several advantages:
 - **🎯 Intuitive**: Use semantic versions instead of commit hashes or tags
 - **📦 Package-Aware**: Automatically converts to the correct tag series
   - Root package: `1.0.0` → `v1.0.0`
-  - Intershell package: `1.0.0` → `intershell-v1.0.0`
+  - UI package: `1.0.0` → `ui-v1.0.0`
 - **🔄 Flexible**: Mix with existing `--from`/`--to` commit/tag options
 - **✅ Validated**: Ensures version exists before processing
 
@@ -367,8 +353,8 @@ The new `--from-version` and `--to-version` switches provide several advantages:
 bun run version:prepare --from-version 1.0.0
 # → Converts to: v1.0.0 (for root package)
 
-bun run version:prepare --package @repo/intershell --from-version 1.0.0  
-# → Converts to: intershell-v1.0.0 (for intershell package)
+bun run version:prepare --package ui --from-version 1.0.0  
+# → Converts to: ui-v1.0.0 (for UI package)
 ```
 
 ### **Manual Version Control**

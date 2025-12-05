@@ -73,7 +73,7 @@ These rules contain detailed guidance on coding standards, security practices, a
 ### Single Package Development
 Use bun run with turbo filtering for working on specific packages:
 - `bun run build --filter=@repo/ui` - Build only the UI package
-- `bun run test --filter=packages/intershell` - Test only the intershell package
+- `bun run test --filter=@repo/utils` - Test only the utils package
 - `bun run dev --filter=apps/admin` - Run only the admin app
 
 ## Architecture Overview
@@ -104,32 +104,20 @@ This is a **Turborepo monorepo** using **Bun** as the package manager and runtim
 - **Containers**: Docker with DevContainer support
 - **Git Hooks**: Lefthook for pre-commit automation
 
-### InterShell CLI Framework
-The repository uses a custom CLI framework called **InterShell** located in `packages/intershell/`. This provides:
-- Entity-driven architecture for managing monorepo components
-- Advanced CLI tooling with validation and automation
-- Automated scripting for complex development workflows
-- Configuration through `i.config.ts` in the root
+### CLI & Automation
+Repository scripts provide tooling for validation, automation, and versioning. Internal implementation details are not part of this repository; refer to script usage in package.json.
 
-**Note**: The interactive page-based navigation system is currently in development - the framework currently focuses on entity-based operations and automated scripting.
-
-### Current InterShell Features (Production Ready)
-The InterShell system provides comprehensive entity-based functionality:
-- **EntityAffected**: Affected package detection for CI/CD optimization
-- **EntityBranch**: Git branch operations and management
-- **EntityCommit**: Staged file checking, commit parsing, validation, and conventional commit support
-- **EntityCompose**: Docker Compose parsing and service health monitoring
-- **EntityIntershellConfig**: Configuration management and validation
-- **EntityPackage**: Package management and operations
-- **EntityPackageChangelog**: Changelog auto-generation with PR integration and Keep a Changelog format
-- **EntityPackageCommits**: Smart commit filtering based on package dependencies with intelligent dependency analysis
-- **EntityPackageTags**: Tag-related operations with package-specific logic
-- **EntityPackageVersion**: Intelligent version management and bump automation based on commit analysis
-- **EntityTag**: Git tag operations and version management
+### Capabilities
+- Affected package detection for CI/CD optimization
+- Git branch operations and management
+- Staged file checking, commit parsing, and conventional commit support
+- Docker Compose parsing and service health monitoring
+- Package management and operations
+- Changelog auto-generation and version management
 
 ### Development Workflow
 1. **Docker-First**: Recommended to use DevContainer for consistent environment
-2. **Entity-Driven**: Use InterShell entities for managing packages, branches, commits, etc.
+2. **Entity-Driven**: Use provided scripts/utilities for managing packages, branches, commits, etc.
 3. **Quality Gates**: All code goes through Biome linting, TypeScript checking, and testing
 4. **Automation**: Git hooks handle commit formatting, version management, and changelog generation
 
@@ -170,7 +158,6 @@ For detailed information about working with specific packages and applications, 
 - Document breaking changes
 
 ### Packages
-- **[packages/intershell/CLAUDE.md](packages/intershell/CLAUDE.md)** - InterShell CLI framework and entity system
 - **[packages/ui/CLAUDE.md](packages/ui/CLAUDE.md)** - React component library with Storybook
 - **[packages/utils/CLAUDE.md](packages/utils/CLAUDE.md)** - Shared utility functions (cn, logger)
 - **[packages/typescript-config/CLAUDE.md](packages/typescript-config/CLAUDE.md)** - TypeScript configuration presets
