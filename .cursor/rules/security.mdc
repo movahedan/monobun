@@ -25,6 +25,16 @@ alwaysApply: true
 /^#\d+$/                        // Anchored to start/end
 ```
 
+### User-supplied patterns (CLI, config, API)
+
+`new RegExp(userControlledString)` and then running `.test` / `.match` across many paths or rows is a common ReDoS surface. Before any high-fan-out matching:
+
+- **Cap pattern size** (character limit) and **cap each candidate string** length so amplification stays bounded.
+- **Screen the pattern** with a catastrophic-backtracking heuristic (for example the [`safe-regex`](https://github.com/davisjam/safe-regex) package used in repo scripts) and **reject** unsafe patterns with a clear error. Heuristics can false-positive or false-negative; pair them with length limits and simple patterns when possible.
+- Prefer **linear-time** matchers (RE2, or constrained glob-to-regex) when the product allows it.
+
+**`Promise.race` + `pattern.test` does not cancel work:** in typical JavaScript runtimes, `RegExp.prototype.test` runs synchronously on the calling thread until it returns, so a timeout in another microtask does not interrupt catastrophic backtracking. Use static checks, bounded inputs, a separate worker you can terminate, or a safe engine—not a fake “async timeout” around sync `.test`.
+
 ## Input Validation
 ```ts
 // ✅ Validate and sanitize
@@ -94,8 +104,8 @@ const refreshToken = async (refreshToken: string) => {
   }
 };
 
-// ✅ Safe regex with timeout
-const safeRegexTest = async (pattern: RegExp, input: string): Promise<boolean> => {
+// ⚠️ Misleading — Promise.race does not stop a running sync .test(); see "User-supplied patterns" above
+const unsafeTimeoutAroundSyncTest = async (pattern: RegExp, input: string): Promise<boolean> => {
   return await Promise.race([
     Promise.resolve(pattern.test(input)),
     new Promise<boolean>((_, reject) => setTimeout(() => reject(new Error('Regex timeout')), 1000))
@@ -181,7 +191,8 @@ app.use(cors({
 - [ ] Use bounded quantifiers when possible
 - [ ] Test with malicious input (repeated characters)
 - [ ] Input length limits to prevent DoS
-- [ ] Set execution timeouts for regex operations
+- [ ] User-supplied regex: length caps, heuristic ReDoS screen (or safe engine), bounded strings under test
+- [ ] Do not rely on `Promise.race` alone to cap sync `RegExp` runtime in JavaScript
 - [ ] Validate and sanitize input before processing
 - [ ] All sensitive data in environment variables
 - [ ] Proper CORS configuration
