@@ -52,7 +52,7 @@ jobs:
         id: affected-services
         run: |
           echo "::group::🔍 Getting affected services"
-          bun run scripts/ci-attach-affected.ts --mode docker --output-id affected-services
+          bun run ci attach-affected --mode docker --output-id affected-services
           echo "::endgroup::"
 
   build-affected:
@@ -89,7 +89,7 @@ jobs:
       - name: 🏗️ Build Packages
         run: |
           echo "::group::🏗️ Building Packages"
-          bun run prod:build ${{ needs.get-affected.outputs.affected-services }}
+          bun run container --prod build ${{ needs.get-affected.outputs.affected-services }}
           echo "::endgroup::"
 
       - name: 📋 - Display deployment info

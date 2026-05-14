@@ -11,13 +11,12 @@ COPY ./apps ./apps
 COPY ./packages ./packages
 COPY ./scripts ./scripts
 COPY ./package.json ./bun.lock ./
-COPY ./scripts ./scripts
 RUN turbo prune --scope=@repo/ui --docker
 
 FROM turbo AS installer
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/bun.lock ./bun.lock
+COPY bun.lock ./bun.lock
 RUN bun install --ignore-scripts
 
 FROM turbo AS build
@@ -25,7 +24,7 @@ WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=installer /app/ .
 COPY --from=pruner /app/scripts ./scripts
-RUN bun run build:storybook --filter=@repo/ui
+RUN bun run turbo run build:storybook --filter=@repo/ui
 
 FROM nginx:alpine AS runner
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates

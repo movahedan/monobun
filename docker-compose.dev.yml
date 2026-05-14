@@ -33,7 +33,7 @@ services:
       - path: ./.env
         required: true
     volumes:
-      # Use environment-aware volume mounts (works from host or devcontainer)
+      # Bind mounts for host development; named volumes for heavy paths
       - ${PROJECT_ROOT:-./}/apps:/app/apps:cached
       - ${PROJECT_ROOT:-./}/packages:/app/packages:cached
       - ${PROJECT_ROOT:-./}/scripts:/app/scripts:cached
@@ -72,7 +72,7 @@ services:
     environment:
       PORT: "3001"
       HOST: "0.0.0.0"
-    command: bun run dev --filter=admin -- --host 0.0.0.0 --port 3001
+    command: bun run turbo run dev --filter=admin -- --host 0.0.0.0 --port 3001
     profiles: ["admin", "all"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://admin:3001"]
@@ -94,7 +94,7 @@ services:
     environment:
       PORT: "3002"
       HOST: "0.0.0.0"
-    command: bun run dev --filter=storefront -- --hostname 0.0.0.0 --port 3002
+    command: bun run turbo run dev --filter=storefront -- --hostname 0.0.0.0 --port 3002
     profiles: ["storefront", "all"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://storefront:3002"]
@@ -116,7 +116,7 @@ services:
     environment:
       PORT: "3003"
       HOST: "0.0.0.0"
-    command: bun run dev --filter=api
+    command: bun run turbo run dev --filter=api
     profiles: ["api", "all"]
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://api:3003/status | grep -q '\"ok\":true'"]
@@ -137,7 +137,7 @@ services:
     environment:
       PORT: "3004"
       HOST: "0.0.0.0"
-    command: bun run dev --filter=@repo/ui
+    command: bun run turbo run dev --filter=@repo/ui
     profiles: ["ui", "all"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://ui:3004"]
@@ -155,7 +155,7 @@ services:
     environment:
       PORT: "3005"
       HOST: "0.0.0.0"
-    command: bun run dev --filter=docs-astro -- --host 0.0.0.0 --port 3005
+    command: bun run turbo run dev --filter=docs-astro -- --host 0.0.0.0 --port 3005
     profiles: ["docs-astro", "all"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://docs-astro:3005"]
@@ -163,30 +163,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
-
-  vscode-service:
-    build:
-      context: ./
-      dockerfile: .devcontainer/Dockerfile.vscode
-    env_file:
-      - path: ./.env
-        required: true
-    volumes:
-      - ${PROJECT_ROOT:-./}:/app:cached
-      # Override volumes
-      - node_modules:/app/node_modules:delegated
-      - turbo_cache:/app/.turbo:delegated
-      - bun_cache:/root/.bun:delegated
-      - vscode_cache:/app/.vscode:delegated
-    command: sleep infinity
-    # Use init for better signal handling
-    init: true
-    networks:
-      - dev-network
-    profiles: ["vscode-service"]
-    healthcheck:
-      test: ["CMD", "ps", "aux"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s

@@ -650,7 +650,7 @@ interface BitwardenEnvManagement {
 - **Kubernetes Cluster**: Local (minikube/kind) + production
 - **Monitoring Stack**: Sentry, Prometheus, Grafana
 - **CI/CD Pipeline**: GitHub Actions
-- **Development Tools**: VS Code, DevContainer
+- **Development Tools**: VS Code, Docker Compose on the host (`bun run container …`)
 
 ### Estimated Timeline
 - **Total Duration**: 16 weeks

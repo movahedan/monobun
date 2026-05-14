@@ -9,7 +9,7 @@ COPY --chown=runner-user:runner-group . .
 
 RUN --mount=type=cache,target=/root/.bun/install/cache \
     --mount=type=cache,target=/app/node_modules/.cache \
-    bun install
+    bun install --ignore-scripts
 RUN --mount=type=cache,target=/app/.turbo \
     mkdir -p .turbo/cache && \
     chmod -R 777 .turbo

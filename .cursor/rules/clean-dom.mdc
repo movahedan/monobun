@@ -1,0 +1,308 @@
+---
+description: HTML semantic elements, DOM structure, responsive images, forms, CSS, and Tailwind best practices with accessibility
+globs: ["**/*.html", "**/*.tsx", "**/*.jsx", "**/*.css"]
+alwaysApply: true
+---
+
+# Clean DOM & Styling
+
+## Semantic HTML
+
+```tsx
+// ✅ Good - Semantic structure
+<header>
+  <nav aria-label="Main navigation">
+    <ul>
+      <li><a href="/">Home</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <article>
+    <h1>Article Title</h1>
+    <section>
+      <h2>Section Title</h2>
+      <p>Content</p>
+    </section>
+  </article>
+</main>
+
+<aside>
+  <h2>Related</h2>
+</aside>
+
+<footer>
+  <p>&copy; 2024</p>
+</footer>
+
+// ❌ Bad - Non-semantic nesting
+<div className="header">
+  <div className="nav">
+    <div className="nav-item">Home</div>
+  </div>
+</div>
+```
+
+**Use semantic elements:** `header`, `nav`, `main`, `article`, `section`, `aside`, `footer`, `figure`, `figcaption`, `time`, `mark`, `address`
+
+**Avoid unnecessary `div`/`span`:** Only when no semantic element fits
+
+## DOM Structure - Anti-Nesting
+
+```tsx
+// ✅ Good - Flat, semantic structure
+<article>
+  <header>
+    <h1>Title</h1>
+    <time dateTime="2024-01-01">Jan 1, 2024</time>
+  </header>
+  <p>Content</p>
+</article>
+
+// ❌ Bad - Unnecessary nesting
+<article>
+  <div className="article-header">
+    <div className="header-content">
+      <div className="title-wrapper">
+        <h1>Title</h1>
+      </div>
+    </div>
+  </div>
+</article>
+```
+
+**Principles:** Prefer semantic elements over wrapper divs, flatten structure, use CSS Grid/Flexbox for layout, group related content with semantic containers
+
+## Responsive Images
+
+```tsx
+// ✅ Good - Responsive with srcset
+<img
+  src="/image.jpg"
+  srcSet="/image-320w.jpg 320w, /image-640w.jpg 640w, /image-1280w.jpg 1280w"
+  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+  alt="Descriptive alt text"
+  loading="lazy"
+  width={1280}
+  height={720}
+/>
+
+// ✅ Good - Picture element for art direction
+<picture>
+  <source media="(max-width: 640px)" srcSet="/mobile.webp" type="image/webp" />
+  <source media="(min-width: 641px)" srcSet="/desktop.webp" type="image/webp" />
+  <img src="/fallback.jpg" alt="Descriptive alt text" loading="lazy" width={1280} height={720} />
+</picture>
+```
+
+**Best Practices:** Always include `alt` text (empty for decorative), use `srcset`/`sizes` for responsive, `<picture>` for art direction, set explicit `width`/`height`, use `loading="lazy"` for below-fold, prefer WebP/AVIF with JPEG fallback
+
+## Forms
+
+```tsx
+// ✅ Good - Proper labels and validation
+<form onSubmit={handleSubmit}>
+  <fieldset>
+    <legend>Contact Information</legend>
+    <div>
+      <label htmlFor="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        name="email"
+        required
+        aria-required="true"
+        aria-describedby="email-error"
+        aria-invalid={errors.email ? 'true' : 'false'}
+      />
+      {errors.email && (
+        <span id="email-error" role="alert" aria-live="polite">
+          {errors.email}
+        </span>
+      )}
+    </div>
+
+    <div>
+      <label htmlFor="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        name="password"
+        required
+        minLength={8}
+        aria-describedby="password-help password-error"
+      />
+      <span id="password-help">Must be at least 8 characters</span>
+      {errors.password && (
+        <span id="password-error" role="alert">{errors.password}</span>
+      )}
+    </div>
+
+    <button type="submit">Submit</button>
+  </fieldset>
+</form>
+
+// ❌ Bad - Missing labels, no validation feedback
+<form>
+  <input type="email" placeholder="Email" />
+  <input type="password" placeholder="Password" />
+  <button>Submit</button>
+</form>
+```
+
+**Best Practices:** Always use `<label>` with `htmlFor` matching input `id`, group related fields with `<fieldset>`/`<legend>`, use appropriate `type` attributes, provide `aria-describedby` linking to help/errors, use `aria-invalid` and `role="alert"` for errors, set `required`, `minLength`, `maxLength`, `pattern` for validation
+
+## Accessibility
+
+```tsx
+// ✅ Good - Keyboard accessible, ARIA labels
+<nav aria-label="Main navigation">
+  <ul>
+    <li>
+      <a href="/" aria-current={isHome ? 'page' : undefined}>Home</a>
+    </li>
+  </ul>
+</nav>
+
+<button
+  type="button"
+  aria-label="Close dialog"
+  aria-expanded={isOpen}
+  aria-controls="dialog"
+>
+  <IconClose aria-hidden="true" />
+</button>
+
+<section aria-labelledby="section-heading">
+  <h2 id="section-heading">Section Title</h2>
+</section>
+
+// ✅ Good - Focus management
+<dialog ref={dialogRef} aria-labelledby="dialog-title" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
+  <h2 id="dialog-title">Dialog Title</h2>
+</dialog>
+```
+
+**Key Requirements:** Heading hierarchy (h1→h2→h3, no skipping), color contrast (4.5:1 normal, 3:1 large), keyboard navigation for all interactive elements, visible focus indicators, `aria-label` for icon buttons, `aria-labelledby` for relationships, skip links, landmark roles, respect `prefers-reduced-motion`, proper table markup with `<thead>`/`<tbody>`/`<th scope>`
+
+## CSS Best Practices
+
+```css
+/* ✅ Good - Mobile-first, semantic selectors */
+.article {
+  max-width: 65ch;
+  margin-inline: auto;
+}
+
+.article__title {
+  font-size: 2rem;
+}
+
+@media (min-width: 768px) {
+  .article__title {
+    font-size: 2.5rem;
+  }
+}
+
+/* ✅ Good - CSS custom properties, logical properties */
+:root {
+  --color-primary: #3b82f6;
+  --spacing-md: 1rem;
+}
+
+.card {
+  margin-inline: auto;
+  padding-inline: 1rem;
+  border-inline-start: 2px solid;
+}
+```
+
+**Principles:** Mobile-first (base styles for mobile, enhance for larger screens), logical properties (`margin-inline`, `padding-block`, `inset-inline-start`), semantic units (`rem` for typography, `em` for relative sizing, `ch` for reading width), CSS custom properties for theming, prefer `clamp()` for fluid typography
+
+## Tailwind CSS
+
+```tsx
+// ✅ Good - Mobile-first, semantic utilities
+<article className="mx-auto max-w-prose">
+  <h1 className="text-2xl font-bold md:text-3xl lg:text-4xl">Title</h1>
+  <p className="text-base leading-relaxed text-gray-700">Content</p>
+</article>
+
+// ✅ Good - Component variants with CVA
+const buttonVariants = cva(
+  'inline-flex items-center justify-center rounded-md font-medium transition-colors',
+  {
+    variants: {
+      variant: {
+        primary: 'bg-blue-600 text-white hover:bg-blue-700',
+        secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300',
+      },
+      size: {
+        sm: 'h-9 px-3 text-sm',
+        md: 'h-10 px-4',
+        lg: 'h-11 px-8',
+      },
+    },
+  }
+);
+
+// ✅ Good - Responsive utilities
+<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+  {items.map(item => <Card key={item.id} {...item} />)}
+</div>
+```
+
+**Best Practices:** Mobile-first (base classes for mobile, `sm:`, `md:`, `lg:`, `xl:` for larger screens), use design tokens (prefer Tailwind scales over arbitrary values), component variants with CVA, avoid arbitrary values unless necessary, group related utilities, use `dark:` variant for dark mode
+
+## Performance
+
+```tsx
+// ✅ Good - Optimized rendering
+<img src={src} alt={alt} loading="lazy" decoding="async" width={1280} height={720} />
+```
+
+```css
+/* ✅ Good - CSS containment, will-change for animations */
+.card {
+  contain: layout style paint;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animated {
+  animation: fadeIn 0.3s ease-in;
+  will-change: opacity; /* Only for actively animating elements */
+}
+```
+
+**Optimization:** Use `loading="lazy"` for below-fold content, set explicit `width`/`height` to prevent layout shift, use `decoding="async"` for images, prefer CSS transforms/opacity for animations (GPU-accelerated), use `will-change` sparingly, use CSS containment for isolated components, prefer `content-visibility: auto` for long lists
+
+## Motion & Accessibility
+
+```css
+/* ✅ Good - Respects reduced motion */
+.modal {
+  animation: slideIn 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal {
+    animation: none;
+    transform: none;
+  }
+}
+```
+
+```tsx
+// ✅ Good - Conditional animation
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+<div className={prefersReducedMotion ? '' : 'transition-transform duration-300'}>
+  Content
+</div>
+```
+
+**Always respect `prefers-reduced-motion`:** Disable animations, use instant transitions, or provide alternatives

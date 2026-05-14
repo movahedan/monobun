@@ -44,7 +44,7 @@ jobs:
 
       - name: 🔍 Generate changelog and bump versions
         id: packages-to-deploy
-        run: bun run version:ci
+        run: bun run release ci
 
       - name: 📋 Display deployment info
         run: |

@@ -47,20 +47,20 @@ jobs:
         run: bun install
 
       - name: 🔍 - Check branch name
-        run: bun run commit:check --branch
+        run: bun run precommit -- --branch
 
       - name: 🔍 - Get affected packages
         id: affected-packages
         run: |
           echo "::group::🔍 Getting affected packages"
-          bun run scripts/ci-attach-affected.ts --mode turbo --output-id affected-packages
+          bun run ci attach-affected --mode turbo --output-id affected-packages
           echo "::endgroup::"
 
       - name: 🔍 - Get affected services
         id: affected-services
         run: |
           echo "::group::🔍 Getting affected services"
-          bun run scripts/ci-attach-affected.ts --mode docker --output-id affected-services
+          bun run ci attach-affected --mode docker --output-id affected-services
           echo "::endgroup::"
       
       - name: 🔍 - Attach service ports to github output
@@ -68,7 +68,7 @@ jobs:
         id: service-ports
         run: |
           echo "::group::🔍 Getting service ports"
-          bun run scripts/ci-attach-service-ports.ts --output-id service-ports
+          bun run ci attach-service-ports --output-id service-ports
           echo "::endgroup::"
 
   validate-source:
@@ -111,19 +111,19 @@ jobs:
         run: bun install
 
       - name: 🔍 - Check branch name
-        run: bun run commit:check --branch
+        run: bun run precommit -- --branch
 
       - name: ✨ - Biome check
-        run: bun run check .
-
-      - name: 🏗️ - Build packages
-        run: bun run build ${{ needs.get-affected.outputs.affected-packages }}
+        run: bun run lint
 
       - name: 🔍 - Type check
-        run: bun run check:types ${{ needs.get-affected.outputs.affected-packages }}
+        run: bun run typecheck -- ${{ needs.get-affected.outputs.affected-packages }}
+
+      - name: 🧪 - Test
+        run: bun run turbo run test -- ${{ needs.get-affected.outputs.affected-packages }}
 
       - name: 🏗️ - Build
-        run: bun run build ${{ needs.get-affected.outputs.affected-packages }}
+        run: bun run build -- ${{ needs.get-affected.outputs.affected-packages }}
 
 
   validate-docker-compose:
@@ -158,6 +158,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
   
+      - name: 📦 Install dependencies
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+        run: bun install
+
       - name: 🐳 Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -171,7 +175,7 @@ jobs:
           fi
 
           # Build production images without cache to test build process
-          bun run prod:compose build ${{ needs.get-affected.outputs.affected-services }} --no-cache --parallel
+          bun run container --prod compose build ${{ needs.get-affected.outputs.affected-services }} --no-cache --parallel
           if [ $? -ne 0 ]; then
             echo "❌ Production builds failed"
             exit 1
@@ -191,13 +195,13 @@ jobs:
           fi
           
           # Start services in background
-          bun run prod:compose up ${{ needs.get-affected.outputs.affected-services }} -d
+          bun run container --prod compose up ${{ needs.get-affected.outputs.affected-services }} -d
           
           # Wait for services to start
           sleep 30
           
           # Check service status
-          bun run prod:compose ps
+          bun run container --prod compose ps
           
           # Test service health (basic connectivity)
           for service in ${{ needs.get-affected.outputs.affected-services }}; do
@@ -224,7 +228,7 @@ jobs:
             exit 0
           fi
 
-          bun run prod:compose down ${{ needs.get-affected.outputs.affected-services }} --remove-orphans || true
+          bun run container --prod compose down ${{ needs.get-affected.outputs.affected-services }} --remove-orphans || true
           docker system prune -f || true
           echo "✅ Cleanup completed"
           echo "::endgroup::"

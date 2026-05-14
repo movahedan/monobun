@@ -14,13 +14,14 @@
 		"./button": "./src/button/button.tsx",
 		"./link": "./src/link/link.tsx",
 		"./counter-button": "./src/counter-button/counter-button.tsx",
-		".": "./index.ts"
+		".": "./src/index.ts"
 	},
 	"scripts": {
-		"check:types": "tsc --noEmit",
-		"dev": "bun run scripts/dev.ts",
-		"dev:storybook": "bunx --bun storybook dev --no-open",
-		"prebuild": "intershell update-package-json",
+		"typecheck": "tsc --noEmit",
+		"watch:exports": "bun --no-clear-screen --watch ./scripts/watch-export-modules.ts",
+		"dev": "bun run watch:exports & WATCH_PID=$!; bun run dev:storybook; kill \"$WATCH_PID\" 2>/dev/null || true",
+		"dev:storybook": "bunx --bun storybook dev --no-open --port 3004",
+		"prebuild": "bun ../../scripts/export-modules/index.tsx update --pattern '^src/(?:index\\.tsx?|([^/]+)/\\1\\.tsx)$' --regex-flags 'i'",
 		"build:storybook": "bunx --bun storybook build -o dist-storybook",
 		"start": "bun run build:storybook && bunx --bun serve dist-storybook"
 	},

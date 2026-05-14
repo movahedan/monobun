@@ -3,12 +3,11 @@
 	"ui": "tui",
 	"envMode": "loose",
 	"tasks": {
-		"//#check": {},
-		"//#check:fix": {
+		"//#lint": {
 			"cache": false
 		},
-		"check:types": {
-			"dependsOn": ["^build", "^check:types"]
+		"typecheck": {
+			"dependsOn": ["^build", "^typecheck"]
 		},
 		"dev": {
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
@@ -25,7 +24,7 @@
 			"outputs": ["build/**", ".vercel/**", "dist/**", ".next/**", "!.next/cache/**"]
 		},
 		"build:storybook": {
-			"dependsOn": ["^check:types", "^build"],
+			"dependsOn": ["^typecheck", "^build"],
 			"outputs": ["dist-storybook/**"]
 		},
 		"test": {
