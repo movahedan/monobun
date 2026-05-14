@@ -54,7 +54,7 @@ bun run dev
 ### Type Checking
 
 ```bash
-bun run check:types
+bun run typecheck
 ```
 
 ### Testing

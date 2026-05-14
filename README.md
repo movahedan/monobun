@@ -33,11 +33,11 @@ Take complete command of your monorepo! We've built powerful entity classes and 
 <img src="https://www.devteds.com/assets/images/post/2023/2023-11-15-devops-local-setup-with-docker-and-devcontainers-vscode.png" alt="Docker first development" width="400">
 <br />
 <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Ready" />
-<img src="https://img.shields.io/badge/DevContainer-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="DevContainer Ready" />
+<img src="https://img.shields.io/badge/Compose%20(host)-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Compose on host" />
 
-> **Production-ready containers** with **zero-config DevContainer** setup
+> **Compose-driven dev and prod-shaped stacks** from your normal shell
 
-Docker isn't just an afterthought - it's the foundation! Our DevContainer setup gives you the exact same environment as production, so you can catch issues early and deploy with confidence. New team members are coding in minutes, not debugging environment differences for hours. We know VSCode DevContainer maintenance can be challenging, so we've done the heavy lifting for you. While it's not optimal for localhost development, the production parity and team consistency benefits make it worthwhile.
+Docker is the foundation for running the full multi-service layout: use **`bun run container …`** against `docker-compose.dev.yml` on your machine (no “Reopen in Container” required). Pass **`--prod` before the subcommand** for the production-shaped `docker-compose.yml`. Install flow, health checks, and teardown live in [docs/GETTING_STARTED.md](./docs/GETTING_STARTED.md).
 
 </div>
 
@@ -70,7 +70,7 @@ We've curated the ultimate framework stack that just works! Vite, Astro, and Sve
 
 > **Developer-first documentation** with **dedicated docs site** and **AI assistant optimization**
 
-We don't just write docs - we build them! Our dedicated docs-astro site makes learning effortless, while our AI-optimized code structure means Cursor and other AI tools instantly understand your project. It's like having a brilliant pair programming partner who never gets confused. Our new **three-tier documentation system** provides comprehensive coverage: **CLAUDE.md** for architecture, **Cursor Rules** for development standards, and **Developer Docs** for practical guidance. And the automation doesn't stop there - Renovate bot keeps your dependencies fresh and secure, while SonarQube ensures your code quality stays top-notch. Every tool here works in perfect harmony!
+We don't just write docs - we build them! Our dedicated docs-astro site makes learning effortless, while our AI-optimized code structure means Cursor and other AI tools instantly understand your project. It's like having a brilliant pair programming partner who never gets confused. The repo uses a **four-tier documentation system**: **`.cursor/rules/`** for standards, **`AGENTS.md`** for AI-oriented commands and structure, **`README.md`** for human onboarding, and **`docs/`** for guides. [Renovate](./renovate.json) keeps dependencies pinned; quality gates run through Biome, TypeScript, and Bun tests.
 
 </div>
 
@@ -102,25 +102,24 @@ Everything you need to build rock-solid applications is right here! We've kept i
 ## 📚 Documentation
 
 ### **🚀 Getting Started**
-[![Installation Guide](https://img.shields.io/badge/📖%20Installation%20Guide-495057?style=for-the-badge)](./docs/1_INSTALLATION_GUIDE.md)
-[![Setup Flows](https://img.shields.io/badge/⚡%20Setup%20Flows-495057?style=for-the-badge)](./docs/2_SETUP_FLOWS.md)
-[![Development Flows](https://img.shields.io/badge/🔧%20Development%20Flows-495057?style=for-the-badge)](./docs/3_DEV_FLOWS.md)
+[![Getting started](https://img.shields.io/badge/📖%20Getting%20Started-495057?style=for-the-badge)](./docs/GETTING_STARTED.md)
 
-### **🛠️ Development Tools**
-[![Auto Versioning](https://img.shields.io/badge/🏷️%20Auto%20Versioning-495057?style=for-the-badge)](./docs/7_AUTO_VERSIONING.md)
-[![Docker & DevContainer](https://img.shields.io/badge/🐳%20Docker%20%26%20DevContainer-495057?style=for-the-badge)](./docs/5_DOCKER.md)
+### **🛠️ Development tools**
+[![Scripting](https://img.shields.io/badge/🧩%20Scripting-495057?style=for-the-badge)](./docs/SCRIPTING.md)
+[![Auto versioning](https://img.shields.io/badge/🏷️%20Auto%20versioning-495057?style=for-the-badge)](./docs/AUTO_VERSIONING.md)
+[![Dev stack (compose)](https://img.shields.io/badge/🐳%20Dev%20stack%20(compose)-495057?style=for-the-badge)](./docs/GETTING_STARTED.md#fast-path-dev-docker-compose-host)
 
-### **🤖 AI & Automation**
-[![Renovate Configuration](https://img.shields.io/badge/🔄%20Renovate-495057?style=for-the-badge)](./docs/6_RENOVATE.md)
-[![MCP Integration](https://img.shields.io/badge/🔌%20MCP%20Integration-495057?style=for-the-badge)](./.mcp.json)
+### **🤖 AI and automation**
+[![Renovate (config)](https://img.shields.io/badge/🔄%20Renovate%20config-495057?style=for-the-badge)](./renovate.json)
+[![MCP integration](https://img.shields.io/badge/🔌%20MCP%20integration-495057?style=for-the-badge)](./.mcp.json)
 
-### **📋 Development Rules**
-[![TypeScript Rules](https://img.shields.io/badge/🔷%20TypeScript%20Rules-495057?style=for-the-badge)](./.cursor/rules/typescript.mdc)
-[![JavaScript Rules](https://img.shields.io/badge/🟨%20JavaScript%20Rules-495057?style=for-the-badge)](./.cursor/rules/javascript.mdc)
-[![Security Guidelines](https://img.shields.io/badge/🔒%20Security%20Guidelines-495057?style=for-the-badge)](./.cursor/rules/security.mdc)
-[![Package Management](https://img.shields.io/badge/📦%20Package%20Management-495057?style=for-the-badge)](./.cursor/rules/packages.mdc)
+### **📋 Cursor rules**
+[![Coding standards](https://img.shields.io/badge/🧭%20Coding%20standards-495057?style=for-the-badge)](./.cursor/rules/coding.mdc)
+[![Testing](https://img.shields.io/badge/🧪%20Testing-495057?style=for-the-badge)](./.cursor/rules/testing.mdc)
+[![Security](https://img.shields.io/badge/🔒%20Security-495057?style=for-the-badge)](./.cursor/rules/security.mdc)
+[![Advisor](https://img.shields.io/badge/🧭%20Advisor-495057?style=for-the-badge)](./.cursor/rules/advisor.mdc)
 
-## � **What's Inside**
+## 📦 **What's Inside**
 
 **🏢 Admin** <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=white" alt="React" style="vertical-align: middle;" /></a> + <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-5.0-646CFF?style=flat&logo=vite&logoColor=white" alt="Vite" style="vertical-align: middle;" /></a> - **Port 3001** - Admin dashboard interface
 
@@ -151,16 +150,13 @@ curl -fsSL https://bun.com/install | bash
 # Clone and go! 🏃‍♂️
 git clone https://github.com/movahedan/monobun.git && cd monobun
 
-# Open in Dev Container (VS Code)
-# Ctrl+Shift+P → Dev Containers: Reopen in Container
+bun install
+bun run local setup
+bun run container setup && bun run container up && bun run container check
+bun run overall
 
-bun run local:setup && bun run dev:setup && bun run dev:up && bun run dev:check
-
-# And of course, you may get stuck, reload:
-bun run dev:cleanup && bun run local:cleanup
-
-# Don't want to use devcontainer? Not recommended though!
-bun run local:setup && bun run check:quick && bun run dev
+# Reset dev stack + local artifacts when things get weird:
+bun run container cleanup && bun run local cleanup
 ```
 
 [![Star](https://img.shields.io/badge/⭐%20Star%20This%20Repo-Support%20Us-00D4AA?style=for-the-badge)](https://github.com/movahedan/monobun)

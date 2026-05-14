@@ -71,20 +71,18 @@ apps/docs-astro/
 The app includes all documentation from the main project:
 
 ### Core Documentation
-- **Quality Checklist** (`0_QUALITY_CHECKLIST.md`)
-- **Installation Guide** (`1_INSTALLATION_GUIDE.md`)
-- **Setup Flows** (`2_SETUP_FLOWS.md`)
-- **Development Flows** (`3_DEV_FLOWS.md`)
+- **Quality Checklist** (`0_QUALITY_CHECKLIST` placeholder in docs-astro; rules live under `.cursor/rules/`)
+- **Getting started** (`docs/GETTING_STARTED.md`) — setup, compose, command cheat sheet (legacy numbered install/setup/dev guides redirect here)
 
-### Technical Documentation
-- **Scripting** (`4_INTERSHELL.md`)
-- **Docker** (`5_DOCKER.md`)
-- **Renovate** (`6_RENOVATE.md`)
-- **Auto Versioning** (`7_AUTO_VERSIONING.md`)
+### Technical documentation
+- **Scripting** (`docs/SCRIPTING.md`) — Bun `scripts/`, Ink, Intershell entities (replaces legacy `4_INTERSHELL.md`)
+- **Auto versioning** (`docs/AUTO_VERSIONING.md`) — `bun run release …` (replaces legacy `7_AUTO_VERSIONING.md`)
+- **Docker / dev stack** — covered in `docs/GETTING_STARTED.md` (replaces standalone `5_DOCKER.md`)
+- **Renovate** — `renovate.json` at repo root plus [Renovate docs](https://docs.renovatebot.com/) (replaces `6_RENOVATE.md`)
 
-### Process Documentation
-- **Testing** (`TESTING.md`)
-- **AI Prompt** (`AI_Prompt.md`)
+### Process documentation
+- **Testing** (`TESTING` placeholder page; standards in `.cursor/rules/testing.mdc`)
+- **AI Prompt** (`AI_Prompt` placeholder page)
 
 ## 🚀 Deployment
 

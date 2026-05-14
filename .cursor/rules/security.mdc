@@ -1,110 +1,90 @@
 ---
-description: Security best practices and secure coding guidelines
+description: Security patterns - ReDoS prevention, input validation, authentication
 globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
 alwaysApply: true
 ---
 
-# 🔒 Security Best Practices
+# Security
 
-Follow security best practices to protect applications and users from vulnerabilities and attacks.
-
-## 🚨 Critical Security Rules
-
-### **NEVER Use These Patterns (ReDoS Vulnerable)**
+## ReDoS Prevention
 ```ts
 // ❌ VULNERABLE - Catastrophic backtracking
-/.*#(\d+).*/                    // Can cause exponential runtime
+/.*#(\d+).*/                    // Exponential runtime
 /^(\w+)(?:\(([^)]+)\))?(!)?:\s*([^\r\n]+?)\s*$/  // Multiple backtracking issues
 /.*\d+.*/                       // Greedy quantifiers with overlapping patterns
 /(a+)+/                         // Nested quantifiers (evil regex)
 /(a|aa)*/                       // Exponential backtracking
-```
+/.*#\d+.*/                      // Can match anywhere, causes backtracking
 
-### **ALWAYS Use These Secure Alternatives**
-```ts
 // ✅ SECURE - Linear runtime guaranteed
 /#(\d+)/                        // Direct match, no backtracking
-/^(\w+)(?:\(([^)]+)\))?(!)?:\s*([^\r\n]+?)\s*$/  // Fixed version
 /\d+/                           // Simple, direct match
 /a+/                            // Single quantifier
 /(?:a|aa)*/                     // Non-capturing, optimized
+/\d{1,10}/                      // Bounded range
+/^#\d+$/                        // Anchored to start/end
 ```
 
-## 🛡️ Input Validation & Sanitization
-
+## Input Validation
 ```ts
-// Always validate user input
-const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
+// ✅ Validate and sanitize
+const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 const validatePassword = (password: string): boolean => {
-  // At least 8 characters, 1 uppercase, 1 lowercase, 1 number
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
-  return passwordRegex.test(password);
+  // At least 8 chars, 1 uppercase, 1 lowercase, 1 number
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/.test(password);
 };
 
-// Sanitize user input to prevent XSS
-const sanitizeHtml = (html: string): string => {
-  return html
+const sanitizeHtml = (html: string): string => 
+  html
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;');
-};
 
-// Input validation with sanitization
-const processInput = (input: string) => {
-  // Validate input length to prevent DoS
-  if (input.length > 1000) {
-    throw new Error('Input too long');
-  }
-  
-  // Sanitize input to remove potentially dangerous characters
-  const sanitized = input.replace(/[^\w\s#]/g, '');
-  
-  return sanitized;
+// ❌ Bad - no length check (DoS risk)
+const processInput = (input: string): string => input.replace(/[^\w\s#]/g, '');
+
+// ✅ Good - validate length first
+const processInput = (input: string): string => {
+  if (input.length > 1000) throw new Error('Input too long');
+  return input.replace(/[^\w\s#]/g, '');
 };
 ```
 
-## 🔐 Environment Variables & Configuration
-
+## Environment Variables
 ```ts
-// Use environment variables for sensitive data
+// ❌ Bad - no validation
 const API_KEY = process.env.API_KEY;
 const DATABASE_URL = process.env.DATABASE_URL;
+
+// ✅ Good - validate required env vars
+const API_KEY = process.env.API_KEY;
+if (!API_KEY) throw new Error('API_KEY is required');
+
+const DATABASE_URL = process.env.DATABASE_URL;
+if (!DATABASE_URL) throw new Error('DATABASE_URL is required');
+
 const JWT_SECRET = process.env.JWT_SECRET;
-
-// Validate required environment variables
-if (!API_KEY) {
-  throw new Error('API_KEY is required');
-}
-
-if (!DATABASE_URL) {
-  throw new Error('DATABASE_URL is required');
-}
-
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET is required');
-}
+if (!JWT_SECRET) throw new Error('JWT_SECRET is required');
 ```
 
-## 🔑 Authentication & Authorization
-
+## Authentication
 ```ts
-// Use JWT tokens for authentication
+// ❌ Bad - no error handling
+const authenticate = (token: string) => jwt.verify(token, process.env.JWT_SECRET);
+
+// ✅ Good - JWT with proper error handling
 const authenticate = async (token: string) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return decoded;
+    return jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
     throw new Error('Invalid token');
   }
 };
 
-// Implement token refresh
+// ✅ Token refresh
 const refreshToken = async (refreshToken: string) => {
   try {
     const response = await api.post('/auth/refresh', { refreshToken });
@@ -114,29 +94,78 @@ const refreshToken = async (refreshToken: string) => {
   }
 };
 
-// Set execution timeouts for regex operations
+// ✅ Safe regex with timeout
 const safeRegexTest = async (pattern: RegExp, input: string): Promise<boolean> => {
   return await Promise.race([
     Promise.resolve(pattern.test(input)),
-    new Promise<boolean>((_, reject) => 
-      setTimeout(() => reject(new Error('Regex timeout')), 1000)
-    )
+    new Promise<boolean>((_, reject) => setTimeout(() => reject(new Error('Regex timeout')), 1000))
   ]);
 };
 ```
 
-## 🚧 Rate Limiting & CORS
-
+## SQL Injection Prevention
 ```ts
-// Implement rate limiting
+// ❌ Bad - vulnerable to SQL injection
+const badQuery = `SELECT * FROM users WHERE id = ${userId}`;
+const badQuery2 = `SELECT * FROM users WHERE name = '${userName}'`;
+
+// ✅ Good - parameterized queries
+const getUserById = async (id: number) => {
+  const query = 'SELECT * FROM users WHERE id = ?';
+  const result = await db.execute(query, [id]);
+  return result[0];
+};
+
+const getUserByName = async (name: string) => {
+  const query = 'SELECT * FROM users WHERE name = ?';
+  const result = await db.execute(query, [name]);
+  return result[0];
+};
+```
+
+## Regex Security Patterns
+```ts
+// ❌ Bad - greedy quantifier with overlapping patterns
+const badPattern = /.*#\d+.*/;
+
+// ✅ Good - direct match
+const goodPattern = /#\d+/;
+
+// ❌ Bad - capturing group overhead
+const badPattern = /(\w+)(\([^)]+\))/;
+
+// ✅ Good - non-capturing group
+const goodPattern = /(\w+)(?:\([^)]+\))/;
+
+// ❌ Bad - unbounded range
+const badPattern = /\d+/;
+
+// ✅ Good - bounded range
+const goodPattern = /\d{1,10}/;
+
+// ❌ Bad - can match anywhere in string
+const badPattern = /#\d+/;
+
+// ✅ Good - anchored to start/end
+const goodPattern = /^#\d+$/;
+```
+
+## Rate Limiting & CORS
+```ts
+// ❌ Bad - no rate limiting
+app.use('/api/', (req, res, next) => next());
+
+// ✅ Good - rate limiting
 const rateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100 // limit each IP to 100 requests per windowMs
 });
-
 app.use('/api/', rateLimiter);
 
-// Configure CORS properly
+// ❌ Bad - permissive CORS
+app.use(cors());
+
+// ✅ Good - configured CORS
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
   credentials: true,
@@ -145,111 +174,23 @@ app.use(cors({
 }));
 ```
 
-## 🛡️ SQL Injection Prevention
-
-```ts
-// Use parameterized queries
-const getUserById = async (id: number) => {
-  const query = 'SELECT * FROM users WHERE id = ?';
-  const result = await db.execute(query, [id]);
-  return result[0];
-};
-
-// ❌ Bad - vulnerable to SQL injection
-const badQuery = `SELECT * FROM users WHERE id = ${userId}`;
-
-// ✅ Good - parameterized query
-const goodQuery = 'SELECT * FROM users WHERE id = ?';
-```
-
-## 🎯 Regex Security Best Practices
-
-### **Avoid Greedy Quantifiers with Overlapping Patterns**
-```ts
-// ❌ Bad - Can cause backtracking
-const badPattern = /.*#\d+.*/;
-
-// ✅ Good - Direct match
-const goodPattern = /#\d+/;
-```
-
-### **Use Non-Capturing Groups When Possible**
-```ts
-// ❌ Bad - Capturing group overhead
-const badPattern = /(\w+)(\([^)]+\))/;
-
-// ✅ Good - Non-capturing group
-const goodPattern = /(\w+)(?:\([^)]+\))/;
-```
-
-### **Limit Quantifier Ranges**
-```ts
-// ❌ Bad - Unbounded range
-const badPattern = /\d+/;
-
-// ✅ Good - Bounded range
-const goodPattern = /\d{1,10}/;
-```
-
-### **Use Anchors to Prevent Unnecessary Matching**
-```ts
-// ❌ Bad - Can match anywhere in string
-const badPattern = /#\d+/;
-
-// ✅ Good - Anchored to start/end
-const goodPattern = /^#\d+$/;
-```
-
-## 🔍 Security Checklist
-
-Before deploying any code, verify:
-
-- [ ] **No nested quantifiers** like `(a+)+`
-- [ ] **No greedy + lazy combinations** like `.*+?`
-- [ ] **No overlapping patterns** that can backtrack
-- [ ] **Use bounded quantifiers** when possible
-- [ ] **Test with malicious input** like repeated characters
-- [ ] **Consider input length limits** to prevent DoS
-- [ ] **Use atomic groups** `(?>...)` to prevent backtracking
-- [ ] **Set execution timeouts** for regex operations
-- [ ] **Validate and sanitize input** before processing
-- [ ] **Test with edge cases** and various input types
-- [ ] **All sensitive data in environment variables**
-- [ ] **Proper CORS configuration**
-- [ ] **Rate limiting implemented**
-- [ ] **SQL injection prevention**
-- [ ] **XSS protection in place**
-
-## 🧪 Security Testing
-
-### **Test with Malicious Input**
-```ts
-// Test patterns with these inputs to detect ReDoS
-const maliciousInputs = [
-  'a'.repeat(1000) + 'b',           // Tests (a+)+ patterns
-  '#1' + '0'.repeat(1000),          // Tests #\d+ patterns
-  'a'.repeat(1000) + '!',           // Tests .* patterns
-];
-
-// If any test takes >100ms, the regex is vulnerable
-```
-
-### **Use Regex Safety Tools**
-```bash
-# Install safe-regex for Node.js
-npm install safe-regex
-
-# Use in code
-import safeRegex from 'safe-regex';
-const isSafe = safeRegex(/your-regex-pattern/);
-```
+## Security Checklist
+- [ ] No nested quantifiers like `(a+)+`
+- [ ] No greedy + lazy combinations like `.*+?`
+- [ ] No overlapping patterns that can backtrack
+- [ ] Use bounded quantifiers when possible
+- [ ] Test with malicious input (repeated characters)
+- [ ] Input length limits to prevent DoS
+- [ ] Set execution timeouts for regex operations
+- [ ] Validate and sanitize input before processing
+- [ ] All sensitive data in environment variables
+- [ ] Proper CORS configuration
+- [ ] Rate limiting implemented
+- [ ] SQL injection prevention (parameterized queries)
+- [ ] XSS protection in place
 
 ## 📚 Resources
 
 - [OWASP ReDoS Prevention](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)
 - [Safe Regex Testing](https://github.com/davisjam/safe-regex)
 - [Regex Performance](https://www.regular-expressions.info/performance.html)
-
----
-
-**Remember**: When in doubt, prefer simple string methods over complex regex patterns. Security and performance are more important than elegant regex solutions.

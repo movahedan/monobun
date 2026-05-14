@@ -10,7 +10,7 @@
 		"./logger": "./src/logger.ts"
 	},
 	"scripts": {
-		"check:types": "tsc --noEmit"
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"clsx": "2.1.1",

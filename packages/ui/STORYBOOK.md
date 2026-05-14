@@ -19,8 +19,9 @@ bun run dev:storybook
 
 This will start Storybook on `http://localhost:3006` with hot reloading enabled.
 
-**For Docker Container Access:**
-When running in a DevContainer, Storybook is accessible at `http://localhost:3006` from your host machine due to port mapping.
+**With the dev Compose stack:**
+
+When the repo’s dev stack is up (`bun run container up` from the repo root), Storybook is published on the same host port the compose file maps for the UI service (see `docker-compose.dev.yml` and [docs/GETTING_STARTED.md](../../docs/GETTING_STARTED.md)).
 
 ### Production Build
 

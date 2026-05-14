@@ -4,9 +4,13 @@ import Layout from '../../layouts/Layout.astro';
 export const prerender = true;
 
 export async function getStaticPaths() {
-	// Define all the documentation pages
 	const docs = [
 		'0_QUALITY_CHECKLIST',
+		'GETTING_STARTED',
+		'SCRIPTING',
+		'AUTO_VERSIONING',
+		'TESTING',
+		'AI_Prompt',
 		'1_INSTALLATION_GUIDE',
 		'2_SETUP_FLOWS',
 		'3_DEV_FLOWS',
@@ -14,8 +18,6 @@ export async function getStaticPaths() {
 		'5_DOCKER',
 		'6_RENOVATE',
 		'7_AUTO_VERSIONING',
-		'TESTING',
-		'AI_Prompt',
 	];
 
 	return docs.map((doc) => ({
@@ -26,58 +28,77 @@ export async function getStaticPaths() {
 
 const doc = Astro.props.doc;
 
-// For now, we'll show a placeholder since we can't read files at build time
-// In a real implementation, you'd use Astro's content collections
 let content = '';
-
 let title = doc;
 
-// Placeholder content for each documentation page
+const movedToGettingStarted =
+	'<p>Content moved to <a href="/docs/GETTING_STARTED">Getting started</a>. Read <code>docs/GETTING_STARTED.md</code> in the repo for the full guide.</p>';
+
+const movedToScripting =
+	'<p>Scripting documentation moved to <a href="/docs/SCRIPTING">Scripting</a>. Read <code>docs/SCRIPTING.md</code> in the repo.</p>';
+
+const movedToAutoVersioning =
+	'<p>Auto versioning documentation moved to <a href="/docs/AUTO_VERSIONING">Auto versioning</a>. Read <code>docs/AUTO_VERSIONING.md</code> in the repo.</p>';
+
+const dockerComposeNote =
+	'<p>Docker and Compose usage for this repo live in <a href="/docs/GETTING_STARTED">Getting started</a> (dev stack on the host). Authoritative copy: <code>docs/GETTING_STARTED.md</code>.</p>';
+
+const renovateNote =
+	'<p>Renovate is configured in <code>renovate.json</code> at the repo root. See <a href="https://docs.renovatebot.com/">Renovate documentation</a> for DSL and options.</p>';
+
 const docContent: Record<string, { title: string; content: string }> = {
 	'0_QUALITY_CHECKLIST': {
 		title: '✅ Quality Checklist',
 		content:
 			'<h1>Quality Checklist</h1><p>This page contains the quality checklist for the project.</p>',
 	},
-	'1_INSTALLATION_GUIDE': {
-		title: '📦 Installation Guide',
+	GETTING_STARTED: {
+		title: '📖 Getting started',
 		content:
-			'<h1>Installation Guide</h1><p>This page contains the installation guide for the project.</p>',
+			'<h1>Getting started</h1><p>Local install, Docker Compose dev stack, <code>bun run overall</code>, command cheat sheet, and <code>scripts/</code> map. Open <code>docs/GETTING_STARTED.md</code> in the repository for the authoritative copy.</p>',
+	},
+	SCRIPTING: {
+		title: '🧩 Scripting',
+		content:
+			'<h1>Scripting</h1><p>Bun CLIs under <code>scripts/</code>, Ink, parseArgs, and Intershell entities. Open <code>docs/SCRIPTING.md</code> in the repository for the authoritative copy.</p>',
+	},
+	AUTO_VERSIONING: {
+		title: '🏷️ Auto versioning',
+		content:
+			'<h1>Auto versioning</h1><p><code>bun run release prepare|apply|ci</code>, tags, and changelogs. Open <code>docs/AUTO_VERSIONING.md</code> in the repository for the authoritative copy.</p>',
+	},
+	'1_INSTALLATION_GUIDE': {
+		title: '📦 Installation guide (moved)',
+		content: `<h1>Installation guide</h1>${movedToGettingStarted}`,
 	},
 	'2_SETUP_FLOWS': {
-		title: '⚙️ Setup Flows',
-		content:
-			'<h1>Setup Flows</h1><p>This page contains the setup flows for the project.</p>',
+		title: '⚙️ Setup flows (moved)',
+		content: `<h1>Setup flows</h1>${movedToGettingStarted}`,
 	},
 	'3_DEV_FLOWS': {
-		title: '🔄 Development Flows',
-		content:
-			'<h1>Development Flows</h1><p>This page contains the development flows for the project.</p>',
+		title: '🔄 Development flows (moved)',
+		content: `<h1>Development flows</h1>${movedToGettingStarted}`,
 	},
 	'4_INTERSHELL': {
-		title: '📝 Scripting',
-		content:
-			'<h1>Scripting</h1><p>This page contains scripting information for the project.</p>',
+		title: '📝 Scripting (moved)',
+		content: `<h1>Scripting</h1>${movedToScripting}`,
 	},
 	'5_DOCKER': {
 		title: '🐳 Docker',
-		content:
-			'<h1>Docker</h1><p>This page contains Docker information for the project.</p>',
+		content: `<h1>Docker</h1>${dockerComposeNote}`,
 	},
 	'6_RENOVATE': {
 		title: '🔄 Renovate',
-		content:
-			'<h1>Renovate</h1><p>This page contains Renovate information for the project.</p>',
+		content: `<h1>Renovate</h1>${renovateNote}`,
 	},
 	'7_AUTO_VERSIONING': {
-		title: '🏷️ Auto Versioning',
-		content:
-			'<h1>Auto Versioning</h1><p>This page contains auto versioning information for the project.</p>',
+		title: '🏷️ Auto versioning (moved)',
+		content: `<h1>Auto versioning</h1>${movedToAutoVersioning}`,
 	},
 	TESTING: {
 		title: '🧪 Testing',
 		content:
-			'<h1>Testing</h1><p>This page contains testing information for the project.</p>',
+			'<h1>Testing</h1><p>See <code>.cursor/rules/testing.mdc</code> and <code>packages/test-preset/AGENTS.md</code> in the repository.</p>',
 	},
 	AI_Prompt: {
 		title: '🤖 AI Prompt',

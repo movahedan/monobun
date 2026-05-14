@@ -8,7 +8,7 @@
 		"start": "bun dist/index.js",
 		"dev": "tsup src/index.ts --watch --onSuccess 'bun dist/index.js'",
 		"build": "tsup src/index.ts",
-		"check:types": "tsc --noEmit"
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@repo/utils": "workspace:*",

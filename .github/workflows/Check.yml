@@ -47,7 +47,7 @@ jobs:
         run: bun install
 
       - name: 🔍 - Check branch name
-        run: bun run commit:check --branch
+        run: bun run precommit --branch
 
       - name: 🔍 - Get affected packages
         id: affected-packages
@@ -111,16 +111,16 @@ jobs:
         run: bun install
 
       - name: 🔍 - Check branch name
-        run: bun run commit:check --branch
+        run: bun run precommit --branch
 
       - name: ✨ - Biome check
-        run: bun run check .
+        run: bun run lint
 
       - name: 🏗️ - Build packages
         run: bun run build ${{ needs.get-affected.outputs.affected-packages }}
 
       - name: 🔍 - Type check
-        run: bun run check:types ${{ needs.get-affected.outputs.affected-packages }}
+        run: bun run typecheck ${{ needs.get-affected.outputs.affected-packages }}
 
       - name: 🏗️ - Build
         run: bun run build ${{ needs.get-affected.outputs.affected-packages }}
@@ -171,7 +171,7 @@ jobs:
           fi
 
           # Build production images without cache to test build process
-          bun run prod:compose build ${{ needs.get-affected.outputs.affected-services }} --no-cache --parallel
+          bun run container --prod compose build ${{ needs.get-affected.outputs.affected-services }} --no-cache --parallel
           if [ $? -ne 0 ]; then
             echo "❌ Production builds failed"
             exit 1
@@ -191,13 +191,13 @@ jobs:
           fi
           
           # Start services in background
-          bun run prod:compose up ${{ needs.get-affected.outputs.affected-services }} -d
+          bun run container --prod compose up ${{ needs.get-affected.outputs.affected-services }} -d
           
           # Wait for services to start
           sleep 30
           
           # Check service status
-          bun run prod:compose ps
+          bun run container --prod compose ps
           
           # Test service health (basic connectivity)
           for service in ${{ needs.get-affected.outputs.affected-services }}; do
@@ -224,7 +224,7 @@ jobs:
             exit 0
           fi
 
-          bun run prod:compose down ${{ needs.get-affected.outputs.affected-services }} --remove-orphans || true
+          bun run container --prod compose down ${{ needs.get-affected.outputs.affected-services }} --remove-orphans || true
           docker system prune -f || true
           echo "✅ Cleanup completed"
           echo "::endgroup::"

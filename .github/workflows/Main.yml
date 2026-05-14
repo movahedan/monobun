@@ -89,7 +89,7 @@ jobs:
       - name: 🏗️ Build Packages
         run: |
           echo "::group::🏗️ Building Packages"
-          bun run prod:build ${{ needs.get-affected.outputs.affected-services }}
+          bun run container --prod build ${{ needs.get-affected.outputs.affected-services }}
           echo "::endgroup::"
 
       - name: 📋 - Display deployment info
