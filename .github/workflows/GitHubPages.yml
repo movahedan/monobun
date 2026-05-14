@@ -45,7 +45,7 @@ jobs:
         uses: withastro/action@v3
         with:
           path: apps/docs-astro
-          node-version: 20
+          node-version: 25
           package-manager: bun
 
   deploy:

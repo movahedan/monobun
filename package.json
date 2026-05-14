@@ -9,6 +9,9 @@
 		"packages/*"
 	],
 	"packageManager": "bun@1.3.1",
+	"engines": {
+		"node": ">=25.0.0"
+	},
 	"intershell": {
 		"config": "intershell.config.ts"
 	},
@@ -40,6 +43,7 @@
 		"typescript": "5.9.3"
 	},
 	"overrides": {
+		"@types/node": "25.7.0",
 		"@types/react": "19.2.2",
 		"@types/react-dom": "19.2.2",
 		"typescript": "5.9.3",
