@@ -132,7 +132,7 @@ Specify type package names to include without glob patterns.
 ```json
 {
   "compilerOptions": {
-    "types": ["node", "bun-types"]
+    "types": ["node", "bun"]
   }
 }
 ```

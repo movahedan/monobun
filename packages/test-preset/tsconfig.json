@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"composite": true,
 		"noEmit": false,
-		"types": ["node", "bun-types"]
+		"types": ["node", "bun"]
 	},
 	"include": ["."]
 }

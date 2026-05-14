@@ -188,8 +188,8 @@ Be explicit about what TypeScript should process:
 ## Dependencies
 
 ### Peer Dependencies
-- **typescript** `5.8.3` - TypeScript compiler
-- **bun-types** `1.3.1` - Bun runtime types
+- **typescript** `5.9.3` - TypeScript compiler
+- **@types/bun** `1.3.14` - Bun runtime types (via DefinitelyTyped wrapper)
 
 These are peer dependencies to avoid version conflicts and allow projects to control their TypeScript version.
 
