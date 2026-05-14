@@ -16,7 +16,7 @@ RUN turbo prune --scope=admin --docker
 FROM turbo AS installer
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/bun.lock ./bun.lock
+COPY bun.lock ./bun.lock
 COPY --from=pruner /app/out/full/ .
 RUN bun install --ignore-scripts
 
