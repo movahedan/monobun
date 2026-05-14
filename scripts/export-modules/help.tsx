@@ -27,7 +27,8 @@ function HelpApp({ errorMessage }: { readonly errorMessage?: string }) {
 			<Text>
 				<Text color="green">{"--pattern <regex>"}</Text> — match file paths (posix, relative to
 				package.json) and build exports from all .ts/.tsx under ./src recursively; first capture
-				sets the export key when present
+				sets the export key when present. Patterns are checked for catastrophic backtracking and
+				rejected if unsafe.
 			</Text>
 			<Text>
 				<Text color="green">{"--regex-flags <flags>"}</Text> — RegExp flags (global g is ignored)

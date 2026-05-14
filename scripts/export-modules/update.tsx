@@ -4,6 +4,8 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import { $ } from "bun";
 import { type ReactNode, useCallback } from "react";
+import safeRegex from "safe-regex";
+
 import { colorify } from "../colorify";
 
 import { renderAndExit } from "../render-and-exit";
@@ -12,6 +14,7 @@ import { StepProgressApp, type StepProgressStep } from "../step-progress";
 import { printHelpAndExit } from "./help";
 
 const MAX_PATTERN_LENGTH = 500;
+const MAX_REL_PATH_FOR_REGEX = 8192;
 
 export interface ExportModulesOptions {
 	readonly useSrc: boolean;
@@ -58,12 +61,24 @@ async function collectTsFilesRecursive(rootDir: string): Promise<readonly string
 	return results;
 }
 
-function compilePathRegex(pattern: string, flags: string): RegExp {
+export function compilePathRegex(pattern: string, flags: string): RegExp {
 	if (pattern.length > MAX_PATTERN_LENGTH) {
 		throw new Error(`Pattern exceeds max length (${MAX_PATTERN_LENGTH})`);
 	}
 	const safeFlags = flags.replaceAll("g", "");
-	return new RegExp(pattern, safeFlags);
+	let compiled: RegExp;
+	try {
+		compiled = new RegExp(pattern, safeFlags);
+	} catch (error: unknown) {
+		const message = error instanceof Error ? error.message : String(error);
+		throw new Error(`Invalid regular expression: ${message}`);
+	}
+	if (!safeRegex(compiled)) {
+		throw new Error(
+			"Pattern is rejected because it may cause catastrophic backtracking (ReDoS). Use a simpler regex without nested quantifiers such as (a+)+ or overlapping unbounded repetition.",
+		);
+	}
+	return compiled;
 }
 
 function exportKeyFromMatch(relFromSrcPosix: string, match: RegExpMatchArray): string {
@@ -99,6 +114,11 @@ function buildExportsFromPattern(
 
 	for (const abs of absoluteFiles) {
 		const relPackage = toPosixPath(path.relative(packageDir, abs));
+		if (relPackage.length > MAX_REL_PATH_FOR_REGEX) {
+			throw new Error(
+				`Path relative to package exceeds max length (${String(MAX_REL_PATH_FOR_REGEX)}): shorten the path or avoid --pattern on this tree.`,
+			);
+		}
 		const match = relPackage.match(regex);
 		if (match === null) continue;
 
@@ -193,10 +213,19 @@ function getExportModulesSteps(
 						throw new Error(`Invalid --pattern: ${message}`);
 					}
 					state.compiledPattern = regex;
-					state.patternMatchedPaths = allFiles.filter((abs) => {
+					const matched: string[] = [];
+					for (const abs of allFiles) {
 						const rel = toPosixPath(path.relative(state.packageDir, abs));
-						return regex.test(rel);
-					});
+						if (rel.length > MAX_REL_PATH_FOR_REGEX) {
+							throw new Error(
+								`Path relative to package exceeds max length (${String(MAX_REL_PATH_FOR_REGEX)}): shorten the path or avoid --pattern on this tree.`,
+							);
+						}
+						if (regex.test(rel)) {
+							matched.push(abs);
+						}
+					}
+					state.patternMatchedPaths = matched;
 					state.files = [];
 					console.log(
 						colorify.blue(
