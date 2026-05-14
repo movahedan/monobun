@@ -52,7 +52,7 @@ jobs:
         id: affected-services
         run: |
           echo "::group::🔍 Getting affected services"
-          bun run scripts/ci-attach-affected.ts --mode docker --output-id affected-services
+          bun run ci attach-affected --mode docker --output-id affected-services
           echo "::endgroup::"
 
   build-affected:

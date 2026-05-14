@@ -47,20 +47,20 @@ jobs:
         run: bun install
 
       - name: 🔍 - Check branch name
-        run: bun run precommit --branch
+        run: bun run precommit -- --branch
 
       - name: 🔍 - Get affected packages
         id: affected-packages
         run: |
           echo "::group::🔍 Getting affected packages"
-          bun run scripts/ci-attach-affected.ts --mode turbo --output-id affected-packages
+          bun run ci attach-affected --mode turbo --output-id affected-packages
           echo "::endgroup::"
 
       - name: 🔍 - Get affected services
         id: affected-services
         run: |
           echo "::group::🔍 Getting affected services"
-          bun run scripts/ci-attach-affected.ts --mode docker --output-id affected-services
+          bun run ci attach-affected --mode docker --output-id affected-services
           echo "::endgroup::"
       
       - name: 🔍 - Attach service ports to github output
@@ -68,7 +68,7 @@ jobs:
         id: service-ports
         run: |
           echo "::group::🔍 Getting service ports"
-          bun run scripts/ci-attach-service-ports.ts --output-id service-ports
+          bun run ci attach-service-ports --output-id service-ports
           echo "::endgroup::"
 
   validate-source:
@@ -111,19 +111,19 @@ jobs:
         run: bun install
 
       - name: 🔍 - Check branch name
-        run: bun run precommit --branch
+        run: bun run precommit -- --branch
 
       - name: ✨ - Biome check
         run: bun run lint
 
-      - name: 🏗️ - Build packages
-        run: bun run build ${{ needs.get-affected.outputs.affected-packages }}
-
       - name: 🔍 - Type check
-        run: bun run typecheck ${{ needs.get-affected.outputs.affected-packages }}
+        run: bun run typecheck -- ${{ needs.get-affected.outputs.affected-packages }}
+
+      - name: 🧪 - Test
+        run: bun run turbo run test -- ${{ needs.get-affected.outputs.affected-packages }}
 
       - name: 🏗️ - Build
-        run: bun run build ${{ needs.get-affected.outputs.affected-packages }}
+        run: bun run build -- ${{ needs.get-affected.outputs.affected-packages }}
 
 
   validate-docker-compose:
@@ -158,6 +158,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
   
+      - name: 📦 Install dependencies
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+        run: bun install
+
       - name: 🐳 Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
