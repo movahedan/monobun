@@ -4,9 +4,6 @@ const nextConfig: NextConfig = {
 	typescript: {
 		ignoreBuildErrors: true,
 	},
-	eslint: {
-		ignoreDuringBuilds: true,
-	},
 
 	// Enable hot reload in Docker containers
 	webpack: (
