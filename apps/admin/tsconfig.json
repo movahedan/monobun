@@ -4,7 +4,7 @@
 		"rootDir": "../..",
 		"outDir": "./dist"
 	},
-	"include": ["src/**/*", "../../packages/ui/src/**/*"],
+	"include": ["src/**/*", "vite.d.ts", "../../packages/ui/src/**/*"],
 	"exclude": [
 		"../../packages/ui/src/**/*.test.ts",
 		"../../packages/ui/src/**/*.test.tsx",
