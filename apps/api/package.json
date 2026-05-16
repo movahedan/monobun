@@ -14,7 +14,7 @@
 		"@repo/utils": "workspace:*",
 		"body-parser": "2.2.2",
 		"cors": "2.8.6",
-		"express": "5.1.0",
+		"express": "5.2.1",
 		"morgan": "1.10.1"
 	},
 	"devDependencies": {
@@ -26,7 +26,7 @@
 		"@types/express": "5.0.6",
 		"@types/morgan": "1.9.10",
 		"@types/supertest": "7.2.0",
-		"supertest": "7.1.4",
+		"supertest": "7.2.2",
 		"tsup": "8.5.1"
 	}
 }
