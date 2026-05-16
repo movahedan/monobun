@@ -47,7 +47,7 @@ jobs:
         run: bun install -E --no-save
 
       - name: 🏗️ Build and upload site
-        uses: withastro/action@v3
+        uses: withastro/action@v6
         with:
           path: apps/docs-astro
           node-version: 25
