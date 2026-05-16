@@ -65,7 +65,6 @@ Designed for React library packages:
 {
   "extends": "@repo/typescript-config/vite.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
@@ -80,7 +79,6 @@ Designed for React library packages:
 {
   "extends": "@repo/typescript-config/nextjs.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
@@ -159,7 +157,6 @@ Only override settings when necessary:
   "extends": "@repo/typescript-config/vite.json",
   "compilerOptions": {
     // Only add project-specific settings
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

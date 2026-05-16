@@ -115,7 +115,6 @@ Specify the base directory to resolve non-relative module names.
 ```json
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     }
