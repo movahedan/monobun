@@ -4,12 +4,12 @@
 	"description": "Documentation site built with Astro for the monobun project",
 	"type": "module",
 	"scripts": {
-		"astro": "astro",
-		"dev": "astro dev",
-		"build": "astro build",
-		"start": "astro preview",
-		"lint": "astro check && biome check .",
-		"typecheck": "astro check && tsc --noEmit --project tsconfig.ts.json"
+		"astro": "bun --bun ../../node_modules/astro/bin/astro.mjs",
+		"dev": "bun run astro dev",
+		"build": "bun run astro build",
+		"start": "bun run astro preview",
+		"lint": "bun run astro check && biome check .",
+		"typecheck": "bun run astro check && tsc --noEmit --project tsconfig.ts.json"
 	},
 	"dependencies": {
 		"@astrojs/tailwind": "6.0.2",
