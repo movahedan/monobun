@@ -13,6 +13,7 @@ Root automation lives under `scripts/` and is run with **Bun** (`bun scripts/<ar
 | **[Ink](https://github.com/vadimdemedes/ink)** | Renders TUI output: help screens (`Box`, `Text`, `render`, `useApp`) and the shared step UI (`Static`, animations). `scripts/render-and-exit.tsx` wraps `ink`’s `render` so scripts exit with a consistent code after the tree unmounts. |
 | **`scripts/colorify.ts`** | Lightweight ANSI helpers for non-Ink log lines (similar idea to chalk, no extra dependency). |
 | **`scripts/step-progress.tsx`** | Reusable multi-step flows (spinner + finished steps) built on Ink. |
+| **`scripts/format-cli-error.ts`** | Prints `Error.message` only (no Bun stack trace) for script failures. |
 | **Intershell (`intershell`)** | Typed **entities** for monorepo facts: affected packages, compose, git/commits/branches, package metadata, tags, versioning—so scripts stay thin orchestration instead of re-parsing YAML, `package.json`, or git by hand. |
 | **Turbo / Biome** | Invoked from scripts via shell (`bun run lint`, `turbo run …`); not imported as libraries in every script. |
 

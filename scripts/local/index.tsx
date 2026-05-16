@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { printCliErrorAndExit } from "../format-cli-error";
 import { runLocalCleanup } from "./cleanup";
 import { printHelpAndExit } from "./help";
 import { runLocalSetup } from "./setup";
@@ -33,7 +34,4 @@ async function main(): Promise<void> {
 	await runLocalVscodeCli(rest);
 }
 
-void main().catch((error: unknown) => {
-	console.error(error);
-	process.exit(1);
-});
+void main().catch(printCliErrorAndExit);

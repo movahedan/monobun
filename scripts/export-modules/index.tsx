@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { printCliErrorAndExit } from "../format-cli-error";
 import { printHelpAndExit } from "./help";
 import { runExportModules } from "./update";
 
@@ -21,7 +22,4 @@ async function main(): Promise<void> {
 	await runExportModules(rest);
 }
 
-void main().catch((error: unknown) => {
-	console.error(error);
-	process.exit(1);
-});
+void main().catch(printCliErrorAndExit);

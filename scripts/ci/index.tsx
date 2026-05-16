@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { printCliErrorAndExit } from "../format-cli-error";
 import { runCiAttachAffected } from "./attach-affected";
 import { runCiAttachServicePorts } from "./attach-service-ports";
 import { printHelpAndExit } from "./help";
@@ -27,7 +28,4 @@ async function main(): Promise<void> {
 	await runCiAttachServicePorts(rest);
 }
 
-void main().catch((error: unknown) => {
-	console.error(error);
-	process.exit(1);
-});
+void main().catch(printCliErrorAndExit);
