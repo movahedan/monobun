@@ -4,7 +4,7 @@
 	"description": "Documentation site built with Astro for the monobun project",
 	"type": "module",
 	"scripts": {
-		"astro": "bun --bun ../../node_modules/astro/bin/astro.mjs",
+		"astro": "bun --bun x astro",
 		"dev": "bun run astro dev",
 		"build": "bun run astro build",
 		"start": "bun run astro preview",
