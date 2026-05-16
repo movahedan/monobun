@@ -2,6 +2,7 @@
 	"extends": "@repo/typescript-config/base.json",
 	"compilerOptions": {
 		"lib": ["ES2015"],
+		"rootDir": "../..",
 		"outDir": "./dist"
 	},
 	"include": [".", "../../packages/logger/src/**/*"]
