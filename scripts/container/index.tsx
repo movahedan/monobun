@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { printCliErrorAndExit } from "../format-cli-error";
 import { runCheck } from "./check";
 import { runCleanup } from "./cleanup";
 import { printHelpAndExit } from "./help";
@@ -116,7 +117,4 @@ async function main(): Promise<void> {
 	await runRm(subRest);
 }
 
-void main().catch((error: unknown) => {
-	console.error(error);
-	process.exit(1);
-});
+void main().catch(printCliErrorAndExit);

@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import { parseArgs } from "node:util";
 
+import { printCliErrorAndExit } from "../format-cli-error";
 import { printOverallHelpAndExit } from "./help";
 import { runOverall } from "./run";
 
@@ -33,7 +34,4 @@ async function main(): Promise<void> {
 	}
 }
 
-void main().catch((error: unknown) => {
-	console.error(error);
-	process.exit(1);
-});
+void main().catch(printCliErrorAndExit);

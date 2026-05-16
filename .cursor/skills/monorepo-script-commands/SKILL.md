@@ -22,7 +22,7 @@ description: >-
 | Entry + routing | `scripts/<area>/index.tsx` (`#!/usr/bin/env bun`, thin `main`) |
 | Help + subcommand guard | `scripts/<area>/help.tsx` — validate subcommand, `printHelpAndExit` |
 | Each subcommand | `scripts/<area>/<name>.tsx` — exports `run*` entry used from `index` |
-| Shared Ink + helpers | `scripts/step-progress.tsx`, `scripts/render-and-exit.tsx` |
+| Shared Ink + helpers | `scripts/step-progress.tsx`, `scripts/render-and-exit.tsx`, `scripts/format-cli-error.ts` |
 
 Keep **one canonical step list** per flow; do not fork “quiet” vs “interactive” logic beyond wrapping.
 
@@ -39,7 +39,8 @@ Keep **one canonical step list** per flow; do not fork “quiet” vs “interac
    `const resolveSteps = useCallback(() => getXxxSteps(deps), [deps]);`
 
 3. **Completed lines**: Ink **`<Static>`** so finished steps stay fixed; **live row** = spinner + dim current label (`marginTop` when there is at least one completed line). Do not use full-terminal height unless a footer must pin to the bottom of the screen.
-4. **Subprocess output**: **`render(..., { stdout: process.stderr })`** so tool output stays on **stdout** and does not fight the Ink buffer. Prefer **`renderAndExit`** from `scripts/render-and-exit.tsx` (defaults to `stdout: process.stderr`, `waitUntilExit`, `unmount`, `console.error` + `process.exit(1)` on failure).
+4. **Subprocess output**: **`render(..., { stdout: process.stderr })`** so tool output stays on **stdout** and does not fight the Ink buffer. Prefer **`renderAndExit`** from `scripts/render-and-exit.tsx` (defaults to `stdout: process.stderr`, `waitUntilExit`, `unmount`, **`printCliError`** + `process.exit(1)` on failure — message only, no Bun stack trace).
+5. **Top-level failures**: use **`printCliErrorAndExit`** from `scripts/format-cli-error.ts` in `index.tsx` `.catch()` handlers; never `console.error(error)` with an `Error` instance.
 
 ## Quiet / CI / postinstall
 

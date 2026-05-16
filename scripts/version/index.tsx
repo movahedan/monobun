@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { printCliErrorAndExit } from "../format-cli-error";
 import { runVersionApply } from "./apply";
 import { runVersionCi } from "./ci";
 import { isVersionSubcommand, printVersionHelpAndExit } from "./help";
@@ -26,7 +27,4 @@ async function main(): Promise<void> {
 	await runVersionCi(rest);
 }
 
-void main().catch((error: unknown) => {
-	console.error(error);
-	process.exit(1);
-});
+void main().catch(printCliErrorAndExit);

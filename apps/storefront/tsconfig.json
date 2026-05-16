@@ -1,6 +1,7 @@
 {
 	"extends": "@repo/typescript-config/nextjs.json",
 	"compilerOptions": {
+		"rootDir": "../..",
 		"outDir": "./dist",
 		"paths": {
 			"@repo/ui": ["../../packages/ui/dist"],
@@ -11,6 +12,7 @@
 		"./src",
 		"./next.config.ts",
 		"./next-env.d.ts",
+		"../../packages/typescript-config/css.d.ts",
 		"./.next/types/**/*.ts",
 		".next/types/**/*.ts",
 		"../../packages/logger/src/**/*",

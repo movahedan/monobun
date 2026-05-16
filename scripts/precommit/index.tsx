@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { printCliErrorAndExit } from "../format-cli-error";
 import { runCommitCheck } from "./run";
 
 async function main(): Promise<void> {
@@ -6,7 +7,4 @@ async function main(): Promise<void> {
 	await runCommitCheck(rest);
 }
 
-void main().catch((error: unknown) => {
-	console.error(error);
-	process.exit(1);
-});
+void main().catch(printCliErrorAndExit);
