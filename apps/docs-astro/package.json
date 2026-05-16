@@ -16,7 +16,7 @@
 		"@tailwindcss/typography": "0.5.19",
 		"astro": "6.1.10",
 		"lucide-astro": "0.536.0",
-		"marked": "16.1.2"
+		"marked": "18.0.3"
 	},
 	"devDependencies": {
 		"@astrojs/check": "0.9.9",
