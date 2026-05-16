@@ -1,5 +1,9 @@
 {
 	"extends": "@repo/typescript-config/vite.json",
+	"compilerOptions": {
+		"rootDir": "../..",
+		"outDir": "./dist"
+	},
 	"include": ["src/**/*", "../../packages/ui/src/**/*"],
 	"exclude": [
 		"../../packages/ui/src/**/*.test.ts",
