@@ -21,11 +21,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "25"
-
       - name: 🚀 Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -46,12 +41,13 @@ jobs:
         if: steps.bun-cache.outputs.cache-hit != 'true'
         run: bun install -E --no-save
 
-      - name: 🏗️ Build and upload site
-        uses: withastro/action@v6
+      - name: 🏗️ Build docs site
+        run: bun run build --filter=docs-astro
+
+      - name: 📤 Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
         with:
-          path: apps/docs-astro
-          node-version: 25
-          package-manager: bun
+          path: apps/docs-astro/dist
 
   deploy:
     needs: build

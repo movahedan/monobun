@@ -1,26 +1,10 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-	typescript: {
-		ignoreBuildErrors: true,
-	},
-	eslint: {
-		ignoreDuringBuilds: true,
-	},
+const isDev = process.env.NODE_ENV === "development";
 
-	// Enable hot reload in Docker containers
-	webpack: (
-		config: { watchOptions: { poll: number; aggregateTimeout: number } },
-		{ dev }: { dev: boolean },
-	) => {
-		if (dev) {
-			config.watchOptions = {
-				poll: 1000,
-				aggregateTimeout: 300,
-			};
-		}
-		return config;
-	},
+const nextConfig: NextConfig = {
+	typescript: { ignoreBuildErrors: true },
+	...(!isDev && { watchOptions: { pollIntervalMs: 1000 } }),
 };
 
 export default nextConfig;
