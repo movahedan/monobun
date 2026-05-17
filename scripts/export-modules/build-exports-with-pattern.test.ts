@@ -6,6 +6,7 @@ import path from "node:path";
 import { MAX_REL_PATH_FOR_REGEX } from "../shared/match-files-by-pattern";
 import { buildExportsWithPattern } from "./build-exports-with-pattern";
 import { compilePathRegex } from "./compile-path-regex";
+import { toSourceExport } from "./source-export";
 
 describe("buildExportsWithPattern", () => {
 	let packageDir: string;
@@ -30,7 +31,7 @@ describe("buildExportsWithPattern", () => {
 		const exports = buildExportsWithPattern([cardFile], packageDir, srcDir, regex);
 
 		expect(exports).toEqual({
-			"./card": "./src/card/card.tsx",
+			"./card": toSourceExport("./src/card/card.tsx"),
 		});
 	});
 
@@ -80,7 +81,7 @@ describe("buildExportsWithPattern", () => {
 		const exports = buildExportsWithPattern([fooTs, fooTsx], packageDir, srcDir, regex);
 
 		expect(exports).toEqual({
-			"./foo": "./src/foo.tsx",
+			"./foo": toSourceExport("./src/foo.tsx"),
 		});
 		expect(warnSpy).toHaveBeenCalled();
 		const warnMessage = String(warnSpy.mock.calls[0]?.[0]);

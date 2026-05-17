@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { buildExportsWithoutPattern } from "./build-exports-without-pattern";
+import { toSourceExport } from "./source-export";
 
 function createDirent(name: string, kind: "directory" | "file"): Dirent {
 	return {
@@ -40,7 +41,7 @@ describe("buildExportsWithoutPattern", () => {
 		);
 
 		expect(exports).toEqual({
-			"./atoms": "./src/atoms/index.ts",
+			"./atoms": toSourceExport("./src/atoms/index.ts"),
 		});
 	});
 
@@ -56,7 +57,7 @@ describe("buildExportsWithoutPattern", () => {
 		);
 
 		expect(exports).toEqual({
-			"./hooks": "./src/hooks/index.tsx",
+			"./hooks": toSourceExport("./src/hooks/index.tsx"),
 		});
 	});
 
@@ -72,7 +73,7 @@ describe("buildExportsWithoutPattern", () => {
 		);
 
 		expect(exports).toEqual({
-			"./card": "./src/card/card.tsx",
+			"./card": toSourceExport("./src/card/card.tsx"),
 		});
 	});
 
@@ -86,7 +87,7 @@ describe("buildExportsWithoutPattern", () => {
 		);
 
 		expect(exports).toEqual({
-			".": "./index.ts",
+			".": toSourceExport("./src/index.ts"),
 		});
 	});
 

@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { colorify } from "../shared/colorify";
 import { MAX_REL_PATH_FOR_REGEX } from "../shared/match-files-by-pattern";
+import { type PackageExportValue, toSourceExport } from "./source-export";
 
 function toPosixPath(filePath: string): string {
 	return filePath.split(path.sep).join("/");
@@ -34,8 +35,8 @@ export function buildExportsWithPattern(
 	packageDir: string,
 	srcDir: string,
 	regex: RegExp,
-): Record<string, string> {
-	const newExports: Record<string, string> = {};
+): Record<string, PackageExportValue> {
+	const newExports: Record<string, PackageExportValue> = {};
 	const duplicateKeys = new Map<string, string[]>();
 
 	for (const abs of absoluteFiles) {
@@ -59,7 +60,7 @@ export function buildExportsWithPattern(
 			duplicateKeys.set(key, list);
 		}
 
-		newExports[key] = exportPath;
+		newExports[key] = toSourceExport(exportPath);
 	}
 
 	if (duplicateKeys.size > 0) {

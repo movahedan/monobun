@@ -1,12 +1,14 @@
 import type { Dirent } from "node:fs";
 import path from "node:path";
 
+import { type PackageExportValue, toSourceExport } from "./source-export";
+
 export async function buildExportsWithoutPattern(
 	files: readonly Dirent[],
 	srcDir: string,
 	packageDir: string,
-): Promise<Record<string, string>> {
-	const newExports: Record<string, string> = {};
+): Promise<Record<string, PackageExportValue>> {
+	const newExports: Record<string, PackageExportValue> = {};
 
 	for (const file of files) {
 		if (file.isDirectory()) {
@@ -16,13 +18,19 @@ export async function buildExportsWithoutPattern(
 			const sameNameTsxFile = path.join(srcDir, file.name, `${file.name}.tsx`);
 
 			if (await Bun.file(indexFile).exists()) {
-				newExports[`./${file.name}`] = `./${path.relative(packageDir, indexFile)}`;
+				newExports[`./${file.name}`] = toSourceExport(`./${path.relative(packageDir, indexFile)}`);
 			} else if (await Bun.file(indexTsxFile).exists()) {
-				newExports[`./${file.name}`] = `./${path.relative(packageDir, indexTsxFile)}`;
+				newExports[`./${file.name}`] = toSourceExport(
+					`./${path.relative(packageDir, indexTsxFile)}`,
+				);
 			} else if (await Bun.file(sameNameFile).exists()) {
-				newExports[`./${file.name}`] = `./${path.relative(packageDir, sameNameFile)}`;
+				newExports[`./${file.name}`] = toSourceExport(
+					`./${path.relative(packageDir, sameNameFile)}`,
+				);
 			} else if (await Bun.file(sameNameTsxFile).exists()) {
-				newExports[`./${file.name}`] = `./${path.relative(packageDir, sameNameTsxFile)}`;
+				newExports[`./${file.name}`] = toSourceExport(
+					`./${path.relative(packageDir, sameNameTsxFile)}`,
+				);
 			}
 
 			continue;
@@ -32,7 +40,9 @@ export async function buildExportsWithoutPattern(
 		if (shouldSkip) continue;
 
 		if (file.name === "index.ts") {
-			newExports["."] = "./index.ts";
+			newExports["."] = toSourceExport(
+				`./${path.relative(packageDir, path.join(srcDir, file.name))}`,
+			);
 			continue;
 		}
 
@@ -40,7 +50,7 @@ export async function buildExportsWithoutPattern(
 		const relativePath = `./${path.relative(packageDir, mainFile)}`;
 
 		if (await Bun.file(mainFile).exists()) {
-			newExports[`./${file.name}`] = relativePath;
+			newExports[`./${file.name}`] = toSourceExport(relativePath);
 		}
 	}
 

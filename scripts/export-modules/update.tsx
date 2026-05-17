@@ -12,8 +12,8 @@ import { StepProgressApp, type StepProgressStep } from "../shared/step-progress"
 import { buildExportsWithPattern } from "./build-exports-with-pattern";
 import { buildExportsWithoutPattern } from "./build-exports-without-pattern";
 import { compilePathRegex } from "./compile-path-regex";
-
 import { printHelpAndExit } from "./help";
+import type { PackageExportValue } from "./source-export";
 
 export interface ExportModulesOptions {
 	readonly useSrc: boolean;
@@ -33,7 +33,7 @@ interface ExportModulesState {
 	cssPatternMatchedPaths: readonly string[];
 	compiledPattern: RegExp | undefined;
 	compiledCssPattern: RegExp | undefined;
-	newExports: Record<string, string>;
+	newExports: Record<string, PackageExportValue>;
 }
 
 function getExportModulesSteps(
@@ -108,7 +108,7 @@ function getExportModulesSteps(
 		{
 			label: "Resolving export paths",
 			run: async () => {
-				const exports: Record<string, string> = {};
+				const exports: Record<string, PackageExportValue> = {};
 
 				if (options.pattern !== undefined && state.compiledPattern !== undefined) {
 					Object.assign(
@@ -159,7 +159,7 @@ function getExportModulesSteps(
 		label: "Writing package.json",
 		run: async () => {
 			const packageJson = JSON.parse(await Bun.file(state.packageJsonPath).text()) as {
-				exports?: Record<string, string>;
+				exports?: Record<string, PackageExportValue>;
 			};
 			packageJson.exports = state.newExports;
 			await Bun.write(state.packageJsonPath, JSON.stringify(packageJson, null, 2));
