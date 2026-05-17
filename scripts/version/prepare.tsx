@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { parseArgs } from "node:util";
 import { $ } from "bun";
+
 import {
 	DefaultChangelogTemplate,
 	EntityCompose,
@@ -13,6 +14,7 @@ import {
 	EntityTag,
 } from "intershell";
 import { type ReactNode, useCallback } from "react";
+
 import { colorify } from "../shared/colorify";
 import { renderAndExit } from "../shared/render-and-exit";
 import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";

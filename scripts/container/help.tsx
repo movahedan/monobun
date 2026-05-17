@@ -1,5 +1,6 @@
 import { Box, render, Text, useApp } from "ink";
 import { useEffect } from "react";
+
 import { getContainerStack, PROD_COMPOSE_PROJECT_NAME } from "./stack";
 
 function HelpApp({ errorMessage }: { readonly errorMessage?: string }) {

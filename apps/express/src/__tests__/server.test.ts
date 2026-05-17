@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test";
+
 import supertest from "supertest";
+
 import { createServer } from "../server";
 
 describe("Server", () => {

@@ -1,9 +1,11 @@
 import { setTimeout } from "node:timers/promises";
 import { parseArgs } from "node:util";
+
 import { EntityCompose, type ServiceHealth, type ServiceInfo } from "intershell";
-import { colorify } from "../colorify";
-import { runStepsInTerminal } from "../run-terminal-steps";
-import type { StepProgressStep } from "../step-progress";
+
+import { colorify } from "../shared/colorify";
+import { runStepsInTerminal } from "../shared/run-terminal-steps";
+import type { StepProgressStep } from "../shared/step-progress";
 import { getComposeFilePath, spawnContainerIndex } from "./stack";
 
 const HEALTH_ICONS: Record<ServiceHealth["status"], string> = {

@@ -1,5 +1,6 @@
 import { Link } from "@repo/ui/molecules";
 import { log } from "@repo/utils/logger";
+
 import { CounterButtonWrapper } from "../components/CounterButtonWrapper";
 
 export const metadata = {

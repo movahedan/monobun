@@ -1,4 +1,5 @@
 import { parseArgs } from "node:util";
+
 import { EntityCompose } from "intershell";
 
 function logVerbose(message: string, quiet: boolean): void {

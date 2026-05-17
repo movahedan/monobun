@@ -29,9 +29,27 @@
 		"lineWidth": 100
 	},
 	"assist": {
+		"enabled": true,
 		"actions": {
 			"source": {
-				"organizeImports": "on"
+				"organizeImports": {
+					"level": "on",
+					"options": {
+						"groups": [
+							[":BUN:", ":NODE:"],
+							":BLANK_LINE:",
+							[":URL:", ":PACKAGE_WITH_PROTOCOL:", ":PACKAGE:", "!@repo/**", "!#/**"],
+							":BLANK_LINE:",
+							["@repo/**"],
+							":BLANK_LINE:",
+							["#/**"],
+							":BLANK_LINE:",
+							[":ALIAS:", ":PATH:", "!#/**", "!**/*.css", "!**/*.scss", "!**/*.sass"],
+							":BLANK_LINE:",
+							["**/*.css", "**/*.scss", "**/*.sass"]
+						]
+					}
+				}
 			}
 		}
 	},

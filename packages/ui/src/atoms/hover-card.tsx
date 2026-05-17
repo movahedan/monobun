@@ -1,8 +1,9 @@
 "use client";
 
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
-import { cn } from "@repo/utils/cn";
 import type * as React from "react";
+
+import { cn } from "@repo/utils/cn";
 
 function HoverCard({ ...props }: React.ComponentProps<typeof HoverCardPrimitive.Root>) {
 	return <HoverCardPrimitive.Root data-slot="hover-card" {...props} />;

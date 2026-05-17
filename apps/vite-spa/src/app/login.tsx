@@ -1,5 +1,6 @@
-import { LoginForm, type LoginFormData } from "@repo/ui/molecules";
 import { useState } from "react";
+
+import { LoginForm, type LoginFormData } from "@repo/ui/molecules";
 
 export function LoginPage() {
 	const [loading, setLoading] = useState(false);

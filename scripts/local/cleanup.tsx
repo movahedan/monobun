@@ -1,5 +1,6 @@
 import { parseArgs } from "node:util";
 import { $ } from "bun";
+
 import { type ReactNode, useCallback } from "react";
 
 import { renderAndExit } from "../shared/render-and-exit";

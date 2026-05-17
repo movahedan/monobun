@@ -1,9 +1,11 @@
 import { parseArgs } from "node:util";
+
 import { type ReactNode, useCallback } from "react";
-import { colorify } from "../colorify";
-import { applyPlainComposeArgv } from "../compose-plain-progress";
-import { renderAndExit } from "../render-and-exit";
-import { StepProgressApp, type StepProgressStep } from "../step-progress";
+
+import { colorify } from "../shared/colorify";
+import { applyPlainComposeArgv } from "../shared/compose-plain-progress";
+import { renderAndExit } from "../shared/render-and-exit";
+import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
 import { getComposePrefix, getComposeSpawnEnv } from "./stack";
 
 export interface CleanupOptions {

@@ -2,6 +2,7 @@ import { exists, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { $ } from "bun";
+
 import { EntityPackage } from "intershell";
 import { type ReactNode, useCallback } from "react";
 

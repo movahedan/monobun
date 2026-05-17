@@ -1,9 +1,10 @@
 "use client";
 
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { cn } from "@repo/utils/cn";
 import { ChevronDownIcon } from "lucide-react";
 import type * as React from "react";
+
+import { cn } from "@repo/utils/cn";
 
 function Accordion({ ...props }: React.ComponentProps<typeof AccordionPrimitive.Root>) {
 	return <AccordionPrimitive.Root data-slot="accordion" {...props} />;

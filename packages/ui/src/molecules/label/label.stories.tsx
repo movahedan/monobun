@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useId } from "react";
+
 import { Input } from "../input/input";
 import { Label } from "./label";
 

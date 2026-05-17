@@ -1,11 +1,11 @@
 import { parseArgs } from "node:util";
+
 import { EntityBranch, EntityCommit } from "intershell";
 import { type ReactNode, useCallback } from "react";
-import { colorify } from "../shared/colorify";
 
+import { colorify } from "../shared/colorify";
 import { renderAndExit } from "../shared/render-and-exit";
 import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
-
 import { printCommitCheckHelpAndExit } from "./help";
 
 const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";

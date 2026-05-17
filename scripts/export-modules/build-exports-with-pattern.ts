@@ -57,7 +57,7 @@ export function buildExportsWithPattern(
 		if (prior !== undefined && prior !== exportPath) {
 			const list = duplicateKeys.get(key) ?? [prior];
 			list.push(exportPath);
-			duplicateKeys.set(key, list);
+			duplicateKeys.set(key, list as string[]);
 		}
 
 		newExports[key] = toSourceExport(exportPath);

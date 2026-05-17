@@ -1,5 +1,6 @@
 import { type RenderOptions, render } from "ink";
 import type { ReactElement } from "react";
+
 import { INK_PROGRESS_ENV } from "./compose-plain-progress";
 import { printCliError } from "./format-cli-error";
 

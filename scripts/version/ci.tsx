@@ -1,11 +1,12 @@
 import { parseArgs } from "node:util";
 import { $ } from "bun";
+
 import { EntityTag } from "intershell";
 import { type ReactNode, useCallback } from "react";
+
 import { colorify } from "../shared/colorify";
 import { renderAndExit } from "../shared/render-and-exit";
 import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
-
 import { runVersionApply } from "./apply";
 import { runVersionPrepare } from "./prepare";
 

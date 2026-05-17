@@ -1,4 +1,5 @@
 import { log } from "@repo/utils/logger";
+
 import { createServer } from "./server";
 
 const host = process.env.HOST || "localhost";
