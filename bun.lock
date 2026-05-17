@@ -198,6 +198,21 @@
         "@types/node": "25.7.0",
       },
     },
+    "scripts": {
+      "name": "@repo/scripts",
+      "dependencies": {
+        "ink": "7.0.3",
+        "intershell": "0.6.2",
+        "react": "19.2.6",
+      },
+      "devDependencies": {
+        "@biomejs/biome": "2.4.15",
+        "@repo/config-typescript": "workspace:*",
+        "@types/bun": "1.3.14",
+        "@types/react": "19.2.14",
+        "typescript": "6.0.3",
+      },
+    },
   },
   "overrides": {
     "@types/node": "25.8.0",
@@ -654,6 +669,8 @@
     "@repo/config-tests": ["@repo/config-tests@workspace:packages/config-tests"],
 
     "@repo/config-typescript": ["@repo/config-typescript@workspace:packages/config-typescript"],
+
+    "@repo/scripts": ["@repo/scripts@workspace:scripts"],
 
     "@repo/ui": ["@repo/ui@workspace:packages/ui"],
 
