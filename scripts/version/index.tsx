@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { printCliErrorAndExit } from "../format-cli-error";
+import { printCliErrorAndExit } from "../shared/format-cli-error";
 import { runVersionApply } from "./apply";
 import { runVersionCi } from "./ci";
 import { isVersionSubcommand, printVersionHelpAndExit } from "./help";

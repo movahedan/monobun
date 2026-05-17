@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { printCliErrorAndExit } from "../format-cli-error";
+import { printCliErrorAndExit } from "../shared/format-cli-error";
 import { runCommitCheck } from "./run";
 
 async function main(): Promise<void> {

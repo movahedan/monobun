@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { getPlainComposeSpawnEnv } from "../compose-plain-progress";
+import { getPlainComposeSpawnEnv } from "../shared/compose-plain-progress";
 
 export type ContainerStack = "dev" | "prod";
 

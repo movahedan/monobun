@@ -1,7 +1,7 @@
 import { parseArgs } from "node:util";
-import { colorify } from "../colorify";
-import { runStepsInTerminal } from "../run-terminal-steps";
-import type { StepProgressStep } from "../step-progress";
+import { colorify } from "../shared/colorify";
+import { runStepsInTerminal } from "../shared/run-terminal-steps";
+import type { StepProgressStep } from "../shared/step-progress";
 import { spawnContainerIndex } from "./stack";
 
 export interface SetupOptions {

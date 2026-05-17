@@ -1,10 +1,10 @@
 import { parseArgs } from "node:util";
 import { EntityBranch, EntityCommit } from "intershell";
 import { type ReactNode, useCallback } from "react";
-import { colorify } from "../colorify";
+import { colorify } from "../shared/colorify";
 
-import { renderAndExit } from "../render-and-exit";
-import { StepProgressApp, type StepProgressStep } from "../step-progress";
+import { renderAndExit } from "../shared/render-and-exit";
+import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
 
 import { printCommitCheckHelpAndExit } from "./help";
 

@@ -1,9 +1,9 @@
 import { parseArgs } from "node:util";
 import { type ReactNode, useCallback } from "react";
-import { colorify } from "../colorify";
-import { applyPlainComposeArgv, getPlainComposeSpawnEnv } from "../compose-plain-progress";
-import { renderAndExit } from "../render-and-exit";
-import { StepProgressApp, type StepProgressStep } from "../step-progress";
+import { colorify } from "../shared/colorify";
+import { applyPlainComposeArgv, getPlainComposeSpawnEnv } from "../shared/compose-plain-progress";
+import { renderAndExit } from "../shared/render-and-exit";
+import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
 import { DEV_COMPOSE_FILE, PROD_COMPOSE_FILE, PROD_COMPOSE_PROJECT_NAME } from "./stack";
 
 async function spawnDocker(

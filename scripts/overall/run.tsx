@@ -1,8 +1,8 @@
 import { $ } from "bun";
 import { type ReactNode, useCallback } from "react";
 
-import { renderAndExit } from "../render-and-exit";
-import { StepProgressApp, type StepProgressStep } from "../step-progress";
+import { renderAndExit } from "../shared/render-and-exit";
+import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
 
 export interface OverallOptions {
 	readonly quiet: boolean;

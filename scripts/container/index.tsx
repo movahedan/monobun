@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
-import { applyPlainComposeArgv } from "../compose-plain-progress";
-import { printCliErrorAndExit } from "../format-cli-error";
+import { applyPlainComposeArgv } from "../shared/compose-plain-progress";
+import { printCliErrorAndExit } from "../shared/format-cli-error";
 import { runCheck } from "./check";
 import { runCleanup } from "./cleanup";
 import { printHelpAndExit } from "./help";

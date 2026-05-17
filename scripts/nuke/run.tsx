@@ -1,14 +1,13 @@
 import { type ReactNode, useCallback } from "react";
-
-import { colorify } from "../colorify";
 import { runCheck } from "../container/check";
 import { runCleanup } from "../container/cleanup";
 import { setContainerStack } from "../container/stack";
 import { runLocalCleanupSteps } from "../local/cleanup";
 import { runLocalSetupSteps } from "../local/setup";
-import { renderAndExit } from "../render-and-exit";
-import { runStepsInTerminal } from "../run-terminal-steps";
-import { StepProgressApp, type StepProgressStep } from "../step-progress";
+import { colorify } from "../shared/colorify";
+import { renderAndExit } from "../shared/render-and-exit";
+import { runStepsInTerminal } from "../shared/run-terminal-steps";
+import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
 
 export interface NukeOptions {
 	readonly quiet: boolean;

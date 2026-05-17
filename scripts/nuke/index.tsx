@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { parseArgs } from "node:util";
 
-import { printCliErrorAndExit } from "../format-cli-error";
+import { printCliErrorAndExit } from "../shared/format-cli-error";
 import { printNukeHelpAndExit } from "./help";
 import { runNuke } from "./run";
 

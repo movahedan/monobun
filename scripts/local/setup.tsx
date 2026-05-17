@@ -2,8 +2,8 @@ import { parseArgs } from "node:util";
 import { $ } from "bun";
 import { type ReactNode, useCallback } from "react";
 
-import { renderAndExit } from "../render-and-exit";
-import { StepProgressApp, type StepProgressStep } from "../step-progress";
+import { renderAndExit } from "../shared/render-and-exit";
+import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
 
 function getSetupSteps(skipTests: boolean): readonly StepProgressStep[] {
 	const steps: StepProgressStep[] = [
