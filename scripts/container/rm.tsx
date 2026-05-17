@@ -1,6 +1,7 @@
 import { parseArgs } from "node:util";
 import { type ReactNode, useCallback } from "react";
 import { colorify } from "../colorify";
+import { applyPlainComposeArgv, getPlainComposeSpawnEnv } from "../compose-plain-progress";
 import { renderAndExit } from "../render-and-exit";
 import { StepProgressApp, type StepProgressStep } from "../step-progress";
 import { DEV_COMPOSE_FILE, PROD_COMPOSE_FILE, PROD_COMPOSE_PROJECT_NAME } from "./stack";
@@ -10,16 +11,18 @@ async function spawnDocker(
 	env: NodeJS.ProcessEnv,
 	verbose: boolean,
 ): Promise<number> {
+	const argv = applyPlainComposeArgv(args);
+	const spawnEnv = getPlainComposeSpawnEnv(env);
 	const proc = verbose
-		? Bun.spawn([...args], {
+		? Bun.spawn(argv, {
 				stdio: ["inherit", "inherit", "inherit"],
 				cwd: process.cwd(),
-				env,
+				env: spawnEnv,
 			})
-		: Bun.spawn([...args], {
+		: Bun.spawn(argv, {
 				stdio: ["ignore", "pipe", "pipe"],
 				cwd: process.cwd(),
-				env,
+				env: spawnEnv,
 			});
 	return await proc.exited;
 }

@@ -1,8 +1,7 @@
 import { parseArgs } from "node:util";
-import { type ReactNode, useCallback } from "react";
 import { colorify } from "../colorify";
-import { renderAndExit } from "../render-and-exit";
-import { StepProgressApp, type StepProgressStep } from "../step-progress";
+import { runStepsInTerminal } from "../run-terminal-steps";
+import type { StepProgressStep } from "../step-progress";
 import { spawnContainerIndex } from "./stack";
 
 export interface SetupOptions {
@@ -36,13 +35,6 @@ async function runSetupSteps(options: SetupOptions): Promise<void> {
 	for (const step of getSetupSteps(options)) await step.run();
 }
 
-function SetupApp({ options }: { readonly options: SetupOptions }): ReactNode {
-	const resolveSteps = useCallback(() => getSetupSteps(options), [options]);
-	return (
-		<StepProgressApp completedHeading="Compose stack setup completed" resolveSteps={resolveSteps} />
-	);
-}
-
 async function printServiceHints(): Promise<void> {
 	console.log(colorify.yellow("Run bun run container cleanup to stop services when done"));
 	console.log(colorify.cyan("\nUseful commands:"));
@@ -69,7 +61,7 @@ export async function runSetup(rest: readonly string[]): Promise<void> {
 	if (options.quiet) {
 		await runSetupSteps(options);
 	} else {
-		await renderAndExit(<SetupApp options={options} />);
+		await runStepsInTerminal(getSetupSteps(options), { heading: "Compose stack setup" });
 	}
 
 	await printServiceHints();

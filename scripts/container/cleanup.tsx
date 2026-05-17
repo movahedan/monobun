@@ -1,6 +1,7 @@
 import { parseArgs } from "node:util";
 import { type ReactNode, useCallback } from "react";
 import { colorify } from "../colorify";
+import { applyPlainComposeArgv } from "../compose-plain-progress";
 import { renderAndExit } from "../render-and-exit";
 import { StepProgressApp, type StepProgressStep } from "../step-progress";
 import { getComposePrefix, getComposeSpawnEnv } from "./stack";
@@ -11,13 +12,14 @@ export interface CleanupOptions {
 }
 
 async function spawnCompose(args: readonly string[], verbose: boolean): Promise<number> {
+	const argv = applyPlainComposeArgv(args);
 	const proc = verbose
-		? Bun.spawn([...args], {
+		? Bun.spawn(argv, {
 				stdio: ["inherit", "inherit", "inherit"],
 				cwd: process.cwd(),
 				env: getComposeSpawnEnv(),
 			})
-		: Bun.spawn([...args], {
+		: Bun.spawn(argv, {
 				stdio: ["ignore", "pipe", "pipe"],
 				cwd: process.cwd(),
 				env: getComposeSpawnEnv(),
@@ -80,7 +82,9 @@ export async function runCleanup(rest: readonly string[]): Promise<void> {
 		await renderAndExit(<CleanupApp options={options} />);
 	}
 
-	console.log(colorify.cyan("\nTo start the stack again:"));
-	console.log(colorify.cyan("  - bun run container setup"));
-	console.log(colorify.cyan("  - bun run container rm  (host only — full compose teardown)"));
+	if (!options.quiet) {
+		console.log(colorify.cyan("\nTo start the stack again:"));
+		console.log(colorify.cyan("  - bun run container setup"));
+		console.log(colorify.cyan("  - bun run container rm  (host only — full compose teardown)"));
+	}
 }

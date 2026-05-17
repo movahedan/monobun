@@ -1,5 +1,7 @@
 import path from "node:path";
 
+import { getPlainComposeSpawnEnv } from "../compose-plain-progress";
+
 export type ContainerStack = "dev" | "prod";
 
 let currentStack: ContainerStack = "dev";
@@ -21,10 +23,11 @@ export function getComposeFilePath(): string {
 }
 
 export function getComposeSpawnEnv(): NodeJS.ProcessEnv {
-	if (getContainerStack() === "prod") {
-		return { ...process.env, COMPOSE_PROJECT_NAME: PROD_COMPOSE_PROJECT_NAME };
-	}
-	return { ...process.env };
+	const base =
+		getContainerStack() === "prod"
+			? { ...process.env, COMPOSE_PROJECT_NAME: PROD_COMPOSE_PROJECT_NAME }
+			: { ...process.env };
+	return getPlainComposeSpawnEnv(base);
 }
 
 export function getComposePrefix(): readonly string[] {
@@ -44,6 +47,7 @@ export async function spawnContainerIndex(subcommandArgs: readonly string[]): Pr
 	const proc = Bun.spawn(argvContainerIndex(subcommandArgs), {
 		stdio: ["inherit", "inherit", "inherit"],
 		cwd: process.cwd(),
+		env: getComposeSpawnEnv(),
 	});
 	return await proc.exited;
 }
