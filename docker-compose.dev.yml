@@ -60,7 +60,7 @@ services:
       start_period: 10s
 
   # Lightweight app containers that inherit from apps runtime
-  admin:
+  vite-spa:
     extends:
       service: apps
     expose:
@@ -73,16 +73,16 @@ services:
     environment:
       PORT: "3001"
       HOST: "0.0.0.0"
-    command: bun run turbo run dev --filter=admin -- --host 0.0.0.0 --port 3001
-    profiles: ["admin", "all"]
+    command: bun run turbo run dev --filter=vite-spa -- --host 0.0.0.0 --port 3001
+    profiles: ["vite-spa", "all"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://admin:3001"]
+      test: ["CMD", "curl", "-f", "http://vite-spa:3001"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
 
-  storefront:
+  nextjs:
     extends:
       service: apps
     expose:
@@ -95,16 +95,16 @@ services:
     environment:
       PORT: "3002"
       HOST: "0.0.0.0"
-    command: bun run turbo run dev --filter=storefront -- --hostname 0.0.0.0 --port 3002
-    profiles: ["storefront", "all"]
+    command: bun run turbo run dev --filter=nextjs -- --hostname 0.0.0.0 --port 3002
+    profiles: ["nextjs", "all"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://storefront:3002"]
+      test: ["CMD", "curl", "-f", "http://nextjs:3002"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
 
-  api:
+  express:
     extends:
       service: apps
     expose:
@@ -117,10 +117,10 @@ services:
     environment:
       PORT: "3003"
       HOST: "0.0.0.0"
-    command: bun run turbo run dev --filter=api
-    profiles: ["api", "all"]
+    command: bun run turbo run dev --filter=express
+    profiles: ["express", "all"]
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://api:3003/status | grep -q '\"ok\":true'"]
+      test: ["CMD-SHELL", "curl -f http://express:3003/status | grep -q '\"ok\":true'"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -143,7 +143,7 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://ui:3004"]
 
-  docs-astro:
+  astro-ssg:
     extends:
       service: apps
     expose:
@@ -156,10 +156,10 @@ services:
     environment:
       PORT: "3005"
       HOST: "0.0.0.0"
-    command: bun run turbo run dev --filter=docs-astro -- --host 0.0.0.0 --port 3005
-    profiles: ["docs-astro", "all"]
+    command: bun run turbo run dev --filter=astro-ssg -- --host 0.0.0.0 --port 3005
+    profiles: ["astro-ssg", "all"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://docs-astro:3005"]
+      test: ["CMD", "curl", "-f", "http://astro-ssg:3005"]
       interval: 30s
       timeout: 10s
       retries: 3
