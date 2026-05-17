@@ -17,6 +17,7 @@
 	},
 	"scripts": {
 		"postinstall": "lefthook install",
+		"nuke": "bun scripts/nuke/index.tsx",
 		"local": "bun scripts/local/index.tsx",
 		"turbo": "turbo",
 		"lint": "biome check .",

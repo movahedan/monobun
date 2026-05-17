@@ -150,13 +150,8 @@ curl -fsSL https://bun.com/install | bash
 # Clone and go! 🏃‍♂️
 git clone https://github.com/movahedan/monobun.git && cd monobun
 
-bun install
-bun run local setup
-bun run container setup && bun run container up && bun run container check
-bun run overall
-
-# Reset dev stack + local artifacts when things get weird:
-bun run container cleanup && bun run local cleanup
+bun nuke
+bun overall
 ```
 
 [![Star](https://img.shields.io/badge/⭐%20Star%20This%20Repo-Support%20Us-00D4AA?style=for-the-badge)](https://github.com/movahedan/monobun)
