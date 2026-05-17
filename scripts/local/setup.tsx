@@ -17,6 +17,10 @@ function getSetupSteps(skipTests: boolean): readonly StepProgressStep[] {
 	return steps;
 }
 
+export async function runLocalSetupSteps(skipTests: boolean): Promise<void> {
+	for (const step of getSetupSteps(skipTests)) await step.run();
+}
+
 function SetupApp({ skipTests }: { readonly skipTests: boolean }): ReactNode {
 	const resolveSteps = useCallback(() => getSetupSteps(skipTests), [skipTests]);
 	return <StepProgressApp completedHeading="Local setup completed" resolveSteps={resolveSteps} />;
@@ -27,9 +31,17 @@ export async function runLocalSetup(rest: readonly string[]): Promise<void> {
 		args: [...rest],
 		options: {
 			"skip-tests": { type: "boolean", short: "t", default: false },
+			quiet: { type: "boolean", default: false },
 		},
 		strict: true,
 	});
 
-	await renderAndExit(<SetupApp skipTests={values["skip-tests"] === true} />);
+	const skipTests = values["skip-tests"] === true;
+
+	if (values.quiet === true) {
+		await runLocalSetupSteps(skipTests);
+		return;
+	}
+
+	await renderAndExit(<SetupApp skipTests={skipTests} />);
 }

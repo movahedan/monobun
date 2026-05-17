@@ -13,5 +13,5 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
 RUN --mount=type=cache,target=/app/.turbo \
     mkdir -p .turbo/cache && \
     chmod -R 777 .turbo
-    
-CMD ["sleep", "infinity"] 
+
+CMD ["sleep", "infinity"]

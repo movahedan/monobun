@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { applyPlainComposeArgv } from "../compose-plain-progress";
 import { printCliErrorAndExit } from "../format-cli-error";
 import { runCheck } from "./check";
 import { runCleanup } from "./cleanup";
@@ -49,7 +50,7 @@ function parseGlobalFlags(argv: readonly string[]): {
 }
 
 async function spawnComposeExit(argv: readonly string[]): Promise<never> {
-	const proc = Bun.spawn([...argv], {
+	const proc = Bun.spawn(applyPlainComposeArgv(argv), {
 		stdio: ["inherit", "inherit", "inherit"],
 		cwd: process.cwd(),
 		env: getComposeSpawnEnv(),
@@ -99,7 +100,7 @@ async function main(): Promise<void> {
 	}
 
 	if (sub === "up") {
-		await spawnComposeExit([...getComposePrefix(), "up", "-d", ...subRest]);
+		await spawnComposeExit(applyPlainComposeArgv([...getComposePrefix(), "up", "-d", ...subRest]));
 	}
 
 	if (sub === "down") {
@@ -111,7 +112,7 @@ async function main(): Promise<void> {
 	}
 
 	if (sub === "build") {
-		await spawnComposeExit([...getComposePrefix(), "build", ...subRest]);
+		await spawnComposeExit(applyPlainComposeArgv([...getComposePrefix(), "build", ...subRest]));
 	}
 
 	await runRm(subRest);

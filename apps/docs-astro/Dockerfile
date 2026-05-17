@@ -16,9 +16,8 @@ RUN bunx turbo prune --scope=docs-astro --docker
 FROM turbo AS installer
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
-COPY bun.lock ./bun.lock
-COPY --from=pruner /app/out/full/ .
-RUN bun install --ignore-scripts
+RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-docs-astro \
+	bun install --ignore-scripts
 
 FROM turbo AS build
 WORKDIR /app

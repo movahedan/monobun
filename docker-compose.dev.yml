@@ -40,6 +40,7 @@ services:
       - ${PROJECT_ROOT:-./}/package.json:/app/package.json:cached
       - ${PROJECT_ROOT:-./}/bun.lock:/app/bun.lock:cached
       - ${PROJECT_ROOT:-./}/turbo.json:/app/turbo.json:cached
+      - ${PROJECT_ROOT:-./}/intershell.config.ts:/app/intershell.config.ts:cached
       # Override volumes
       - node_modules:/app/node_modules:delegated
       - turbo_cache:/app/.turbo:delegated

@@ -1,10 +1,9 @@
 import { setTimeout } from "node:timers/promises";
 import { parseArgs } from "node:util";
 import { EntityCompose, type ServiceHealth, type ServiceInfo } from "intershell";
-import { type ReactNode, useCallback } from "react";
 import { colorify } from "../colorify";
-import { renderAndExit } from "../render-and-exit";
-import { StepProgressApp, type StepProgressStep } from "../step-progress";
+import { runStepsInTerminal } from "../run-terminal-steps";
+import type { StepProgressStep } from "../step-progress";
 import { getComposeFilePath, spawnContainerIndex } from "./stack";
 
 const HEALTH_ICONS: Record<ServiceHealth["status"], string> = {
@@ -142,16 +141,6 @@ async function runCheckSteps(options: CheckOptions): Promise<void> {
 	for (const step of getCheckSteps(options)) await step.run();
 }
 
-function CheckApp({ options }: { readonly options: CheckOptions }): ReactNode {
-	const resolveSteps = useCallback(() => getCheckSteps(options), [options]);
-	return (
-		<StepProgressApp
-			completedHeading="Compose stack health check completed"
-			resolveSteps={resolveSteps}
-		/>
-	);
-}
-
 export async function runCheck(rest: readonly string[]): Promise<void> {
 	const { values } = parseArgs({
 		args: [...rest],
@@ -170,7 +159,7 @@ export async function runCheck(rest: readonly string[]): Promise<void> {
 	if (options.quiet) {
 		await runCheckSteps(options);
 	} else {
-		await renderAndExit(<CheckApp options={options} />);
+		await runStepsInTerminal(getCheckSteps(options), { heading: "Compose stack health check" });
 	}
 
 	console.log(colorify.green("✅ Compose stack health check completed successfully!"));
