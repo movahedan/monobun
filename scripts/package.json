@@ -13,7 +13,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.15",
-		"@repo/typescript-config": "workspace:*",
+		"@repo/config-typescript": "workspace:*",
 		"@types/bun": "1.3.14",
 		"@types/react": "19.2.14",
 		"typescript": "6.0.3"

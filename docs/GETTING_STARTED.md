@@ -43,7 +43,7 @@ Production-shaped stack: pass **`--prod` before the subcommand** (same CLI, diff
 | Path | Role |
 |------|------|
 | `apps/` | Runnables: `admin`, `api`, `docs-astro`, `storefront` |
-| `packages/` | Shared libs (`ui`, `utils`, `typescript-config`, `test-preset`, …) |
+| `packages/` | Shared libs (`ui`, `utils`, `config-typescript`, `config-tests`, …) |
 | `scripts/` | Bun CLIs wired from root `package.json` |
 | `docs/` | Human guides + planning notes |
 | `turbo.json` | Turborepo pipelines (`build`, `test`, `typecheck`, …) |
@@ -129,7 +129,7 @@ The repo depends on the [`intershell`](https://www.npmjs.com/package/intershell)
 
 - **Docker errors**: ensure the daemon is running; try `bun run container compose -- ps`.
 - **`bun install` / lockfile issues**: remove `node_modules`, rerun `bun install`.
-- **Flaky tests / isolation**: prefer targeted folders (`bun test packages/<pkg>/src/…`); see `packages/test-preset/AGENTS.md`.
+- **Flaky tests / isolation**: prefer targeted folders (`bun test packages/<pkg>/src/…`); see `packages/config-tests/AGENTS.md`.
 - **Type/lint drift**: `bun run lint -- --write` then `bun run typecheck`.
 
 For deeper topics (Renovate policy, auto-versioning details), read [`renovate.json`](../renovate.json) plus [AUTO_VERSIONING.md](./AUTO_VERSIONING.md); upstream Renovate docs are at [renovatebot.com](https://docs.renovatebot.com/).

@@ -1,10 +1,10 @@
 # AGENTS.md
 
-This file provides guidance to Agents when working with the test-preset package.
+This file provides guidance to Agents when working with the config-tests package.
 
 ## Package Overview
 
-**@repo/test-preset** provides shared testing configurations, utilities, and mocks for consistent testing across all packages and applications in the monorepo.
+**@repo/config-tests** provides shared testing configurations, utilities, and mocks for consistent testing across all packages and applications in the monorepo.
 
 ## Essential Commands
 
@@ -18,22 +18,22 @@ bun test  # Uses this preset automatically
 
 ### Main Test Setup
 ```typescript
-import '@repo/test-preset'; // Main test setup and global configuration
+import '@repo/config-tests'; // Main test setup and global configuration
 ```
 
 ### Specific Testing Utilities
 ```typescript
-import '@repo/test-preset/mock-modules'; // Module mocking utilities
-import '@repo/test-preset/mock-bun'; // Bun runtime mocking
-import '@repo/test-preset/testing-library'; // React Testing Library setup
-import '@repo/test-preset/happydom'; // HappyDOM browser environment
+import '@repo/config-tests/mock-modules'; // Module mocking utilities
+import '@repo/config-tests/mock-bun'; // Bun runtime mocking
+import '@repo/config-tests/testing-library'; // React Testing Library setup
+import '@repo/config-tests/happydom'; // HappyDOM browser environment
 ```
 
 ### Debugging Tools
 ```bash
 # Test isolation debugging tool
-bun run @repo/test-preset/test-by-folder [path]
-bun run @repo/test-preset/test-by-folder src/entities/
+bun run @repo/config-tests/test-by-folder [path]
+bun run @repo/config-tests/test-by-folder src/entities/
 ```
 
 ## Testing Stack
@@ -119,7 +119,7 @@ describe('EntityCommit', () => {
 ### Mocking External Dependencies
 ```typescript
 import { describe, it, expect, mock } from 'bun:test';
-import '@repo/test-preset/mock-modules';
+import '@repo/config-tests/mock-modules';
 
 // Mock external modules
 const mockFetch = mock(() => Promise.resolve({
@@ -147,7 +147,7 @@ describe('API Service', () => {
 - **mock-bun.ts** - Bun-specific mocking utilities
 
 ### Global Test Configuration
-The test preset automatically configures:
+The config-tests preset automatically configures:
 - DOM environment with HappyDOM
 - Testing Library matchers
 - Common mocks and utilities
@@ -161,13 +161,13 @@ The `test-by-folder.ts` script helps identify cross-test interference issues:
 
 ```bash
 # Run tests by folder to check for isolation issues
-bun run @repo/test-preset/test-by-folder
+bun run @repo/config-tests/test-by-folder
 
 # Test specific path
-bun run @repo/test-preset/test-by-folder src/entities/
+bun run @repo/config-tests/test-by-folder src/entities/
 
 # Test specific package
-bun run @repo/test-preset/test-by-folder packages/intershell/src/entities/
+bun run @repo/config-tests/test-by-folder packages/intershell/src/entities/
 ```
 
 **What it does:**
@@ -262,7 +262,7 @@ Add to your test configuration:
 // In package.json
 {
   "devDependencies": {
-    "@repo/test-preset": "workspace:*"
+    "@repo/config-tests": "workspace:*"
   }
 }
 ```
@@ -272,14 +272,14 @@ Add to your test configuration:
 // In bunfig.toml or package.json
 {
   "test": {
-    "preload": ["@repo/test-preset"]
+    "preload": ["@repo/config-tests"]
   }
 }
 ```
 
 ## Development Guidelines
 
-When extending the test preset:
+When extending the config-tests preset:
 
 1. **Add utilities that benefit multiple packages** - Avoid package-specific helpers
 2. **Maintain backwards compatibility** - Changes affect all packages
@@ -287,4 +287,4 @@ When extending the test preset:
 4. **Test the preset itself** - Ensure configurations work correctly
 5. **Consider performance** - Test setup affects all test runs
 
-This preset ensures consistent, reliable testing across the entire monorepo while providing the tools needed for comprehensive test coverage.
+This package ensures consistent, reliable testing across the entire monorepo while providing the tools needed for comprehensive test coverage.

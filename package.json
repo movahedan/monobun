@@ -13,7 +13,7 @@
 		"node": ">=25.0.0"
 	},
 	"intershell": {
-		"config": "intershell.config.ts"
+		"config": "intershell.config.json"
 	},
 	"scripts": {
 		"postinstall": "lefthook install",

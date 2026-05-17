@@ -1,6 +1,6 @@
 {
 	"private": true,
-	"name": "@repo/typescript-config",
+	"name": "@repo/config-typescript",
 	"exports": {
 		"./base.json": "./base.json",
 		"./vite.json": "./vite.json",

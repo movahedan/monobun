@@ -27,7 +27,7 @@ This file provides guidance to Agents when working with the storefront applicati
 - Server Components and Client Components patterns
 
 ### Build & Development
-- **@repo/typescript-config** - Shared TypeScript configuration extending Next.js preset
+- **@repo/config-typescript** - Shared TypeScript configuration extending Next.js preset
 
 ## Architecture
 

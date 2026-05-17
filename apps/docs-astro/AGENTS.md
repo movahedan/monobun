@@ -30,7 +30,7 @@ This file provides guidance to Agents when working with the docs-astro applicati
 ### Development Tools
 - **@astrojs/tailwind** - Tailwind CSS integration
 - **@astrojs/check** - Astro type checking
-- **@repo/typescript-config** - Shared TypeScript configuration
+- **@repo/config-typescript** - Shared TypeScript configuration
 
 ## Architecture
 
@@ -358,7 +358,7 @@ src/content/docs/
 ## Integration with Monorepo
 
 ### Shared Configuration
-- **@repo/typescript-config**: Shared TypeScript settings
+- **@repo/config-typescript**: Shared TypeScript settings
 - **Tailwind CSS**: Consistent with other apps
 - **Documentation syncing**: Pull content from package READMEs
 
