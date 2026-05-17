@@ -465,7 +465,7 @@ docs(root): reorganize documentation and add comprehensive commit workflow
 ###### <a href="https://github.com/movahedan/monobun/commit/e64caeb6cf2259b9179bedc0690b43fa1d12db8a"><img src="https://img.shields.io/badge/fix-(noscope)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> add write permissions to version workflow ([e64caeb](https://github.com/movahedan/monobun/commit/e64caeb6cf2259b9179bedc0690b43fa1d12db8a)) by **Soheil Movahedan**
 ###### <a href="https://github.com/movahedan/monobun/commit/c27ebfd872bee0221bc1f617df66c41934ed3e9d"><img src="https://img.shields.io/badge/fix-(noscope)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> add version fields to utility packages and update versioning logic ([c27ebfd](https://github.com/movahedan/monobun/commit/c27ebfd872bee0221bc1f617df66c41934ed3e9d)) by **Soheil Movahedan**
 ###### <a href="https://github.com/movahedan/monobun/commit/6678a5f64c67d26bf63f0bc4a2fe55620b1169b1"><img src="https://img.shields.io/badge/fix-(noscope)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> add auto-ignore logic to version-commit script ([6678a5f](https://github.com/movahedan/monobun/commit/6678a5f64c67d26bf63f0bc4a2fe55620b1169b1)) by **Soheil Movahedan**
-###### <a href="https://github.com/movahedan/monobun/commit/716b8aab1d2648ee92e150a26c6201862d513b9c"><img src="https://img.shields.io/badge/refactor-(noscope)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> rename config-typescript to typescript-config for consistency ([716b8aa](https://github.com/movahedan/monobun/commit/716b8aab1d2648ee92e150a26c6201862d513b9c)) by **Soheil Movahedan**
+###### <a href="https://github.com/movahedan/monobun/commit/716b8aab1d2648ee92e150a26c6201862d513b9c"><img src="https://img.shields.io/badge/refactor-(noscope)-007ACC?style=flat" alt="refactor" style="vertical-align: middle;" /></a> rename config-typescript to typescript-config for consistency ([716b8aa](https://github.com/movahedan/monobun/commit/716b8aab1d2648ee92e150a26c6201862d513b9c)) by **Soheil Movahedan** *(package is now `config-typescript` / `@repo/config-typescript`)*
 ###### <a href="https://github.com/movahedan/monobun/commit/0c78b5b46a01e2a4125088feb71be5476874248f"><img src="https://img.shields.io/badge/fix-(root)-EF4444?style=flat" alt="fix" style="vertical-align: middle;" /></a> version pipeline ([0c78b5b](https://github.com/movahedan/monobun/commit/0c78b5b46a01e2a4125088feb71be5476874248f)) by **Soheil Movahedan**
 ###### <a href="https://github.com/movahedan/monobun/commit/5bc59cf7be1c7ee2e54cb2a3073acbe3cf10eaab"><img src="https://img.shields.io/badge/chore-(noscope)-495057?style=flat" alt="chore" style="vertical-align: middle;" /></a> improve logs ([5bc59cf](https://github.com/movahedan/monobun/commit/5bc59cf7be1c7ee2e54cb2a3073acbe3cf10eaab)) by **Soheil Movahedan**
 ###### <a href="https://github.com/movahedan/monobun/commit/76f122a0d9d064a0c2de837759b6250f58ac827f"><img src="https://img.shields.io/badge/feat-(noscope)-00D4AA?style=flat" alt="feat" style="vertical-align: middle;" /></a> implement git tag-based versioning and deployment system ([76f122a](https://github.com/movahedan/monobun/commit/76f122a0d9d064a0c2de837759b6250f58ac827f)) by **Soheil Movahedan**
@@ -528,8 +528,8 @@ This PR refactors the development setup to improve containerization and environm
 
 ### 🚀 refactor/124-refactor-test-approach-use-bun-as-much-as-possible <img src="https://img.shields.io/badge/Feature%20Releases-495057?style=flat" alt="Feature Releases" style="vertical-align: middle;" /> <a href="https://github.com/movahedan/monobun/pull/135"><img src="https://img.shields.io/badge/%23135-blue?style=flat" alt="#135" style="vertical-align: middle;" /></a> <img src="https://img.shields.io/badge/1%20commits-green?style=flat" alt="1 commits" style="vertical-align: middle;" />
 
-This PR centralizes test dependencies and configurations to improve maintainability and coverage reporting across the monorepo. The changes consolidate test-related dependencies into a centralized test-preset package and remove redundant test scripts.
-    Centralizes @happy-dom/global-registrator and testing dependencies in the test-preset package
+This PR centralizes test dependencies and configurations to improve maintainability and coverage reporting across the monorepo. The changes consolidate test-related dependencies into a centralized config-tests package (`@repo/config-tests`; formerly `test-preset`) and remove redundant test scripts.
+    Centralizes @happy-dom/global-registrator and testing dependencies in the config-tests package
     Simplifies package.json scripts by removing redundant test:watch and test:coverage scripts
     Adds comprehensive Card component tests achieving 100% coverage
 
@@ -956,7 +956,7 @@ chore(deps): update oven/bun docker tag to v1.2.18
 This PR refactors the repository’s testing setup to migrate from Jest to Bun’s built-in test runner.
     Removed Jest types, presets, dependencies, and scripts across packages.
     Updated test files to import from bun:test and leverage Testing Library with Happy DOM.
-    Added Bun configuration (bunfig.toml) and custom test-preset modules for global setup and matchers.
+    Added Bun configuration (bunfig.toml) and custom config-tests modules for global setup and matchers (package was `test-preset` at the time).
 
 <details><summary><strong>📝 Commits</strong> (Click to expand)</summary>
 

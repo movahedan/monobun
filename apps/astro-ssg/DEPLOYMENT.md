@@ -1,6 +1,6 @@
 # 🚀 Cloudflare Pages Deployment Guide
 
-This guide will help you deploy the docs-astro app to Cloudflare Pages.
+This guide will help you deploy the astro-ssg app to Cloudflare Pages.
 
 ## 📋 Prerequisites
 
@@ -19,14 +19,14 @@ This guide will help you deploy the docs-astro app to Cloudflare Pages.
 2. **Create Pages Project**
    - Select the **Pages** tab
    - Click **Connect to Git**
-   - Select your repository containing the docs-astro app
+   - Select your repository containing the astro-ssg app
 
 3. **Configure Build Settings**
    - **Framework preset**: `Astro`
    - **Production branch**: `main` (or your default branch)
    - **Build command**: `bun run build`
    - **Build output directory**: `dist`
-   - **Root directory**: `apps/docs-astro` (if in monorepo)
+   - **Root directory**: `apps/astro-ssg` (if in monorepo)
 
 4. **Environment Variables** (if needed)
    - Add any environment variables your app requires
@@ -46,8 +46,8 @@ npm install -g wrangler
 # Login to Cloudflare
 wrangler login
 
-# Deploy from the docs-astro directory
-cd apps/docs-astro
+# Deploy from the astro-ssg directory
+cd apps/astro-ssg
 wrangler pages deploy dist --project-name=your-project-name
 ```
 

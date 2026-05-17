@@ -1,6 +1,6 @@
 {
 	"private": true,
-	"name": "storefront",
+	"name": "nextjs",
 	"description": "E-commerce storefront built with Next.js and React",
 	"type": "module",
 	"scripts": {

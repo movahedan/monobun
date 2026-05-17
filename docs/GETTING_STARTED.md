@@ -42,7 +42,7 @@ Production-shaped stack: pass **`--prod` before the subcommand** (same CLI, diff
 
 | Path | Role |
 |------|------|
-| `apps/` | Runnables: `admin`, `api`, `docs-astro`, `storefront` |
+| `apps/` | Runnables: `vite-spa`, `express`, `astro-ssg`, `nextjs` |
 | `packages/` | Shared libs (`ui`, `utils`, `config-typescript`, `config-tests`, …) |
 | `scripts/` | Bun CLIs wired from root `package.json` |
 | `docs/` | Human guides + planning notes |
@@ -67,7 +67,7 @@ There is no root `dev` script. From the repo root use the **`turbo`** script plu
 
 | Command | Purpose |
 |---------|---------|
-| `bun run turbo run dev --filter=admin` | One app’s dev server (repeat `--filter` for `storefront`, `api`, …) |
+| `bun run turbo run dev --filter=vite-spa` | One app’s dev server (repeat `--filter` for `nextjs`, `express`, …) |
 | `bun run turbo run dev` | All workspaces that define a `dev` task (often noisy) |
 
 **Compose (`container`)**

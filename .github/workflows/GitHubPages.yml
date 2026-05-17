@@ -1,4 +1,4 @@
-name: Deploy docs-astro to GitHub Pages
+name: Deploy astro-ssg to GitHub Pages
 on:
   push:
     branches: [main]
@@ -42,12 +42,12 @@ jobs:
         run: bun install -E --no-save
 
       - name: 🏗️ Build docs site
-        run: bun run build --filter=docs-astro
+        run: bun run build --filter=astro-ssg
 
       - name: 📤 Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: apps/docs-astro/dist
+          path: apps/astro-ssg/dist
 
   deploy:
     needs: build

@@ -1,6 +1,6 @@
 {
 	"private": true,
-	"name": "admin",
+	"name": "vite-spa",
 	"description": "Admin dashboard built with Vite and React",
 	"type": "module",
 	"scripts": {

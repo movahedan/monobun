@@ -72,7 +72,7 @@ function HelpApp({ errorMessage }: { readonly errorMessage?: string }) {
 			<Text dimColor>bun run container build -- --parallel</Text>
 			<Text dimColor>bun run container compose -- ps</Text>
 			<Text dimColor>bun run container health</Text>
-			<Text dimColor>bun run container logs -- -f storefront</Text>
+			<Text dimColor>bun run container logs -- -f nextjs</Text>
 		</Box>
 	);
 }

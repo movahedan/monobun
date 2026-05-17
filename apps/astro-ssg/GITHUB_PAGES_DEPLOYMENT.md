@@ -1,6 +1,6 @@
 # 🚀 GitHub Pages Deployment Guide
 
-This guide will help you deploy the docs-astro app to GitHub Pages using the official Astro GitHub Action.
+This guide will help you deploy the astro-ssg app to GitHub Pages using the official Astro GitHub Action.
 
 ## 📋 Prerequisites
 
@@ -18,7 +18,7 @@ First, update the `astro.config.mjs` file with your actual GitHub username:
 export default defineConfig({
   output: 'static',
   site: 'https://your-username.github.io', // Replace with your actual GitHub username
-  base: 'docs-astro', // Repository name
+  base: 'astro-ssg', // Repository or site path segment (adjust if your Pages URL differs)
   vite: {
     plugins: [tailwindcss()],
   },
@@ -38,7 +38,7 @@ The GitHub Action will automatically deploy your site when you push to the `main
 
 ```bash
 git add .
-git commit -m "Add docs-astro GitHub Pages deployment"
+git commit -m "Add astro-ssg GitHub Pages deployment"
 git push origin main
 ```
 
@@ -61,13 +61,13 @@ The workflow (`.github/workflows/deploy.yml`) includes:
 - **Manual Triggers**: Can be run manually from Actions tab
 - **Proper Permissions**: Configured for GitHub Pages deployment
 - **Bun Package Manager**: Uses bun for faster builds
-- **Path Configuration**: Points to `apps/docs-astro` in monorepo
+- **Path Configuration**: Points to `apps/astro-ssg` in monorepo
 
 ## 🌐 Custom Domain Setup
 
 ### Option 1: GitHub Pages Custom Domain
 
-1. Add a `CNAME` file to `apps/docs-astro/public/`:
+1. Add a `CNAME` file to `apps/astro-ssg/public/`:
    ```
    docs.yourdomain.com
    ```
@@ -77,7 +77,7 @@ The workflow (`.github/workflows/deploy.yml`) includes:
    export default defineConfig({
      output: 'static',
      site: 'https://docs.yourdomain.com', // Your custom domain
-     // Remove base: 'docs-astro' for custom domain
+     // Remove base: 'astro-ssg' for custom domain
      vite: {
        plugins: [tailwindcss()],
      },
@@ -99,7 +99,7 @@ For a subdomain like `docs.yourdomain.com`:
 
 1. Go to your GitHub repository
 2. Click **Actions** tab
-3. Monitor the "Deploy docs-astro to GitHub Pages" workflow
+3. Monitor the "Deploy astro-ssg to GitHub Pages" workflow
 4. Check the deployment URL in the workflow output
 
 ### Troubleshooting
@@ -125,7 +125,7 @@ For a subdomain like `docs.yourdomain.com`:
 
 ```bash
 # Test build locally
-cd apps/docs-astro
+cd apps/astro-ssg
 bun run build
 
 # Check build output
@@ -222,7 +222,7 @@ After successful deployment:
 
 ## 🎉 Conclusion
 
-The docs-astro app is now configured for automatic deployment to GitHub Pages. Every push to the main branch will trigger a new deployment, ensuring your documentation is always up-to-date.
+The astro-ssg app is now configured for automatic deployment to GitHub Pages. Every push to the main branch will trigger a new deployment, ensuring your documentation is always up-to-date.
 
 The setup provides:
 - ✅ **Automatic Deployments**: Deploy on every push
@@ -231,4 +231,4 @@ The setup provides:
 - ✅ **HTTPS**: Automatic SSL certificates
 - ✅ **Easy Maintenance**: Just push to deploy
 
-Your documentation site will be available at `https://your-username.github.io/docs-astro/` once deployed! 
+Your documentation site will be available at `https://your-username.github.io/astro-ssg/` once deployed (adjust the path if your repository name differs). 

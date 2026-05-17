@@ -11,12 +11,12 @@ COPY ./apps ./apps
 COPY ./packages ./packages
 COPY ./scripts ./scripts
 COPY ./package.json ./bun.lock ./
-RUN turbo prune --scope=storefront --docker
+RUN turbo prune --scope=nextjs --docker
 
 FROM turbo AS installer
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
-RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-storefront \
+RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-nextjs \
 	bun install --ignore-scripts
 
 FROM turbo AS build
@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/scripts ./scripts
 COPY --from=installer /app/ .
-RUN bun run build --filter=storefront
+RUN bun run build --filter=nextjs
 
 FROM turbo AS runner
 WORKDIR /app
@@ -37,9 +37,9 @@ COPY --from=pruner --chown=runner-user:runner-group /app/out/json/ .
 COPY --from=installer --chown=runner-user:runner-group /app/node_modules ./node_modules
 COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/packages/ui ./packages/ui
 COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/packages/utils ./packages/utils
-COPY --from=build --chown=runner-user:runner-group --chmod=${OWNER_MODE} /app/apps/storefront/.next ./apps/storefront/.next
-COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/apps/storefront/public ./apps/storefront/public
-COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/apps/storefront/next.config.ts ./apps/storefront/next.config.ts
+COPY --from=build --chown=runner-user:runner-group --chmod=${OWNER_MODE} /app/apps/nextjs/.next ./apps/nextjs/.next
+COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/apps/nextjs/public ./apps/nextjs/public
+COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/apps/nextjs/next.config.ts ./apps/nextjs/next.config.ts
 
 USER runner-user
-CMD ["bun", "run", "start", "--filter=storefront"]
+CMD ["bun", "run", "start", "--filter=nextjs"]

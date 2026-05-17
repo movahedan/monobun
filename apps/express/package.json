@@ -1,7 +1,7 @@
 {
 	"private": false,
 	"version": "0.1.0",
-	"name": "api",
+	"name": "express",
 	"description": "REST API server built with Express.js and TypeScript",
 	"type": "module",
 	"scripts": {

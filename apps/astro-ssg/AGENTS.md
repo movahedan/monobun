@@ -1,10 +1,10 @@
 # AGENTS.md
 
-This file provides guidance to Agents when working with the docs-astro application.
+This file provides guidance to Agents when working with the astro-ssg application.
 
 ## Application Overview
 
-**docs-astro** is a documentation website built with Astro, providing comprehensive documentation for the monorepo projects. It features static site generation with modern web technologies and Markdown content management.
+**astro-ssg** is a documentation website built with Astro, providing comprehensive documentation for the monorepo projects. It features static site generation with modern web technologies and Markdown content management.
 
 ## Essential Commands
 
@@ -36,7 +36,7 @@ This file provides guidance to Agents when working with the docs-astro applicati
 
 ### Project Structure
 ```
-apps/docs-astro/
+apps/astro-ssg/
 ├── src/
 │   ├── pages/              # Route pages (.astro, .md files)
 │   │   ├── index.astro    # Home page
@@ -208,7 +208,7 @@ Before you begin, ensure you have the following installed:
 
 The monorepo is organized as follows:
 
-- `apps/` - Applications (admin, storefront, api, docs)
+- `apps/` - Applications (vite-spa, nextjs, express, astro-ssg)
 - `packages/` - Shared packages (ui, utils, config)
 - `scripts/` - Development and automation scripts
 - `docs/` - Additional documentation files
@@ -339,9 +339,9 @@ src/content/docs/
 │   ├── utilities.md
 │   └── configuration.md
 ├── apps/
-│   ├── admin-dashboard.md
-│   ├── storefront.md
-│   └── api-server.md
+│   ├── vite-spa.md
+│   ├── nextjs.md
+│   └── express.md
 └── deployment/
     ├── docker.md
     ├── ci-cd.md
@@ -397,4 +397,4 @@ describe('Content Collections', () => {
 });
 ```
 
-When working with this documentation site, focus on creating clear, comprehensive content that helps users understand and work with the monorepo effectively. Leverage Astro's static generation capabilities for optimal performance and SEO.
+When working with this documentation site (astro-ssg), focus on creating clear, comprehensive content that helps users understand and work with the monorepo effectively. Leverage Astro's static generation capabilities for optimal performance and SEO.

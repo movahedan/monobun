@@ -11,12 +11,12 @@ COPY ./apps ./apps
 COPY ./packages ./packages
 COPY ./scripts ./scripts
 COPY ./package.json ./bun.lock ./
-RUN turbo prune --scope=api --docker
+RUN turbo prune --scope=express --docker
 
 FROM turbo AS installer
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
-RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-api \
+RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-express \
 	bun install --ignore-scripts
 
 FROM turbo AS build
@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/scripts ./scripts
 COPY --from=installer /app/ .
-RUN bun run build --filter=api
+RUN bun run build --filter=express
 
 FROM oven/bun:1.3.14-alpine AS runner
 WORKDIR /app
@@ -35,7 +35,7 @@ RUN chown -R runner-user:runner-group /app
 COPY --from=pruner --chown=runner-user:runner-group /app/out/json/ .
 COPY --from=installer --chown=runner-user:runner-group /app/node_modules ./node_modules
 COPY --from=build --chown=runner-user:runner-group /app/packages/utils ./packages/utils
-COPY --from=build --chown=runner-user:runner-group /app/apps/api ./apps/api
+COPY --from=build --chown=runner-user:runner-group /app/apps/express ./apps/express
 
 USER runner-user
-CMD ["bun", "run", "./apps/api/dist/index.js"]
+CMD ["bun", "run", "./apps/express/dist/index.js"]

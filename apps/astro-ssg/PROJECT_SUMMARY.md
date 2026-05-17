@@ -2,7 +2,7 @@
 
 ## 🎯 Overview
 
-The `docs-astro` app is a modern, responsive documentation site built with Astro that serves as a comprehensive documentation hub for the project. It features a clean, professional design with excellent navigation and is optimized for deployment on Cloudflare Pages.
+The `astro-ssg` app is a modern, responsive documentation site built with Astro that serves as a comprehensive documentation hub for the project. It features a clean, professional design with excellent navigation and is optimized for deployment on Cloudflare Pages.
 
 ## 🚀 Key Features
 
@@ -32,7 +32,7 @@ The `docs-astro` app is a modern, responsive documentation site built with Astro
 
 ### File Structure
 ```
-apps/docs-astro/
+apps/astro-ssg/
 ├── src/
 │   ├── components/
 │   │   └── MobileNav.astro          # Mobile navigation component
@@ -71,7 +71,7 @@ apps/docs-astro/
 The app includes all documentation from the main project:
 
 ### Core Documentation
-- **Quality Checklist** (`0_QUALITY_CHECKLIST` placeholder in docs-astro; rules live under `.cursor/rules/`)
+- **Quality Checklist** (`0_QUALITY_CHECKLIST` placeholder in astro-ssg; rules live under `.cursor/rules/`)
 - **Getting started** (`docs/GETTING_STARTED.md`) — setup, compose, command cheat sheet (legacy numbered install/setup/dev guides redirect here)
 
 ### Technical documentation
@@ -90,7 +90,7 @@ The app includes all documentation from the main project:
 - **Framework Preset**: Astro
 - **Build Command**: `bun run build`
 - **Build Output Directory**: `dist`
-- **Root Directory**: `apps/docs-astro` (if in monorepo)
+- **Root Directory**: `apps/astro-ssg` (if in monorepo)
 
 ### Build Process
 1. **Static Generation**: Astro generates static HTML for better performance
@@ -249,6 +249,6 @@ bun run preview
 
 ## 🎉 Conclusion
 
-The `docs-astro` app provides a modern, professional documentation experience that's fast, accessible, and easy to maintain. With its responsive design, excellent performance, and comprehensive feature set, it serves as an ideal platform for project documentation.
+The `astro-ssg` app provides a modern, professional documentation experience that's fast, accessible, and easy to maintain. With its responsive design, excellent performance, and comprehensive feature set, it serves as an ideal platform for project documentation.
 
 The app is ready for immediate deployment to Cloudflare Pages and can be easily customized to match your project's branding and requirements. 

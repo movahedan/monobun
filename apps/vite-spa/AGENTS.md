@@ -1,10 +1,10 @@
 # AGENTS.md
 
-This file provides guidance to Agents when working with the admin application.
+This file provides guidance to Agents when working with the vite-spa application.
 
 ## Application Overview
 
-**admin** is a React-based admin dashboard built with Vite, providing management interfaces and administrative functionality. It runs on **port 3001** in the monorepo setup.
+**vite-spa** is the Vite + React admin dashboard, providing management interfaces and administrative functionality. It runs on **port 3001** in the monorepo setup.
 
 ## Essential Commands
 
@@ -34,7 +34,7 @@ This file provides guidance to Agents when working with the admin application.
 
 ### Project Structure
 ```
-apps/admin/
+apps/vite-spa/
 ├── src/
 │   ├── components/     # Admin-specific components
 │   ├── pages/          # Route/page components  
@@ -220,7 +220,7 @@ class AdminErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logger.error('Admin app error boundary caught error', {
+    logger.error('Vite-spa app error boundary caught error', {
       error: error.message,
       errorInfo
     });
@@ -256,9 +256,9 @@ class AdminErrorBoundary extends Component<
 - **@repo/config-typescript**: Extends Vite TypeScript configuration
 
 ### Port Configuration
-The admin app runs on port 3001 by default. This is configured in the development workflow and should not conflict with:
-- Storefront (port 3002)  
-- API (port 3003)
+The vite-spa app runs on port 3001 by default. This is configured in the development workflow and should not conflict with:
+- nextjs storefront (port 3002)  
+- express API (port 3003)
 - UI Storybook (port 3004)
 
 ## Testing Guidelines

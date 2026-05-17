@@ -137,7 +137,7 @@ docs/ ──→ Human reads → README.md (for overview)
 
 Run from the **repository root**. Prefer `rg` (ripgrep); if it is missing, use `grep -RIn "TERM" <dir>` over the same paths.
 
-Replace `TERM` with concrete strings from the change: path segments (`apps/api`, `packages/ui`), script names, env vars, service names, CLI flags, feature names.
+Replace `TERM` with concrete strings from the change: path segments (`apps/express`, `packages/ui`), script names, env vars, service names, CLI flags, feature names.
 
 ### Search prose and rules by keyword
 
@@ -166,7 +166,7 @@ rg -n "packages/ui|@repo/ui|repo/ui" docs/ AGENTS.md README.md .cursor/rules/
 **API app** (adjust `TERM` to your area):
 
 ```bash
-rg -n "apps/api|api\b|3003" docs/ AGENTS.md README.md
+rg -n "apps/express|express\b|3003" docs/ AGENTS.md README.md
 ```
 
 **Docker / Compose**:
