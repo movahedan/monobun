@@ -25,12 +25,12 @@ This file provides guidance to Agents when working with the express application.
 - **cors 2.8.5** - Cross-Origin Resource Sharing
 - **body-parser 2.2.0** - Request body parsing  
 - **morgan 1.10.1** - HTTP request logging
-- **@repo/utils** - Shared utilities (logger)
+- **@packages/utils** - Shared utilities (logger)
 
 ### Development Tools
 - **tsup 8.5.0** - Fast TypeScript bundler
 - **supertest 7.1.4** - HTTP testing library
-- **@repo/config-tests** - Shared testing configuration
+- **@tools/tests-preset** - Shared testing configuration
 
 ## Architecture
 
@@ -69,7 +69,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
-import { logger } from '@repo/utils/logger';
+import { logger } from '@packages/utils/logger';
 import { errorHandler } from './middleware/error';
 import routes from './routes';
 
@@ -103,7 +103,7 @@ export default app;
 ```typescript
 // src/routes/products/index.ts
 import { Router } from 'express';
-import { logger } from '@repo/utils/logger';
+import { logger } from '@packages/utils/logger';
 import { productService } from '../../services/products';
 import { validateProduct } from '../../middleware/validation';
 import { authMiddleware } from '../../middleware/auth';
@@ -195,7 +195,7 @@ export default router;
 #### Service Layer Pattern
 ```typescript
 // src/services/products.ts
-import { logger } from '@repo/utils/logger';
+import { logger } from '@packages/utils/logger';
 
 export interface Product {
   id: string;
@@ -311,7 +311,7 @@ export const productService = new ProductService();
 ```typescript
 // src/middleware/auth.ts
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '@repo/utils/logger';
+import { logger } from '@packages/utils/logger';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -363,7 +363,7 @@ export const authMiddleware = async (
 
 // src/middleware/validation.ts
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '@repo/utils/logger';
+import { logger } from '@packages/utils/logger';
 
 export const validateProduct = (
   req: Request,
@@ -404,7 +404,7 @@ export const validateProduct = (
 
 // src/middleware/error.ts
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '@repo/utils/logger';
+import { logger } from '@packages/utils/logger';
 
 export const errorHandler = (
   error: Error,
@@ -511,8 +511,8 @@ describe('Products API', () => {
 - CORS properly configured for cross-origin requests
 
 ### Shared Dependencies
-- **@repo/utils**: Uses logger for consistent logging across the monorepo
-- **@repo/config-tests**: Shared testing configuration and utilities
+- **@packages/utils**: Uses logger for consistent logging across the monorepo
+- **@tools/tests-preset**: Shared testing configuration and utilities
 
 ### Frontend Integration
 - Provides REST API endpoints for vite-spa and nextjs applications  

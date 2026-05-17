@@ -11,7 +11,7 @@ COPY ./apps ./apps
 COPY ./packages ./packages
 COPY ./tools ./tools
 COPY ./package.json ./bun.lock ./
-RUN bunx turbo prune --scope=astro-ssg --docker
+RUN bunx turbo prune --scope=@apps/astro-ssg --docker
 
 FROM turbo AS installer
 WORKDIR /app
@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/tools ./tools
 COPY --from=installer /app/ .
-RUN bun run build --filter=astro-ssg
+RUN bun run build --filter=@apps/astro-ssg
 
 FROM nginx:alpine AS runner
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates

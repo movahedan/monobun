@@ -42,7 +42,7 @@ Production-shaped stack: pass **`--prod` before the subcommand** (same CLI, diff
 
 | Path | Role |
 |------|------|
-| `apps/` | Runnables: `vite-spa`, `express`, `astro-ssg`, `nextjs` |
+| `apps/` | Runnables: `@apps/vite-spa`, `@apps/express`, `@apps/astro-ssg`, `@apps/nextjs` |
 | `packages/` | Shared libs (`ui`, `utils`, …) |
 | `tools/` | `typescript`, `tests-preset`, and Bun CLIs under `tools/scripts/` |
 | `docs/` | Human guides + planning notes |
@@ -67,7 +67,7 @@ There is no root `dev` script. From the repo root use the **`turbo`** script plu
 
 | Command | Purpose |
 |---------|---------|
-| `bun run turbo run dev --filter=vite-spa` | One app’s dev server (repeat `--filter` for `nextjs`, `express`, …) |
+| `bun run turbo run dev --filter=@apps/vite-spa` | One app’s dev server (repeat `--filter` for `@apps/nextjs`, `@apps/express`, …) |
 | `bun run turbo run dev` | All workspaces that define a `dev` task (often noisy) |
 
 **Compose (`container`)**
@@ -103,8 +103,8 @@ There is no root `dev` script. From the repo root use the **`turbo`** script plu
 **Turborepo filters**
 
 ```bash
-bun run build --filter=@repo/ui
-bun run test --filter=@repo/utils
+bun run build --filter=@packages/ui
+bun run test --filter=@packages/utils
 ```
 
 ## `tools/scripts/` map

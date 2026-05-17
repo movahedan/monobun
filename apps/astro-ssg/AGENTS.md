@@ -30,7 +30,7 @@ This file provides guidance to Agents when working with the astro-ssg applicatio
 ### Development Tools
 - **@astrojs/tailwind** - Tailwind CSS integration
 - **@astrojs/check** - Astro type checking
-- **@repo/config-typescript** - Shared TypeScript configuration
+- **@tools/typescript** - Shared TypeScript configuration
 
 ## Architecture
 
@@ -358,7 +358,7 @@ src/content/docs/
 ## Integration with Monorepo
 
 ### Shared Configuration
-- **@repo/config-typescript**: Shared TypeScript settings
+- **@tools/typescript**: Shared TypeScript settings
 - **Tailwind CSS**: Consistent with other apps
 - **Documentation syncing**: Pull content from package READMEs
 

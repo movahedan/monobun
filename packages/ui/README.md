@@ -1,4 +1,4 @@
-# @repo/ui
+# @packages/ui
 
 A React component library built with Vite, providing tree-shakable components with individual exports for optimal performance.
 
@@ -14,7 +14,7 @@ A React component library built with Vite, providing tree-shakable components wi
 ## Installation
 
 ```bash
-bun add @repo/ui
+bun add @packages/ui
 ```
 
 ## Usage
@@ -24,9 +24,9 @@ bun add @repo/ui
 For optimal tree-shaking and bundle size:
 
 ```typescript
-import { Button } from '@repo/ui/button/button';
-import { Link } from '@repo/ui/link/link';
-import { CounterButton } from '@repo/ui/counter-button/counter-button';
+import { Button } from '@packages/ui/button/button';
+import { Link } from '@packages/ui/link/link';
+import { CounterButton } from '@packages/ui/counter-button/counter-button';
 ```
 
 ### Barrel Import (Convenience)
@@ -34,7 +34,7 @@ import { CounterButton } from '@repo/ui/counter-button/counter-button';
 For easier imports when you need multiple components:
 
 ```typescript
-import { Button, Link, CounterButton } from '@repo/ui';
+import { Button, Link, CounterButton } from '@packages/ui';
 ```
 
 ## Development
@@ -98,7 +98,7 @@ src/
 The component will be automatically:
 - ✅ Built by Vite
 - ✅ Added to exports.json
-- ✅ Available for import: `import { NewComponent } from '@repo/ui/new-component'`
+- ✅ Available for import: `import { NewComponent } from '@packages/ui/new-component'`
 
 ## Build Output
 

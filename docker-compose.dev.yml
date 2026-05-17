@@ -73,7 +73,7 @@ services:
     environment:
       PORT: "3001"
       HOST: "0.0.0.0"
-    command: bun run turbo run dev --filter=vite-spa -- --host 0.0.0.0 --port 3001
+    command: bun run turbo run dev --filter=@apps/vite-spa -- --host 0.0.0.0 --port 3001
     profiles: ["vite-spa", "all"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://vite-spa:3001"]
@@ -95,7 +95,7 @@ services:
     environment:
       PORT: "3002"
       HOST: "0.0.0.0"
-    command: bun run turbo run dev --filter=nextjs -- --hostname 0.0.0.0 --port 3002
+    command: bun run turbo run dev --filter=@apps/nextjs -- --hostname 0.0.0.0 --port 3002
     profiles: ["nextjs", "all"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://nextjs:3002"]
@@ -117,7 +117,7 @@ services:
     environment:
       PORT: "3003"
       HOST: "0.0.0.0"
-    command: bun run turbo run dev --filter=express
+    command: bun run turbo run dev --filter=@apps/express
     profiles: ["express", "all"]
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://express:3003/status | grep -q '\"ok\":true'"]
@@ -138,7 +138,7 @@ services:
     environment:
       PORT: "3004"
       HOST: "0.0.0.0"
-    command: bun run turbo run dev --filter=@repo/ui
+    command: bun run turbo run dev --filter=@packages/ui
     profiles: ["ui", "all"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://ui:3004"]
@@ -156,7 +156,7 @@ services:
     environment:
       PORT: "3005"
       HOST: "0.0.0.0"
-    command: bun run turbo run dev --filter=astro-ssg -- --host 0.0.0.0 --port 3005
+    command: bun run turbo run dev --filter=@apps/astro-ssg -- --host 0.0.0.0 --port 3005
     profiles: ["astro-ssg", "all"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://astro-ssg:3005"]

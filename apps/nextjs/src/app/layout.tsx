@@ -1,4 +1,4 @@
-import "@repo/ui/style.css";
+import "@packages/ui/style.css";
 import "./styles.css";
 
 export default function RootLayout({

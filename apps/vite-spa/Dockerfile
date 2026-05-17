@@ -11,7 +11,7 @@ COPY ./apps ./apps
 COPY ./packages ./packages
 COPY ./tools ./tools
 COPY ./package.json ./bun.lock ./
-RUN turbo prune --scope=vite-spa --docker
+RUN turbo prune --scope=@apps/vite-spa --docker
 
 FROM turbo AS installer
 WORKDIR /app
@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/tools ./tools
 COPY --from=installer /app/ .
-RUN bun run build --filter=vite-spa
+RUN bun run build --filter=@apps/vite-spa
 
 FROM nginx:alpine AS runner
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
