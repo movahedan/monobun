@@ -7,10 +7,10 @@
 		"lib": ["DOM", "ES2015"],
 		"target": "ES2015"
 	},
-	"include": ["src", "../config-tests/matchers.d.ts"],
+	"include": ["src", "../../tools/tests-preset/matchers.d.ts"],
 	"references": [
 		{
-			"path": "../config-tests"
+			"path": "../../tools/tests-preset"
 		}
 	]
 }

@@ -22,7 +22,7 @@ These references contain detailed guidance on coding standards, security practic
 - **[.cursor/skills/planning-workflow/SKILL.md](.cursor/skills/planning-workflow/SKILL.md)** — Phased `.cursor/plans/*.plan.md` specs (todos, gates, doc list before PR).
 - **[.cursor/skills/builder-workflow/SKILL.md](.cursor/skills/builder-workflow/SKILL.md)** — Code/config execution via subagents; ends before doc sync and commit.
 - **[.cursor/skills/documentation-sync/SKILL.md](.cursor/skills/documentation-sync/SKILL.md)** — Update docs after build, before PR (not during builder).
-- **[.cursor/skills/monorepo-script-commands/SKILL.md](.cursor/skills/monorepo-script-commands/SKILL.md)** — Bun subcommand CLIs with `parseArgs`, Ink step progress; reference `scripts/local/`, `scripts/container/`, and `scripts/render-and-exit.tsx` / `scripts/step-progress.tsx`.
+- **[.cursor/skills/monorepo-script-commands/SKILL.md](.cursor/skills/monorepo-script-commands/SKILL.md)** — Bun subcommand CLIs with `parseArgs`, Ink step progress; reference `tools/scripts/local/`, `tools/scripts/container/`, and `tools/scripts/shared/render-and-exit.tsx` / `tools/scripts/shared/step-progress.tsx`.
 
 ## Essential Commands
 
@@ -37,7 +37,7 @@ Human-oriented cheat sheet: **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
 
 ### Testing
 - `bun test` - Run tests across all packages
-- `bun test scripts/my-script.test.ts` - Run specific test
+- `bun test tools/scripts/my-script.test.ts` - Run specific test
 - `bun test --coverage` - Run tests with coverage report
 - `bun test --coverage-reporter=lcov` - Run tests with coverage reporter lcov
 
@@ -80,8 +80,11 @@ This is a **Turborepo monorepo** using **Bun** as the package manager and runtim
 - **`packages/`** - Shared packages and libraries
   - `ui` - Shared React component library with Storybook (port 3004)
   - `utils` - Shared utility functions
-  - `config-typescript` - Shared TypeScript configurations
-  - `config-tests` - Shared testing configurations and mocks
+
+- **`tools/`** - Repo tooling workspaces
+  - `typescript` - Shared TypeScript configurations (`@repo/config-typescript`)
+  - `tests-preset` - Shared testing configurations and mocks (`@repo/config-tests`)
+  - `scripts` - Bun CLIs for local, container, CI, release (`@repo/scripts`)
 
 - **`apps/`** - Applications
   - `vite-spa` - React + Vite admin dashboard (port 3001)
@@ -123,7 +126,7 @@ Repository scripts provide tooling for validation, automation, and versioning. I
 - Import organization: React → Third-party → Local (absolute) → Relative
 
 ### Testing Conventions
-- Use Bun test runner with custom test presets from `packages/config-tests`
+- Use Bun test runner with custom test presets from `tools/tests-preset`
 - Follow AAA pattern (Arrange, Act, Assert)
 - Create reusable test utilities and mock factories
 - Group tests logically with descriptive `describe` blocks
@@ -155,8 +158,8 @@ For detailed information about working with specific packages and applications, 
 ### Packages
 - **[packages/ui/AGENTS.md](packages/ui/AGENTS.md)** - React component library with Storybook
 - **[packages/utils/AGENTS.md](packages/utils/AGENTS.md)** - Shared utility functions (cn, logger)
-- **[packages/config-typescript/AGENTS.md](packages/config-typescript/AGENTS.md)** - TypeScript configuration presets
-- **[packages/config-tests/AGENTS.md](packages/config-tests/AGENTS.md)** - Testing configuration and utilities
+- **[tools/typescript/AGENTS.md](tools/typescript/AGENTS.md)** - TypeScript configuration presets
+- **[tools/tests-preset/AGENTS.md](tools/tests-preset/AGENTS.md)** - Testing configuration and utilities
 
 ### Applications  
 - **[apps/vite-spa/AGENTS.md](apps/vite-spa/AGENTS.md)** - Vite + React admin dashboard (port 3001)

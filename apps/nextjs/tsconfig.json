@@ -7,7 +7,7 @@
 		"./src",
 		"./next.config.ts",
 		"./next-env.d.ts",
-		"../../packages/config-typescript/css.d.ts",
+		"../../tools/typescript/css.d.ts",
 		"./.next/types/**/*.ts",
 		".next/types/**/*.ts",
 		"../../packages/logger/src/**/*"

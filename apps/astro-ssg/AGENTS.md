@@ -210,7 +210,7 @@ The monorepo is organized as follows:
 
 - `apps/` - Applications (vite-spa, nextjs, express, astro-ssg)
 - `packages/` - Shared packages (ui, utils, config)
-- `scripts/` - Development and automation scripts
+- `tools/scripts/` - Development and automation scripts
 - `docs/` - Additional documentation files
 
 ## Next Steps

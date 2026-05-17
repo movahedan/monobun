@@ -1,8 +1,8 @@
 # Scripting in this repo
 
-Root automation lives under `scripts/` and is run with **Bun** (`bun scripts/<area>/index.tsx`, wired from root `package.json`). This page lists the **libraries and patterns** those scripts use—not an API reference for every command.
+Root automation lives under `tools/scripts/` and is run with **Bun** (`bun tools/scripts/<area>/index.tsx`, wired from root `package.json`). This page lists the **libraries and patterns** those scripts use—not an API reference for every command.
 
-## Stack used by `scripts/`
+## Stack used by `tools/scripts/`
 
 | Piece | Role |
 |--------|------|
@@ -10,10 +10,10 @@ Root automation lives under `scripts/` and is run with **Bun** (`bun scripts/<ar
 | **`node:util` `parseArgs`** | Subcommand CLIs and flags (`--help`, `--quiet`, etc.). |
 | **`node:fs` / `node:path`** | Filesystem steps where needed (e.g. listing dirs, paths). |
 | **React** | Ink is React-based; hooks and small components drive terminals. |
-| **[Ink](https://github.com/vadimdemedes/ink)** | Renders TUI output: help screens (`Box`, `Text`, `render`, `useApp`) and the shared step UI (`Static`, animations). `scripts/render-and-exit.tsx` wraps `ink`’s `render` so scripts exit with a consistent code after the tree unmounts. |
-| **`scripts/colorify.ts`** | Lightweight ANSI helpers for non-Ink log lines (similar idea to chalk, no extra dependency). |
-| **`scripts/step-progress.tsx`** | Reusable multi-step flows (spinner + finished steps) built on Ink. |
-| **`scripts/format-cli-error.ts`** | Prints `Error.message` only (no Bun stack trace) for script failures. |
+| **[Ink](https://github.com/vadimdemedes/ink)** | Renders TUI output: help screens (`Box`, `Text`, `render`, `useApp`) and the shared step UI (`Static`, animations). `tools/scripts/shared/render-and-exit.tsx` wraps `ink`’s `render` so scripts exit with a consistent code after the tree unmounts. |
+| **`tools/scripts/shared/colorify.ts`** | Lightweight ANSI helpers for non-Ink log lines (similar idea to chalk, no extra dependency). |
+| **`tools/scripts/shared/step-progress.tsx`** | Reusable multi-step flows (spinner + finished steps) built on Ink. |
+| **`tools/scripts/shared/format-cli-error.ts`** | Prints `Error.message` only (no Bun stack trace) for script failures. |
 | **Intershell (`intershell`)** | Typed **entities** for monorepo facts: affected packages, compose, git/commits/branches, package metadata, tags, versioning—so scripts stay thin orchestration instead of re-parsing YAML, `package.json`, or git by hand. |
 | **Turbo / Biome** | Invoked from scripts via shell (`bun run lint`, `turbo run …`); not imported as libraries in every script. |
 
@@ -23,7 +23,7 @@ Intershell is organized around **entities**: plain TypeScript modules, each expo
 
 That matches this monorepo’s scripts:
 
-- **CI** (`scripts/ci/`) uses `EntityAffected` and `EntityCompose` to attach GitHub Actions outputs from the same rules as local dev.
+- **CI** (`tools/scripts/ci/`) uses `EntityAffected` and `EntityCompose` to attach GitHub Actions outputs from the same rules as local dev.
 - **Dev / prod** helpers use `EntityCompose` (and related types) for health and compose-aware flows.
 - **Version** and **precommit** scripts use `EntityPackage*`, `EntityTag`, `EntityCommit`, `EntityBranch`, etc., so versioning and branch/commit checks stay aligned with config instead of duplicating parsers.
 
@@ -40,7 +40,7 @@ The authoritative catalog of entities (what each one is responsible for) is `doc
 - **Help UIs**: Several `*/help.tsx` files render a static Ink tree and exit—readable command summaries without maintaining separate string templates.
 - **Long-running steps**: `StepProgressApp` composes Ink primitives so users see one line update for the active step and a stable list of completed steps (`Static` for finished lines, animated/spinner region for the current one).
 
-When adding a new script, prefer the existing helpers (`renderAndExit`, `StepProgressApp`, `parseArgs` pattern) so behavior and exit codes stay consistent with the rest of `scripts/`.
+When adding a new script, prefer the existing helpers (`renderAndExit`, `StepProgressApp`, `parseArgs` pattern) so behavior and exit codes stay consistent with the rest of `tools/scripts/`.
 
 ## Where to go next
 

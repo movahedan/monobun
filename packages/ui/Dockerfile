@@ -9,7 +9,7 @@ FROM turbo AS pruner
 WORKDIR /app
 COPY ./apps ./apps
 COPY ./packages ./packages
-COPY ./scripts ./scripts
+COPY ./tools ./tools
 COPY ./package.json ./bun.lock ./
 RUN turbo prune --scope=@repo/ui --docker
 
@@ -23,7 +23,7 @@ FROM turbo AS build
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=installer /app/ .
-COPY --from=pruner /app/scripts ./scripts
+COPY --from=pruner /app/tools ./tools
 RUN bun run turbo run build:storybook --filter=@repo/ui
 
 FROM nginx:alpine AS runner
