@@ -66,7 +66,7 @@ Use Turbo from the repo root (`bun run turbo …`):
 
 - `bun run build --filter=@repo/ui` - Build only the UI package
 - `bun run test --filter=@repo/utils` - Test only the utils package
-- `bun run turbo run dev --filter=admin` - Run only the admin app dev script
+- `bun run turbo run dev --filter=vite-spa` - Run only the vite-spa (Vite admin) app dev script
 
 ## Architecture Overview
 
@@ -80,10 +80,10 @@ This is a **Turborepo monorepo** using **Bun** as the package manager and runtim
   - `config-tests` - Shared testing configurations and mocks
 
 - **`apps/`** - Applications
-  - `admin` - React + Vite admin dashboard (port 3001)
-  - `storefront` - Next.js e-commerce frontend (port 3002)
-  - `api` - Express + TypeScript backend API (port 3003)
-  - `docs-astro` - Astro documentation site
+  - `vite-spa` - React + Vite admin dashboard (port 3001)
+  - `nextjs` - Next.js e-commerce storefront (port 3002)
+  - `express` - Express + TypeScript backend API (port 3003)
+  - `astro-ssg` - Astro documentation site
 
 ### Key Technologies
 - **Build System**: Turborepo with Bun package manager
@@ -155,10 +155,10 @@ For detailed information about working with specific packages and applications, 
 - **[packages/config-tests/AGENTS.md](packages/config-tests/AGENTS.md)** - Testing configuration and utilities
 
 ### Applications  
-- **[apps/admin/AGENTS.md](apps/admin/AGENTS.md)** - React admin dashboard (port 3001)
-- **[apps/storefront/AGENTS.md](apps/storefront/AGENTS.md)** - Next.js e-commerce frontend (port 3002)
-- **[apps/api/AGENTS.md](apps/api/AGENTS.md)** - Express.js backend API (port 3003)
-- **[apps/docs-astro/AGENTS.md](apps/docs-astro/AGENTS.md)** - Astro documentation site
+- **[apps/vite-spa/AGENTS.md](apps/vite-spa/AGENTS.md)** - Vite + React admin dashboard (port 3001)
+- **[apps/nextjs/AGENTS.md](apps/nextjs/AGENTS.md)** - Next.js e-commerce storefront (port 3002)
+- **[apps/express/AGENTS.md](apps/express/AGENTS.md)** - Express.js backend API (port 3003)
+- **[apps/astro-ssg/AGENTS.md](apps/astro-ssg/AGENTS.md)** - Astro documentation site
 
 **When working on a specific package or application, always read its AGENTS.md file first for detailed guidance, architecture patterns, and development practices specific to that component.**
 

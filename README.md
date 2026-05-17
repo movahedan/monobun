@@ -70,7 +70,7 @@ We've curated the ultimate framework stack that just works! Vite, Astro, and Sve
 
 > **Developer-first documentation** with **dedicated docs site** and **AI assistant optimization**
 
-We don't just write docs - we build them! Our dedicated docs-astro site makes learning effortless, while our AI-optimized code structure means Cursor and other AI tools instantly understand your project. It's like having a brilliant pair programming partner who never gets confused. The repo uses a **four-tier documentation system**: **`.cursor/rules/`** for standards, **`AGENTS.md`** for AI-oriented commands and structure, **`README.md`** for human onboarding, and **`docs/`** for guides. [Renovate](./renovate.json) keeps dependencies pinned; quality gates run through Biome, TypeScript, and Bun tests.
+We don't just write docs - we build them! Our dedicated astro-ssg site makes learning effortless, while our AI-optimized code structure means Cursor and other AI tools instantly understand your project. It's like having a brilliant pair programming partner who never gets confused. The repo uses a **four-tier documentation system**: **`.cursor/rules/`** for standards, **`AGENTS.md`** for AI-oriented commands and structure, **`README.md`** for human onboarding, and **`docs/`** for guides. [Renovate](./renovate.json) keeps dependencies pinned; quality gates run through Biome, TypeScript, and Bun tests.
 
 </div>
 
@@ -121,11 +121,11 @@ Everything you need to build rock-solid applications is right here! We've kept i
 
 ## 📦 **What's Inside**
 
-**🏢 Admin** <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=white" alt="React" style="vertical-align: middle;" /></a> + <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-5.0-646CFF?style=flat&logo=vite&logoColor=white" alt="Vite" style="vertical-align: middle;" /></a> - **Port 3001** - Admin dashboard interface
+**🏢 vite-spa** (`apps/vite-spa`) <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=white" alt="React" style="vertical-align: middle;" /></a> + <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-5.0-646CFF?style=flat&logo=vite&logoColor=white" alt="Vite" style="vertical-align: middle;" /></a> - **Port 3001** - Vite admin dashboard
 
-**🛍️ Storefront** <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-15-000000?style=flat&logo=next.js&logoColor=white" alt="Next.js" style="vertical-align: middle;" /></a> - **Port 3002** - E-commerce frontend
+**🛍️ nextjs** (`apps/nextjs`) <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-15-000000?style=flat&logo=next.js&logoColor=white" alt="Next.js" style="vertical-align: middle;" /></a> - **Port 3002** - E-commerce frontend
 
-**🔌 API** <a href="https://expressjs.com/"><img src="https://img.shields.io/badge/Express-4.18-000000?style=flat&logo=express&logoColor=white" alt="Express" style="vertical-align: middle;" /></a> + <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.0-007ACC?style=flat&logo=typescript&logoColor=white" alt="TypeScript" style="vertical-align: middle;" /></a> - **Port 3003** - Backend API server
+**🔌 express** (`apps/express`) <a href="https://expressjs.com/"><img src="https://img.shields.io/badge/Express-4.18-000000?style=flat&logo=express&logoColor=white" alt="Express" style="vertical-align: middle;" /></a> + <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.0-007ACC?style=flat&logo=typescript&logoColor=white" alt="TypeScript" style="vertical-align: middle;" /></a> - **Port 3003** - Backend API server
 
 **🎨 UI Package** <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=white" alt="React" style="vertical-align: middle;" /></a> + <a href="https://storybook.js.org/"><img src="https://img.shields.io/badge/Storybook-7.0-FF4785?style=flat&logo=storybook&logoColor=white" alt="Storybook" style="vertical-align: middle;" /></a> - **Port 3004** - Shared components
 

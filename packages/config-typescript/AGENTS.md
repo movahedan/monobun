@@ -60,7 +60,7 @@ Designed for React library packages:
 
 ## Usage Examples
 
-### Vite React Application (apps/admin)
+### Vite React Application (apps/vite-spa)
 ```json
 {
   "extends": "@repo/config-typescript/vite.json",
@@ -74,7 +74,7 @@ Designed for React library packages:
 }
 ```
 
-### Next.js Application (apps/storefront)
+### Next.js Application (apps/nextjs)
 ```json
 {
   "extends": "@repo/config-typescript/nextjs.json",

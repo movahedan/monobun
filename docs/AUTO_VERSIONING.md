@@ -43,11 +43,11 @@ Run `bun run release` with no arguments for Ink help.
 ## Package scope
 
 - **Versioned packages** — `package.json` has `private !== true` and a semver `version`. Listed by `EntityPackage.getVersionedPackages()`; `prepare` rejects unknown or private-only names.
-- **Paths** — `EntityPackage`: `root` → repo root; `@repo/foo` → `packages/foo`; `api` → `apps/api` (name must match `package.json` `name`).
+- **Paths** — `EntityPackage`: `root` → repo root; `@repo/foo` → `packages/foo`; `express` → `apps/express` (name must match `package.json` `name`).
 
 ## Tagging
 
-- **Prefix** — From `EntityPackage.getTagSeriesName()`: `root` → `v` (tags like `v0.2.0`); other packages → `<slug>-v` where `<slug>` is the app name or the `@repo/` name without scope (e.g. `api-v1.0.0`, `utils-v0.1.0`).
+- **Prefix** — From `EntityPackage.getTagSeriesName()`: `root` → `v` (tags like `v0.2.0`); other packages → `<slug>-v` where `<slug>` is the app name or the `@repo/` name without scope (e.g. `express-v1.0.0`, `utils-v0.1.0`).
 - **Range** — Default lower bound is the latest existing tag for that prefix, or the first commit that introduced the package if no tag exists yet (`EntityPackageTags` + `EntityPackageCommits`).
 - **Apply** — Reads version from disk, skips creating a tag if it already exists, otherwise validates the prefix and creates an **annotated** tag via `EntityTag.createTag`, then pushes with `git push --follow-tags` unless `--no-push`.
 
@@ -71,7 +71,7 @@ If there are no commits in range, or the calculator says **no bump**, prepare st
 
 ## CI: compose deploy hint
 
-After a successful prepare write, the script may append `packages-to-deploy=<name>` to `GITHUB_OUTPUT` when `docker-compose.yml` defines a **service** whose name equals the versioned package name (e.g. package `api` → service `api`). Downstream workflows can consume that output.
+After a successful prepare write, the script may append `packages-to-deploy=<name>` to `GITHUB_OUTPUT` when `docker-compose.yml` defines a **service** whose name equals the versioned package name (e.g. package `express` → service `express`). Downstream workflows can consume that output.
 
 ## Version checklist
 
