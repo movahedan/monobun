@@ -22,9 +22,11 @@ function HelpApp({ errorMessage }: { readonly errorMessage?: string }) {
 			<Text>
 				<Text color="green">setup</Text> — install deps, check, test, build
 			</Text>
+			<Text dimColor> setup flags: --skip-tests, --quiet</Text>
 			<Text>
 				<Text color="green">cleanup</Text> — remove build artifacts and node_modules
 			</Text>
+			<Text dimColor> cleanup flags: --quiet</Text>
 			<Text>
 				<Text color="green">vscode</Text> — sync .vscode settings and extensions from the workspace
 			</Text>

@@ -27,7 +27,7 @@ async function main(): Promise<void> {
 	}
 
 	if (sub === "cleanup") {
-		await runLocalCleanup();
+		await runLocalCleanup(rest);
 		return;
 	}
 

@@ -1,3 +1,4 @@
+import { parseArgs } from "node:util";
 import { $ } from "bun";
 import { type ReactNode, useCallback } from "react";
 
@@ -55,11 +56,28 @@ function getCleanupSteps(): readonly StepProgressStep[] {
 	];
 }
 
+export async function runLocalCleanupSteps(): Promise<void> {
+	for (const step of getCleanupSteps()) await step.run();
+}
+
 function CleanupApp(): ReactNode {
 	const resolveSteps = useCallback(() => getCleanupSteps(), []);
 	return <StepProgressApp completedHeading="Local cleanup completed" resolveSteps={resolveSteps} />;
 }
 
-export async function runLocalCleanup(): Promise<void> {
+export async function runLocalCleanup(rest: readonly string[]): Promise<void> {
+	const { values } = parseArgs({
+		args: [...rest],
+		options: {
+			quiet: { type: "boolean", default: false },
+		},
+		strict: true,
+	});
+
+	if (values.quiet === true) {
+		await runLocalCleanupSteps();
+		return;
+	}
+
 	await renderAndExit(<CleanupApp />);
 }
