@@ -1,0 +1,9 @@
+{
+	"extends": "@repo/config-typescript/base.json",
+	"compilerOptions": {
+		"composite": true,
+		"noEmit": false,
+		"types": ["node", "bun"]
+	},
+	"include": ["."]
+}
