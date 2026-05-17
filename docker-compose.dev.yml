@@ -36,7 +36,7 @@ services:
       # Bind mounts for host development; named volumes for heavy paths
       - ${PROJECT_ROOT:-./}/apps:/app/apps:cached
       - ${PROJECT_ROOT:-./}/packages:/app/packages:cached
-      - ${PROJECT_ROOT:-./}/scripts:/app/scripts:cached
+      - ${PROJECT_ROOT:-./}/tools:/app/tools:cached
       - ${PROJECT_ROOT:-./}/package.json:/app/package.json:cached
       - ${PROJECT_ROOT:-./}/bun.lock:/app/bun.lock:cached
       - ${PROJECT_ROOT:-./}/turbo.json:/app/turbo.json:cached

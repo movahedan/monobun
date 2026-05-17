@@ -30,13 +30,9 @@ exact = true
 [install.scopes]
 # Configure scopes if needed
 
-[install.registries]
-# Configure local workspace registry
-"@repo" = { url = "file:./packages" }
-
 [test]
-# Preload centralized test setup from config-tests package
-preload = ["./packages/config-tests/happydom.ts", "./packages/config-tests/testing-library.ts", "./packages/config-tests/test-setup.ts"]
+# Preload centralized test setup from tests-preset package
+preload = ["./tools/tests-preset/happydom.ts", "./tools/tests-preset/testing-library.ts", "./tools/tests-preset/test-setup.ts"]
 # Environment variables for tests
 env = { 
 	NODE_ENV = "test", 
@@ -54,8 +50,8 @@ coverageThreshold = { lines = 0.1, functions = 0.1, statements = 0.1 }
 coverageIgnoreSourcemaps = true
 coverageSkipTestFiles = true
 coveragePathIgnorePatterns = [
-	"**/packages/config-tests/**",
-	"**/scripts/**",
+	"**/tools/tests-preset/**",
+	"**/tools/scripts/**",
 	"**/node_modules/**",
 	"**/dist/**",
 	"**/build/**",
@@ -89,7 +85,7 @@ ignore = [
 	"**/build/**",
 	"**/.turbo/**",
 	"**/coverage/**",
-	"**/config-tests/**"
+	"**/tools/tests-preset/**"
 ]
 
 # Debounce time for file changes (in milliseconds)

@@ -9,7 +9,7 @@ FROM turbo AS pruner
 WORKDIR /app
 COPY ./apps ./apps
 COPY ./packages ./packages
-COPY ./scripts ./scripts
+COPY ./tools ./tools
 COPY ./package.json ./bun.lock ./
 RUN turbo prune --scope=express --docker
 
@@ -22,7 +22,7 @@ RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-expr
 FROM turbo AS build
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
-COPY --from=pruner /app/scripts ./scripts
+COPY --from=pruner /app/tools ./tools
 COPY --from=installer /app/ .
 RUN bun run build --filter=express
 

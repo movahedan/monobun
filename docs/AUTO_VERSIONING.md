@@ -1,6 +1,6 @@
 # Auto versioning
 
-This repo versions packages through `scripts/version/` (`bun run release …`). Logic for commits, tags, dependency-aware commit filtering, and changelog text lives in the **Intershell** library (`intershell` dependency). The upstream Intershell repo mirrors the same ideas under `src/` (entities) and `scripts/version/` (standalone scripts).
+This repo versions packages through `tools/scripts/version/` (`bun run release …`). Logic for commits, tags, dependency-aware commit filtering, and changelog text lives in the **Intershell** library (`intershell` dependency). The upstream Intershell repo mirrors the same ideas under `src/` (entities) and `scripts/version/` (standalone scripts).
 
 ## Commands
 
@@ -106,8 +106,8 @@ Use this before and after a release.
 
 | Area | In this repo | In Intershell (library / reference scripts) |
 |------|----------------|---------------------------------------------|
-| CLI entry | `scripts/version/index.tsx` | `scripts/version/prepare.ts`, `apply.ts`, `publish.ts` |
-| Prepare pipeline | `scripts/version/prepare.tsx` | Overlapping flow; entities imported from `intershell` |
+| CLI entry | `tools/scripts/version/index.tsx` | `scripts/version/prepare.ts`, `apply.ts`, `publish.ts` |
+| Prepare pipeline | `tools/scripts/version/prepare.tsx` | Overlapping flow; entities imported from `intershell` |
 | Commits + deps | — | `src/package-commits/package-commits.ts`, `src/package-commits/dependency-analyzer.ts` |
 | Tags / versions | — | `src/package-tags/package-tags.ts`, `src/package-version/`, `src/tag/tag.ts` |
 

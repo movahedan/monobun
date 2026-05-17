@@ -40,7 +40,7 @@
 		"watch:exports": "bun --no-clear-screen --watch ./scripts/watch-export-modules.ts",
 		"dev": "bun run watch:exports & WATCH_PID=$!; bun run dev:storybook; kill \"$WATCH_PID\" 2>/dev/null || true",
 		"dev:storybook": "bunx --bun storybook dev --no-open --port 3004",
-		"prebuild": "bun scripts/write-barrels.ts && bun ../../scripts/export-modules/index.tsx update --quiet --css-pattern '^src/([^/]+\\.css)$'",
+		"prebuild": "bun scripts/write-barrels.ts && bun ../../tools/scripts/export-modules/index.tsx update --quiet --css-pattern '^src/([^/]+\\.css)$'",
 		"build:storybook": "bunx --bun storybook build -o dist-storybook",
 		"start": "bun run build:storybook && bunx --bun serve dist-storybook"
 	},

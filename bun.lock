@@ -100,24 +100,6 @@
         "vite": "8.0.13",
       },
     },
-    "packages/config-tests": {
-      "name": "@repo/config-tests",
-      "devDependencies": {
-        "@happy-dom/global-registrator": "20.9.0",
-        "@repo/config-typescript": "workspace:*",
-        "@testing-library/dom": "10.4.1",
-        "@testing-library/jest-dom": "6.9.1",
-        "@testing-library/react": "16.3.2",
-        "@types/bun": "1.3.14",
-      },
-    },
-    "packages/config-typescript": {
-      "name": "@repo/config-typescript",
-      "peerDependencies": {
-        "@types/bun": "1.3.14",
-        "typescript": "6.0.3",
-      },
-    },
     "packages/ui": {
       "name": "@repo/ui",
       "dependencies": {
@@ -198,7 +180,7 @@
         "@types/node": "25.7.0",
       },
     },
-    "scripts": {
+    "tools/scripts": {
       "name": "@repo/scripts",
       "dependencies": {
         "ink": "7.0.3",
@@ -210,6 +192,24 @@
         "@repo/config-typescript": "workspace:*",
         "@types/bun": "1.3.14",
         "@types/react": "19.2.14",
+        "typescript": "6.0.3",
+      },
+    },
+    "tools/tests-preset": {
+      "name": "@repo/config-tests",
+      "devDependencies": {
+        "@happy-dom/global-registrator": "20.9.0",
+        "@repo/config-typescript": "workspace:*",
+        "@testing-library/dom": "10.4.1",
+        "@testing-library/jest-dom": "6.9.1",
+        "@testing-library/react": "16.3.2",
+        "@types/bun": "1.3.14",
+      },
+    },
+    "tools/typescript": {
+      "name": "@repo/config-typescript",
+      "peerDependencies": {
+        "@types/bun": "1.3.14",
         "typescript": "6.0.3",
       },
     },
@@ -666,11 +666,11 @@
 
     "@radix-ui/rect": ["@radix-ui/rect@1.1.0", "", {}, "sha512-A9+lCBZoaMJlVKcRBz2YByCG+Cp2t6nAnMnNba+XiWxnj6r4JUFqfsgwocMBZU9LPtdxC6wB56ySYpc7LQIoJg=="],
 
-    "@repo/config-tests": ["@repo/config-tests@workspace:packages/config-tests"],
+    "@repo/config-tests": ["@repo/config-tests@workspace:tools/tests-preset"],
 
-    "@repo/config-typescript": ["@repo/config-typescript@workspace:packages/config-typescript"],
+    "@repo/config-typescript": ["@repo/config-typescript@workspace:tools/typescript"],
 
-    "@repo/scripts": ["@repo/scripts@workspace:scripts"],
+    "@repo/scripts": ["@repo/scripts@workspace:tools/scripts"],
 
     "@repo/ui": ["@repo/ui@workspace:packages/ui"],
 
