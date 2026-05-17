@@ -1,0 +1,19 @@
+{
+	"branch": {
+		"prefixes": [
+			"feature",
+			"fix",
+			"hotfix",
+			"release",
+			"docs",
+			"refactor",
+			"ci",
+			"chore",
+			"wip",
+			"renovate",
+			"codex",
+			"cursor",
+			"agent"
+		]
+	}
+}

@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json.schemastore.org/tsconfig",
-	"extends": "@repo/typescript-config/react-library.json",
+	"extends": "@repo/config-typescript/react-library.json",
 	"compilerOptions": {
 		"composite": true,
 		"module": "esnext",
@@ -8,11 +8,11 @@
 		"target": "ES2015",
 		"rootDir": ".."
 	},
-	"include": [".", "../test-preset/matchers.d.ts", "../utils/src/**/*"],
+	"include": [".", "../config-tests/matchers.d.ts", "../utils/src/**/*"],
 	"exclude": ["../utils/src/**/*.test.ts", "../utils/src/**/*.test.tsx"],
 	"references": [
 		{
-			"path": "../test-preset"
+			"path": "../config-tests"
 		}
 	]
 }

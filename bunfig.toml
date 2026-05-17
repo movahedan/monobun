@@ -35,8 +35,8 @@ exact = true
 "@repo" = { url = "file:./packages" }
 
 [test]
-# Preload centralized test setup from test-preset package
-preload = ["./packages/test-preset/happydom.ts", "./packages/test-preset/testing-library.ts", "./packages/test-preset/test-setup.ts"]
+# Preload centralized test setup from config-tests package
+preload = ["./packages/config-tests/happydom.ts", "./packages/config-tests/testing-library.ts", "./packages/config-tests/test-setup.ts"]
 # Environment variables for tests
 env = { 
 	NODE_ENV = "test", 
@@ -54,7 +54,7 @@ coverageThreshold = { lines = 0.1, functions = 0.1, statements = 0.1 }
 coverageIgnoreSourcemaps = true
 coverageSkipTestFiles = true
 coveragePathIgnorePatterns = [
-	"**/packages/test-preset/**",
+	"**/packages/config-tests/**",
 	"**/scripts/**",
 	"**/node_modules/**",
 	"**/dist/**",
@@ -89,7 +89,7 @@ ignore = [
 	"**/build/**",
 	"**/.turbo/**",
 	"**/coverage/**",
-	"**/test-preset/**"
+	"**/config-tests/**"
 ]
 
 # Debounce time for file changes (in milliseconds)

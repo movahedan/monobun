@@ -405,7 +405,7 @@ interface BitwardenEnvManagement {
 #### 6.1 Jest Configuration
 - [ ] **Configure Jest for all packages**
   ```typescript
-  // packages/test-preset/src/jest-config.ts
+  // packages/config-tests/src/jest-config.ts
   export const jestConfig = {
     preset: 'ts-jest',
     testEnvironment: 'node',

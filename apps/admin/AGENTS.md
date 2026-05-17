@@ -28,7 +28,7 @@ This file provides guidance to Agents when working with the admin application.
 
 ### Build & Development
 - **@vitejs/plugin-react** - React support for Vite
-- **@repo/typescript-config** - Shared TypeScript configuration
+- **@repo/config-typescript** - Shared TypeScript configuration
 
 ## Architecture
 
@@ -253,7 +253,7 @@ class AdminErrorBoundary extends Component<
 ### Shared Dependencies
 - **@repo/ui**: Import UI components (Button, Card, Input, etc.)
 - **@repo/utils**: Use cn() for classes, logger for logging
-- **@repo/typescript-config**: Extends Vite TypeScript configuration
+- **@repo/config-typescript**: Extends Vite TypeScript configuration
 
 ### Port Configuration
 The admin app runs on port 3001 by default. This is configured in the development workflow and should not conflict with:

@@ -30,7 +30,7 @@ This file provides guidance to Agents when working with the API application.
 ### Development Tools
 - **tsup 8.5.0** - Fast TypeScript bundler
 - **supertest 7.1.4** - HTTP testing library
-- **@repo/test-preset** - Shared testing configuration
+- **@repo/config-tests** - Shared testing configuration
 
 ## Architecture
 
@@ -512,7 +512,7 @@ describe('Products API', () => {
 
 ### Shared Dependencies
 - **@repo/utils**: Uses logger for consistent logging across the monorepo
-- **@repo/test-preset**: Shared testing configuration and utilities
+- **@repo/config-tests**: Shared testing configuration and utilities
 
 ### Frontend Integration
 - Provides REST API endpoints for admin and storefront applications  

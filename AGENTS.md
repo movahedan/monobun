@@ -76,8 +76,8 @@ This is a **Turborepo monorepo** using **Bun** as the package manager and runtim
 - **`packages/`** - Shared packages and libraries
   - `ui` - Shared React component library with Storybook (port 3004)
   - `utils` - Shared utility functions
-  - `typescript-config` - Shared TypeScript configurations
-  - `test-preset` - Shared testing configurations and mocks
+  - `config-typescript` - Shared TypeScript configurations
+  - `config-tests` - Shared testing configurations and mocks
 
 - **`apps/`** - Applications
   - `admin` - React + Vite admin dashboard (port 3001)
@@ -119,7 +119,7 @@ Repository scripts provide tooling for validation, automation, and versioning. I
 - Import organization: React → Third-party → Local (absolute) → Relative
 
 ### Testing Conventions
-- Use Bun test runner with custom test presets from `packages/test-preset`
+- Use Bun test runner with custom test presets from `packages/config-tests`
 - Follow AAA pattern (Arrange, Act, Assert)
 - Create reusable test utilities and mock factories
 - Group tests logically with descriptive `describe` blocks
@@ -151,8 +151,8 @@ For detailed information about working with specific packages and applications, 
 ### Packages
 - **[packages/ui/AGENTS.md](packages/ui/AGENTS.md)** - React component library with Storybook
 - **[packages/utils/AGENTS.md](packages/utils/AGENTS.md)** - Shared utility functions (cn, logger)
-- **[packages/typescript-config/AGENTS.md](packages/typescript-config/AGENTS.md)** - TypeScript configuration presets
-- **[packages/test-preset/AGENTS.md](packages/test-preset/AGENTS.md)** - Testing configuration and utilities
+- **[packages/config-typescript/AGENTS.md](packages/config-typescript/AGENTS.md)** - TypeScript configuration presets
+- **[packages/config-tests/AGENTS.md](packages/config-tests/AGENTS.md)** - Testing configuration and utilities
 
 ### Applications  
 - **[apps/admin/AGENTS.md](apps/admin/AGENTS.md)** - React admin dashboard (port 3001)
