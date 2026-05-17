@@ -4,7 +4,7 @@ This file provides guidance to Agents when working with the utils package.
 
 ## Package Overview
 
-**@repo/utils** provides essential utility functions used across the monorepo, specifically for CSS class manipulation and logging functionality.
+**@packages/utils** provides essential utility functions used across the monorepo, specifically for CSS class manipulation and logging functionality.
 
 ## Essential Commands
 
@@ -18,10 +18,10 @@ The package provides two main utilities:
 
 ```typescript
 // CSS class utility for Tailwind CSS
-import { cn } from '@repo/utils/cn';
+import { cn } from '@packages/utils/cn';
 
 // Logging utility
-import { logger } from '@repo/utils/logger';
+import { logger } from '@packages/utils/logger';
 ```
 
 ## Available Utilities
@@ -31,7 +31,7 @@ import { logger } from '@repo/utils/logger';
 A utility function that combines `clsx` and `tailwind-merge` for optimal Tailwind CSS class handling:
 
 ```typescript
-import { cn } from '@repo/utils/cn';
+import { cn } from '@packages/utils/cn';
 
 // Combines classes and resolves Tailwind conflicts
 const className = cn(
@@ -53,7 +53,7 @@ const className = cn(
 A structured logging utility for consistent logging across the monorepo:
 
 ```typescript
-import { logger } from '@repo/utils/logger';
+import { logger } from '@packages/utils/logger';
 
 // Usage examples
 logger.info('Application started');
@@ -66,7 +66,7 @@ logger.debug('Debug information');
 
 ### React Components
 ```typescript
-import { cn } from '@repo/utils/cn';
+import { cn } from '@packages/utils/cn';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary';
@@ -87,7 +87,7 @@ const Button = ({ className, variant = 'primary', size = 'md', ...props }) => {
 
 ### Server-side Usage
 ```typescript
-import { logger } from '@repo/utils/logger';
+import { logger } from '@packages/utils/logger';
 
 export async function apiHandler(req: Request) {
   try {

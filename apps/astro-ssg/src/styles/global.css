@@ -1,4 +1,4 @@
-@import "@repo/ui/style.css";
+@import "@packages/ui/style.css";
 @plugin "@tailwindcss/typography";
 
 @source "../pages";

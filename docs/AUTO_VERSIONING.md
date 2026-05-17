@@ -43,11 +43,11 @@ Run `bun run release` with no arguments for Ink help.
 ## Package scope
 
 - **Versioned packages** — `package.json` has `private !== true` and a semver `version`. Listed by `EntityPackage.getVersionedPackages()`; `prepare` rejects unknown or private-only names.
-- **Paths** — `EntityPackage`: `root` → repo root; `@repo/foo` → `packages/foo`; `express` → `apps/express` (name must match `package.json` `name`).
+- **Paths** — `EntityPackage`: `root` → repo root; `@packages/foo` → `packages/foo`; `@tools/foo` → `tools/foo`; `@apps/express` → `apps/express` (name must match `package.json` `name`).
 
 ## Tagging
 
-- **Prefix** — From `EntityPackage.getTagSeriesName()`: `root` → `v` (tags like `v0.2.0`); other packages → `<slug>-v` where `<slug>` is the app name or the `@repo/` name without scope (e.g. `express-v1.0.0`, `utils-v0.1.0`).
+- **Prefix** — From `EntityPackage.getTagSeriesName()`: `root` → `v` (tags like `v0.2.0`); other packages → `<slug>-v` where `<slug>` is the scoped name without `@apps/`, `@packages/`, or `@tools/` (e.g. `express-v1.0.0`, `utils-v0.1.0`).
 - **Range** — Default lower bound is the latest existing tag for that prefix, or the first commit that introduced the package if no tag exists yet (`EntityPackageTags` + `EntityPackageCommits`).
 - **Apply** — Reads version from disk, skips creating a tag if it already exists, otherwise validates the prefix and creates an **annotated** tag via `EntityTag.createTag`, then pushes with `git push --follow-tags` unless `--no-push`.
 
@@ -56,7 +56,7 @@ Run `bun run release` with no arguments for Ink help.
 For each commit in the range, `EntityPackageCommits`:
 
 1. Loads **internal** dependencies of the scoped package **at that commit** (`EntityDependencyAnalyzer.getPackageDependenciesAtRef`).
-2. Resolves them from **workspace** `package.json` (`dependencies` / `devDependencies` / `peerDependencies` — `@repo/*` only) and from **`tsconfig` path mappings** (including extended configs), intersected with `EntityPackage.getAllPackages()`.
+2. Resolves them from **workspace** `package.json` (`dependencies` / `devDependencies` / `peerDependencies` — `@packages/*`, `@tools/*`, `@apps/*`) and from **`tsconfig` path mappings** (including extended configs), intersected with `EntityPackage.getAllPackages()`.
 3. Keeps a commit if it touches the package directory **or** any of those dependency paths. For `root`, any changed file counts as a direct hit.
 
 Merge commits are folded so PR squash ranges do not duplicate individual commits.
@@ -71,7 +71,7 @@ If there are no commits in range, or the calculator says **no bump**, prepare st
 
 ## CI: compose deploy hint
 
-After a successful prepare write, the script may append `packages-to-deploy=<name>` to `GITHUB_OUTPUT` when `docker-compose.yml` defines a **service** whose name equals the versioned package name (e.g. package `express` → service `express`). Downstream workflows can consume that output.
+After a successful prepare write, the script may append `packages-to-deploy=<name>` to `GITHUB_OUTPUT` when `docker-compose.yml` defines a **service** whose name equals the versioned package name (e.g. package `@apps/express` → compose service `express`). Downstream workflows can consume that output.
 
 ## Version checklist
 
@@ -80,7 +80,7 @@ Use this before and after a release.
 **Before prepare**
 
 - [ ] Conventional commits in range are correct (`feat`, `fix`, breaking changes as expected for the bump you want).
-- [ ] You picked the right `--package` (`root` vs app vs `@repo/...`).
+- [ ] You picked the right `--package` (`root` vs `@apps/...`, `@packages/...`, or `@tools/...`).
 - [ ] Workspace validates (`EntityPackage.validateAllPackages()` must pass — fix `package.json` / Intershell package rules if prepare fails early).
 - [ ] Private packages stay `private: true` without a conflicting version policy.
 

@@ -59,14 +59,14 @@ Human-oriented cheat sheet: **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
 - `bun run ci attach-affected` / `bun run ci attach-service-ports` - GitHub Actions outputs (see `bun run ci` with no args for help)
 
 ### Storybook
-- `bun run turbo run build:storybook --filter=@repo/ui` - Build Storybook for the UI package (see `packages/ui/package.json`)
+- `bun run turbo run build:storybook --filter=@packages/ui` - Build Storybook for the UI package (see `packages/ui/package.json`)
 
 ### Single Package Development
 Use Turbo from the repo root (`bun run turbo …`):
 
-- `bun run build --filter=@repo/ui` - Build only the UI package
-- `bun run test --filter=@repo/utils` - Test only the utils package
-- `bun run turbo run dev --filter=vite-spa` - Run only the vite-spa (Vite admin) app dev script
+- `bun run build --filter=@packages/ui` - Build only the UI package
+- `bun run test --filter=@packages/utils` - Test only the utils package
+- `bun run turbo run dev --filter=@apps/vite-spa` - Run only the vite-spa (Vite admin) app dev script
 
 ## Architecture Overview
 
@@ -78,15 +78,15 @@ This is a **Turborepo monorepo** using **Bun** as the package manager and runtim
   - `utils` - Shared utility functions
 
 - **`tools/`** - Repo tooling workspaces
-  - `typescript` - Shared TypeScript configurations (`@repo/config-typescript`)
-  - `tests-preset` - Shared testing configurations and mocks (`@repo/config-tests`)
-  - `scripts` - Bun CLIs for local, container, CI, release (`@repo/scripts`)
+  - `typescript` - Shared TypeScript configurations (`@tools/typescript`)
+  - `tests-preset` - Shared testing configurations and mocks (`@tools/tests-preset`)
+  - `scripts` - Bun CLIs for local, container, CI, release (`@tools/scripts`)
 
 - **`apps/`** - Applications
-  - `vite-spa` - React + Vite admin dashboard (port 3001)
-  - `nextjs` - Next.js e-commerce storefront (port 3002)
-  - `express` - Express + TypeScript backend API (port 3003)
-  - `astro-ssg` - Astro documentation site
+  - `@apps/vite-spa` - React + Vite admin dashboard (port 3001)
+  - `@apps/nextjs` - Next.js e-commerce storefront (port 3002)
+  - `@apps/express` - Express + TypeScript backend API (port 3003)
+  - `@apps/astro-ssg` - Astro documentation site
 
 ### Key Technologies
 - **Build System**: Turborepo with Bun package manager

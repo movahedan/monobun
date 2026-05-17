@@ -4,7 +4,7 @@ This file provides guidance to Agents when working with the config-typescript pa
 
 ## Package Overview
 
-**@repo/config-typescript** provides shared TypeScript configuration files for all packages and applications in the monorepo, ensuring consistent TypeScript settings across the entire codebase.
+**@tools/typescript** provides shared TypeScript configuration files for all packages and applications in the monorepo, ensuring consistent TypeScript settings across the entire codebase.
 
 ## Available Configurations
 
@@ -14,7 +14,7 @@ The package exports four TypeScript configuration presets:
 Basic TypeScript configuration with strict settings:
 ```json
 {
-  "extends": "@repo/config-typescript/base.json"
+  "extends": "@tools/typescript/base.json"
 }
 ```
 - Strict type checking enabled
@@ -26,7 +26,7 @@ Basic TypeScript configuration with strict settings:
 Optimized for Vite-based applications and libraries:
 ```json
 {
-  "extends": "@repo/config-typescript/vite.json"
+  "extends": "@tools/typescript/vite.json"
 }
 ```
 - Module resolution for Vite
@@ -38,7 +38,7 @@ Optimized for Vite-based applications and libraries:
 Tailored for Next.js applications:
 ```json
 {
-  "extends": "@repo/config-typescript/nextjs.json"
+  "extends": "@tools/typescript/nextjs.json"
 }
 ```
 - Next.js specific compiler options
@@ -50,7 +50,7 @@ Tailored for Next.js applications:
 Designed for React library packages:
 ```json
 {
-  "extends": "@repo/config-typescript/react-library.json"
+  "extends": "@tools/typescript/react-library.json"
 }
 ```
 - Library-specific module resolution
@@ -63,7 +63,7 @@ Designed for React library packages:
 ### Vite React Application (apps/vite-spa)
 ```json
 {
-  "extends": "@repo/config-typescript/vite.json",
+  "extends": "@tools/typescript/vite.json",
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
@@ -77,7 +77,7 @@ Designed for React library packages:
 ### Next.js Application (apps/nextjs)
 ```json
 {
-  "extends": "@repo/config-typescript/nextjs.json",
+  "extends": "@tools/typescript/nextjs.json",
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
@@ -91,7 +91,7 @@ Designed for React library packages:
 ### React Library Package (packages/ui)
 ```json
 {
-  "extends": "@repo/config-typescript/react-library.json",
+  "extends": "@tools/typescript/react-library.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src"
@@ -104,7 +104,7 @@ Designed for React library packages:
 ### Utility Package (packages/utils)
 ```json
 {
-  "extends": "@repo/config-typescript/base.json",
+  "extends": "@tools/typescript/base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src"
@@ -140,12 +140,12 @@ Always extend the most specific configuration for your project type:
 ```json
 // ✅ Good - specific configuration
 {
-  "extends": "@repo/config-typescript/nextjs.json"
+  "extends": "@tools/typescript/nextjs.json"
 }
 
 // ❌ Avoid - generic configuration for specific project
 {
-  "extends": "@repo/config-typescript/base.json"
+  "extends": "@tools/typescript/base.json"
 }
 ```
 
@@ -154,7 +154,7 @@ Only override settings when necessary:
 
 ```json
 {
-  "extends": "@repo/config-typescript/vite.json",
+  "extends": "@tools/typescript/vite.json",
   "compilerOptions": {
     // Only add project-specific settings
     "paths": {
@@ -169,7 +169,7 @@ Be explicit about what TypeScript should process:
 
 ```json
 {
-  "extends": "@repo/config-typescript/react-library.json",
+  "extends": "@tools/typescript/react-library.json",
   "include": [
     "src/**/*"  // Source code
   ],

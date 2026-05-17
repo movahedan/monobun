@@ -22,13 +22,13 @@ This file provides guidance to Agents when working with the vite-spa application
 - **TypeScript** - Type-safe development
 
 ### UI & Styling  
-- **@repo/ui** - Shared component library (Button, Card, Input, etc.)
-- **@repo/utils** - Shared utilities (cn helper, logger)
+- **@packages/ui** - Shared component library (Button, Card, Input, etc.)
+- **@packages/utils** - Shared utilities (cn helper, logger)
 - Components use Tailwind CSS via the shared UI library
 
 ### Build & Development
 - **@vitejs/plugin-react** - React support for Vite
-- **@repo/config-typescript** - Shared TypeScript configuration
+- **@tools/typescript** - Shared TypeScript configuration
 
 ## Architecture
 
@@ -55,9 +55,9 @@ apps/vite-spa/
 
 #### Component Development
 ```typescript
-import { Button } from '@repo/ui/button';
-import { Card } from '@repo/ui/card';
-import { cn } from '@repo/utils/cn';
+import { Button } from '@packages/ui/button';
+import { Card } from '@packages/ui/card';
+import { cn } from '@packages/utils/cn';
 
 interface DashboardCardProps {
   title: string;
@@ -95,7 +95,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
 
 #### API Service Pattern
 ```typescript
-import { logger } from '@repo/utils/logger';
+import { logger } from '@packages/utils/logger';
 
 interface User {
   id: string;
@@ -243,7 +243,7 @@ class AdminErrorBoundary extends Component<
 - Optimize images and assets
 
 ### UI Consistency
-- Always use components from @repo/ui package
+- Always use components from @packages/ui package
 - Follow the design system patterns
 - Use the cn utility for conditional classes
 - Maintain consistent spacing and typography
@@ -251,9 +251,9 @@ class AdminErrorBoundary extends Component<
 ## Integration with Monorepo
 
 ### Shared Dependencies
-- **@repo/ui**: Import UI components (Button, Card, Input, etc.)
-- **@repo/utils**: Use cn() for classes, logger for logging
-- **@repo/config-typescript**: Extends Vite TypeScript configuration
+- **@packages/ui**: Import UI components (Button, Card, Input, etc.)
+- **@packages/utils**: Use cn() for classes, logger for logging
+- **@tools/typescript**: Extends Vite TypeScript configuration
 
 ### Port Configuration
 The vite-spa app runs on port 3001 by default. This is configured in the development workflow and should not conflict with:

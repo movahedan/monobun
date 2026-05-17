@@ -1,5 +1,5 @@
 {
-	"extends": "@repo/config-typescript/vite.json",
+	"extends": "@tools/typescript/vite.json",
 	"compilerOptions": {
 		"outDir": "./dist"
 	},

@@ -11,7 +11,7 @@ COPY ./apps ./apps
 COPY ./packages ./packages
 COPY ./tools ./tools
 COPY ./package.json ./bun.lock ./
-RUN turbo prune --scope=express --docker
+RUN turbo prune --scope=@apps/express --docker
 
 FROM turbo AS installer
 WORKDIR /app
@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/tools ./tools
 COPY --from=installer /app/ .
-RUN bun run build --filter=express
+RUN bun run build --filter=@apps/express
 
 FROM oven/bun:1.3.14-alpine AS runner
 WORKDIR /app

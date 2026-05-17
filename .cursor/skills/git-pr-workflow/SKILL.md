@@ -78,7 +78,7 @@ Do **not** pick a generic subject before reading the change. Build the message f
 
 2. **Map touched workspaces to scopes**
    - For each path under `apps/<dir>/`, read `apps/<dir>/package.json` → `name` (e.g. `vite-spa`, `express`, `nextjs`, `astro-ssg`).
-   - For each path under `packages/<dir>/`, read `packages/<dir>/package.json` → `name` (e.g. `@repo/ui`).
+   - For each path under `packages/<dir>/`, read `packages/<dir>/package.json` → `name` (e.g. `@packages/ui`).
    - Root-only files (`.github/`, `docs/`, `tools/scripts/`, root `package.json`, `turbo.json`, `.cursor/`, etc.) → scope **`root`**.
    - If many scopes fit, prefer a **comma-separated** list (no spaces after commas) when the subject stays ≤ 72 chars; otherwise use the narrowest scope that matches the **primary** intent and validate with precommit.
 
@@ -117,7 +117,7 @@ Format: `type(scope1,scope2): description` (multiple scopes comma-separated, no 
 | `revert` | ⏪ Revert commits |
 | `merge` | Merge commits |
 
-**Scopes:** every scope token must equal the **`name`** field of a workspace `package.json` you touched (e.g. `root`, `vite-spa`, `express`, `nextjs`, `astro-ssg`, `@repo/ui`, `@repo/utils`). Omit scope only when it truly spans names awkwardly—then validate with precommit anyway. Intershell’s validator only knows names under `apps/`, `packages/`, and `root` today—if `precommit` rejects a scope, align with that list or adjust `intershell` config.
+**Scopes:** every scope token must equal the **`name`** field of a workspace `package.json` you touched (e.g. `root`, `vite-spa`, `express`, `nextjs`, `astro-ssg`, `@packages/ui`, `@packages/utils`). Omit scope only when it truly spans names awkwardly—then validate with precommit anyway. Intershell’s validator only knows names under `apps/`, `packages/`, and `root` today—if `precommit` rejects a scope, align with that list or adjust `intershell` config.
 
 **Practices:** imperative description; lowercase type; subject ≤ 72 chars; no trailing `.`; do not repeat the type as the first word of the description; `BREAKING CHANGE:` in body when needed.
 

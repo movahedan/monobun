@@ -42,7 +42,7 @@ jobs:
         run: bun install -E --no-save
 
       - name: 🏗️ Build docs site
-        run: bun run build --filter=astro-ssg
+        run: bun run build --filter=@apps/astro-ssg
 
       - name: 📤 Upload Pages artifact
         uses: actions/upload-pages-artifact@v5

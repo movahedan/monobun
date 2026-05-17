@@ -1,1 +1,1 @@
-export { cn } from "@repo/utils/cn";
+export { cn } from "@packages/utils/cn";

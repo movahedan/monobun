@@ -38,9 +38,17 @@
 						"groups": [
 							[":BUN:", ":NODE:"],
 							":BLANK_LINE:",
-							[":URL:", ":PACKAGE_WITH_PROTOCOL:", ":PACKAGE:", "!@repo/**", "!#/**"],
+							[
+								":URL:",
+								":PACKAGE_WITH_PROTOCOL:",
+								":PACKAGE:",
+								"!@packages/**",
+								"!@tools/**",
+								"!@apps/**",
+								"!#/**"
+							],
 							":BLANK_LINE:",
-							["@repo/**"],
+							["@packages/**", "@tools/**", "@apps/**"],
 							":BLANK_LINE:",
 							["#/**"],
 							":BLANK_LINE:",
