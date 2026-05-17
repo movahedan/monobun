@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { printCliErrorAndExit } from "../format-cli-error";
+import { printCliErrorAndExit } from "../shared/format-cli-error";
 import { printHelpAndExit } from "./help";
 import { runExportModules } from "./update";
 

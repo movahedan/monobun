@@ -20,7 +20,8 @@ function HelpApp({ errorMessage }: { readonly errorMessage?: string }) {
 			<Text> </Text>
 			<Text bold>Commands</Text>
 			<Text>
-				<Text color="green">update</Text> — set package.json exports from src (or package root)
+				<Text color="green">update</Text> — set package.json exports from src (or package root):
+				./&lt;dir&gt; for src/&lt;dir&gt;/index.ts(x) when not using --pattern
 			</Text>
 			<Text> </Text>
 			<Text bold>Flags</Text>
@@ -29,6 +30,11 @@ function HelpApp({ errorMessage }: { readonly errorMessage?: string }) {
 				package.json) and build exports from all .ts/.tsx under ./src recursively; first capture
 				sets the export key when present. Patterns are checked for catastrophic backtracking and
 				rejected if unsafe.
+			</Text>
+			<Text>
+				<Text color="green">{"--css-pattern <regex>"}</Text> — same as --pattern for .css files
+				(e.g. src/&lt;dir&gt;/&lt;name&gt;.css or src/&lt;file&gt;.css). Merges with --pattern or
+				default index.ts exports.
 			</Text>
 			<Text>
 				<Text color="green">{"--regex-flags <flags>"}</Text> — RegExp flags (global g is ignored)
@@ -52,6 +58,9 @@ function HelpApp({ errorMessage }: { readonly errorMessage?: string }) {
 			<Text dimColor>bun run export-modules update --quiet</Text>
 			<Text dimColor>
 				{`bun run export-modules update --pattern 'src/([^/]+)/\\1\\.tsx$' --dry-run`}
+			</Text>
+			<Text dimColor>
+				{`bun run export-modules update --css-pattern 'src/([^/]+/[^/]+)\\.css$' --dry-run`}
 			</Text>
 		</Box>
 	);

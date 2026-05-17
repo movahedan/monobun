@@ -4,23 +4,23 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import { $ } from "bun";
 import { type ReactNode, useCallback } from "react";
-import safeRegex from "safe-regex";
-
-import { colorify } from "../colorify";
-
-import { renderAndExit } from "../render-and-exit";
-import { StepProgressApp, type StepProgressStep } from "../step-progress";
+import { collectFilesRecursive } from "../shared/collect-files-recursive";
+import { colorify } from "../shared/colorify";
+import { matchFilesByPattern } from "../shared/match-files-by-pattern";
+import { renderAndExit } from "../shared/render-and-exit";
+import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
+import { buildExportsWithPattern } from "./build-exports-with-pattern";
+import { buildExportsWithoutPattern } from "./build-exports-without-pattern";
+import { compilePathRegex } from "./compile-path-regex";
 
 import { printHelpAndExit } from "./help";
-
-const MAX_PATTERN_LENGTH = 500;
-const MAX_REL_PATH_FOR_REGEX = 8192;
 
 export interface ExportModulesOptions {
 	readonly useSrc: boolean;
 	readonly dryRun: boolean;
 	readonly quiet: boolean;
 	readonly pattern: string | undefined;
+	readonly cssPattern: string | undefined;
 	readonly regexFlags: string;
 }
 
@@ -30,166 +30,10 @@ interface ExportModulesState {
 	srcDir: string;
 	files: readonly Dirent[];
 	patternMatchedPaths: readonly string[];
+	cssPatternMatchedPaths: readonly string[];
 	compiledPattern: RegExp | undefined;
+	compiledCssPattern: RegExp | undefined;
 	newExports: Record<string, string>;
-}
-
-function toPosixPath(filePath: string): string {
-	return filePath.split(path.sep).join("/");
-}
-
-async function collectTsFilesRecursive(rootDir: string): Promise<readonly string[]> {
-	const results: string[] = [];
-
-	const walk = async (dir: string): Promise<void> => {
-		const entries = await readdir(dir, { withFileTypes: true });
-		for (const entry of entries) {
-			const full = path.join(dir, entry.name);
-			if (entry.isDirectory()) {
-				await walk(full);
-				continue;
-			}
-			if (!entry.isFile()) continue;
-			if (entry.name.endsWith(".d.ts")) continue;
-			if (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx")) {
-				results.push(full);
-			}
-		}
-	};
-
-	await walk(rootDir);
-	return results;
-}
-
-export function compilePathRegex(pattern: string, flags: string): RegExp {
-	if (pattern.length > MAX_PATTERN_LENGTH) {
-		throw new Error(`Pattern exceeds max length (${MAX_PATTERN_LENGTH})`);
-	}
-	const safeFlags = flags.replaceAll("g", "");
-	let compiled: RegExp;
-	try {
-		compiled = new RegExp(pattern, safeFlags);
-	} catch (error: unknown) {
-		const message = error instanceof Error ? error.message : String(error);
-		throw new Error(`Invalid regular expression: ${message}`);
-	}
-	if (!safeRegex(compiled)) {
-		throw new Error(
-			"Pattern is rejected because it may cause catastrophic backtracking (ReDoS). Use a simpler regex without nested quantifiers such as (a+)+ or overlapping unbounded repetition.",
-		);
-	}
-	return compiled;
-}
-
-function exportKeyFromMatch(relFromSrcPosix: string, match: RegExpMatchArray): string {
-	if (match[1] !== undefined && match[1].length > 0) {
-		const sub = match[1].replace(/^\.?\//, "");
-		if (sub === "" || sub === ".") {
-			return ".";
-		}
-		return sub.startsWith("./") ? sub : `./${sub}`;
-	}
-
-	if (relFromSrcPosix === "index.ts" || relFromSrcPosix === "index.tsx") {
-		return ".";
-	}
-
-	const noExt = relFromSrcPosix.replace(/\.tsx?$/, "");
-	const parts = noExt.split("/");
-	if (parts.length >= 2 && parts[parts.length - 1] === parts[parts.length - 2]) {
-		return `./${parts[parts.length - 1]}`;
-	}
-
-	return `./${noExt}`;
-}
-
-function buildExportsFromPattern(
-	absoluteFiles: readonly string[],
-	packageDir: string,
-	srcDir: string,
-	regex: RegExp,
-): Record<string, string> {
-	const newExports: Record<string, string> = {};
-	const duplicateKeys = new Map<string, string[]>();
-
-	for (const abs of absoluteFiles) {
-		const relPackage = toPosixPath(path.relative(packageDir, abs));
-		if (relPackage.length > MAX_REL_PATH_FOR_REGEX) {
-			throw new Error(
-				`Path relative to package exceeds max length (${String(MAX_REL_PATH_FOR_REGEX)}): shorten the path or avoid --pattern on this tree.`,
-			);
-		}
-		const match = relPackage.match(regex);
-		if (match === null) continue;
-
-		const relFromSrc = toPosixPath(path.relative(srcDir, abs));
-		const key = exportKeyFromMatch(relFromSrc, match);
-		const exportPath = relPackage.startsWith(".") ? relPackage : `./${relPackage}`;
-
-		const prior = newExports[key];
-		if (prior !== undefined && prior !== exportPath) {
-			const list = duplicateKeys.get(key) ?? [prior];
-			list.push(exportPath);
-			duplicateKeys.set(key, list);
-		}
-
-		newExports[key] = exportPath;
-	}
-
-	if (duplicateKeys.size > 0) {
-		const lines = [...duplicateKeys.entries()]
-			.map(([key, paths]) => `${key}: ${paths.join(", ")}`)
-			.join("\n");
-		console.warn(colorify.yellow(`Duplicate export keys (last path wins):\n${lines}`));
-	}
-
-	return newExports;
-}
-
-async function getNewExports(
-	files: readonly Dirent[],
-	srcDir: string,
-	packageDir: string,
-): Promise<Record<string, string>> {
-	const newExports: Record<string, string> = {};
-
-	for (const file of files) {
-		if (file.isDirectory()) {
-			const indexFile = path.join(srcDir, file.name, "index.ts");
-			const indexTsxFile = path.join(srcDir, file.name, "index.tsx");
-			const sameNameFile = path.join(srcDir, file.name, `${file.name}.ts`);
-			const sameNameTsxFile = path.join(srcDir, file.name, `${file.name}.tsx`);
-
-			if (await Bun.file(indexFile).exists()) {
-				newExports[`./${file.name}`] = `./${path.relative(packageDir, indexFile)}`;
-			} else if (await Bun.file(indexTsxFile).exists()) {
-				newExports[`./${file.name}`] = `./${path.relative(packageDir, indexTsxFile)}`;
-			} else if (await Bun.file(sameNameFile).exists()) {
-				newExports[`./${file.name}`] = `./${path.relative(packageDir, sameNameFile)}`;
-			} else if (await Bun.file(sameNameTsxFile).exists()) {
-				newExports[`./${file.name}`] = `./${path.relative(packageDir, sameNameTsxFile)}`;
-			}
-
-			continue;
-		}
-
-		const shouldSkip = !file.name.endsWith(".ts") && !file.name.endsWith(".tsx");
-		if (shouldSkip) continue;
-
-		if (file.name === "index.ts") {
-			newExports["."] = "./index.ts";
-			continue;
-		}
-
-		const mainFile = path.join(srcDir, file.name);
-		const relativePath = `./${path.relative(packageDir, mainFile)}`;
-
-		if (await Bun.file(mainFile).exists()) {
-			newExports[`./${file.name}`] = relativePath;
-		}
-	}
-
-	return newExports;
 }
 
 function getExportModulesSteps(
@@ -204,65 +48,98 @@ function getExportModulesSteps(
 				state.packageDir = path.dirname(state.packageJsonPath);
 				state.srcDir = options.useSrc ? path.join(state.packageDir, "src") : state.packageDir;
 				if (options.pattern !== undefined) {
-					const allFiles = await collectTsFilesRecursive(state.srcDir);
-					let regex: RegExp;
+					const allTsFiles = await collectFilesRecursive(state.srcDir, [".ts", ".tsx"]);
 					try {
-						regex = compilePathRegex(options.pattern, options.regexFlags);
+						state.compiledPattern = compilePathRegex(options.pattern, options.regexFlags);
 					} catch (error: unknown) {
 						const message = error instanceof Error ? error.message : String(error);
 						throw new Error(`Invalid --pattern: ${message}`);
 					}
-					state.compiledPattern = regex;
-					const matched: string[] = [];
-					for (const abs of allFiles) {
-						const rel = toPosixPath(path.relative(state.packageDir, abs));
-						if (rel.length > MAX_REL_PATH_FOR_REGEX) {
-							throw new Error(
-								`Path relative to package exceeds max length (${String(MAX_REL_PATH_FOR_REGEX)}): shorten the path or avoid --pattern on this tree.`,
-							);
-						}
-						if (regex.test(rel)) {
-							matched.push(abs);
-						}
-					}
-					state.patternMatchedPaths = matched;
+					state.patternMatchedPaths = matchFilesByPattern(
+						allTsFiles,
+						state.packageDir,
+						state.compiledPattern,
+					);
 					state.files = [];
 					console.log(
 						colorify.blue(
-							`Pattern ${colorify.cyan(options.pattern)} matched ${String(state.patternMatchedPaths.length)} of ${String(allFiles.length)} files under ${path.relative(state.packageDir, state.srcDir) || "."}`,
+							`Pattern ${colorify.cyan(options.pattern)} matched ${String(state.patternMatchedPaths.length)} of ${String(allTsFiles.length)} TypeScript files under ${path.relative(state.packageDir, state.srcDir) || "."}`,
 						),
 					);
-					return;
+				} else {
+					state.compiledPattern = undefined;
+					state.patternMatchedPaths = [];
+					state.files = await readdir(state.srcDir, {
+						withFileTypes: true,
+						recursive: false,
+					});
+					console.log(
+						colorify.blue(
+							`Found ${state.files.length} entries under ${path.relative(state.packageDir, state.srcDir) || "."}:`,
+						),
+						colorify.cyan(state.files.map((f) => f.name).join(" ")),
+					);
 				}
 
-				state.compiledPattern = undefined;
-				state.patternMatchedPaths = [];
-				state.files = await readdir(state.srcDir, {
-					withFileTypes: true,
-					recursive: false,
-				});
-				console.log(
-					colorify.blue(
-						`Found ${state.files.length} entries under ${path.relative(state.packageDir, state.srcDir) || "."}:`,
-					),
-					colorify.cyan(state.files.map((f) => f.name).join(" ")),
-				);
+				if (options.cssPattern !== undefined) {
+					const allCssFiles = await collectFilesRecursive(state.srcDir, [".css"]);
+					try {
+						state.compiledCssPattern = compilePathRegex(options.cssPattern, options.regexFlags);
+					} catch (error: unknown) {
+						const message = error instanceof Error ? error.message : String(error);
+						throw new Error(`Invalid --css-pattern: ${message}`);
+					}
+					state.cssPatternMatchedPaths = matchFilesByPattern(
+						allCssFiles,
+						state.packageDir,
+						state.compiledCssPattern,
+					);
+					console.log(
+						colorify.blue(
+							`CSS pattern ${colorify.cyan(options.cssPattern)} matched ${String(state.cssPatternMatchedPaths.length)} of ${String(allCssFiles.length)} CSS files under ${path.relative(state.packageDir, state.srcDir) || "."}`,
+						),
+					);
+				} else {
+					state.compiledCssPattern = undefined;
+					state.cssPatternMatchedPaths = [];
+				}
 			},
 		},
 		{
 			label: "Resolving export paths",
 			run: async () => {
+				const exports: Record<string, string> = {};
+
 				if (options.pattern !== undefined && state.compiledPattern !== undefined) {
-					state.newExports = buildExportsFromPattern(
-						state.patternMatchedPaths,
-						state.packageDir,
-						state.srcDir,
-						state.compiledPattern,
+					Object.assign(
+						exports,
+						buildExportsWithPattern(
+							state.patternMatchedPaths,
+							state.packageDir,
+							state.srcDir,
+							state.compiledPattern,
+						),
 					);
-					return;
+				} else {
+					Object.assign(
+						exports,
+						await buildExportsWithoutPattern(state.files, state.srcDir, state.packageDir),
+					);
 				}
 
-				state.newExports = await getNewExports(state.files, state.srcDir, state.packageDir);
+				if (options.cssPattern !== undefined && state.compiledCssPattern !== undefined) {
+					Object.assign(
+						exports,
+						buildExportsWithPattern(
+							state.cssPatternMatchedPaths,
+							state.packageDir,
+							state.srcDir,
+							state.compiledCssPattern,
+						),
+					);
+				}
+
+				state.newExports = exports;
 			},
 		},
 	];
@@ -322,6 +199,7 @@ export async function runExportModules(rest: readonly string[]): Promise<void> {
 			"no-src": { type: "boolean", default: false },
 			quiet: { type: "boolean", default: false },
 			pattern: { type: "string" },
+			"css-pattern": { type: "string" },
 			"regex-flags": { type: "string", default: "" },
 		},
 		strict: true,
@@ -336,6 +214,7 @@ export async function runExportModules(rest: readonly string[]): Promise<void> {
 		dryRun: values["dry-run"] === true,
 		quiet: values.quiet === true,
 		pattern: values.pattern,
+		cssPattern: values["css-pattern"],
 		regexFlags: values["regex-flags"] ?? "",
 	};
 
@@ -345,7 +224,9 @@ export async function runExportModules(rest: readonly string[]): Promise<void> {
 		srcDir: "",
 		files: [],
 		patternMatchedPaths: [],
+		cssPatternMatchedPaths: [],
 		compiledPattern: undefined,
+		compiledCssPattern: undefined,
 		newExports: {},
 	};
 
