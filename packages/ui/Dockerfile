@@ -16,8 +16,8 @@ RUN turbo prune --scope=@repo/ui --docker
 FROM turbo AS installer
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
-COPY bun.lock ./bun.lock
-RUN bun install --ignore-scripts
+RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-ui \
+	bun install --ignore-scripts
 
 FROM turbo AS build
 WORKDIR /app
