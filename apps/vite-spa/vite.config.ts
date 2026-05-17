@@ -9,7 +9,7 @@ export default defineConfig({
 	server: {
 		port,
 		host,
-		allowedHosts: ["localhost", "admin"],
+		allowedHosts: ["localhost", "vite-spa"],
 		watch: {
 			usePolling: true,
 			interval: 1000,

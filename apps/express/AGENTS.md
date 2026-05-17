@@ -1,10 +1,10 @@
 # AGENTS.md
 
-This file provides guidance to Agents when working with the API application.
+This file provides guidance to Agents when working with the express application.
 
 ## Application Overview
 
-**api** is a Node.js/Express backend API server built with TypeScript, providing REST endpoints for the monorepo applications. It runs on **port 3003** and uses modern development tooling with Bun and tsup.
+**express** is the Node.js/Express backend API server built with TypeScript, providing REST endpoints for the monorepo applications. It runs on **port 3003** and uses modern development tooling with Bun and tsup.
 
 ## Essential Commands
 
@@ -36,7 +36,7 @@ This file provides guidance to Agents when working with the API application.
 
 ### Project Structure
 ```
-apps/api/
+apps/express/
 ├── src/
 │   ├── routes/           # Route handlers
 │   │   ├── auth/        # Authentication routes
@@ -515,8 +515,8 @@ describe('Products API', () => {
 - **@repo/config-tests**: Shared testing configuration and utilities
 
 ### Frontend Integration
-- Provides REST API endpoints for admin and storefront applications  
+- Provides REST API endpoints for vite-spa and nextjs applications  
 - Consistent response formats for easy frontend integration
 - Proper error handling and status codes
 
-When working with this API application, focus on building robust, scalable REST endpoints while maintaining consistency with monorepo patterns and leveraging shared utilities.
+When working with this express application, focus on building robust, scalable REST endpoints while maintaining consistency with monorepo patterns and leveraging shared utilities.

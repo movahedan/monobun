@@ -11,12 +11,12 @@ COPY ./apps ./apps
 COPY ./packages ./packages
 COPY ./scripts ./scripts
 COPY ./package.json ./bun.lock ./
-RUN bunx turbo prune --scope=docs-astro --docker
+RUN turbo prune --scope=vite-spa --docker
 
 FROM turbo AS installer
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
-RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-docs-astro \
+RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-vite-spa \
 	bun install --ignore-scripts
 
 FROM turbo AS build
@@ -24,13 +24,13 @@ WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/scripts ./scripts
 COPY --from=installer /app/ .
-RUN bun run build --filter=docs-astro
+RUN bun run build --filter=vite-spa
 
 FROM nginx:alpine AS runner
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
 ENV NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx/conf.d
-COPY --from=build --chown=nginx:nginx --chmod=644 /app/apps/docs-astro/nginx.conf /etc/nginx/templates/default.conf.template
-COPY --from=build --chown=nginx:nginx --chmod=755 /app/apps/docs-astro/dist/ /usr/share/nginx/html/
+COPY --from=build --chown=nginx:nginx --chmod=644 /app/apps/vite-spa/nginx.conf /etc/nginx/templates/default.conf.template
+COPY --from=build --chown=nginx:nginx /app/apps/vite-spa/dist/ /usr/share/nginx/html
 RUN chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d /run && \
     chmod -R 755 /var/cache/nginx /var/log/nginx /etc/nginx/conf.d /run && \
     chmod -R 755 /etc/nginx/templates && \

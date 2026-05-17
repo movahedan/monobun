@@ -1,10 +1,10 @@
 # AGENTS.md
 
-This file provides guidance to Agents when working with the storefront application.
+This file provides guidance to Agents when working with the nextjs application.
 
 ## Application Overview
 
-**storefront** is a Next.js e-commerce frontend application providing customer-facing shopping functionality. It runs on **port 3002** in the monorepo setup and uses the latest Next.js App Router architecture.
+**nextjs** is the Next.js e-commerce storefront, providing customer-facing shopping functionality. It runs on **port 3002** in the monorepo setup and uses the latest Next.js App Router architecture.
 
 ## Essential Commands
 
@@ -33,7 +33,7 @@ This file provides guidance to Agents when working with the storefront applicati
 
 ### Project Structure (App Router)
 ```
-apps/storefront/
+apps/nextjs/
 ├── src/
 │   ├── app/                    # App Router directory
 │   │   ├── (shop)/            # Route groups
@@ -377,7 +377,7 @@ export async function generateMetadata(
 - **@repo/utils**: cn() for styling, logger for monitoring
 
 ### API Integration
-- Communicates with the API app (port 3003) for backend functionality
+- Communicates with the express API (port 3003) for backend functionality
 - Use proper error handling and logging
 - Implement proper loading and error states
 

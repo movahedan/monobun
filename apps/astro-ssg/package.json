@@ -1,6 +1,6 @@
 {
 	"private": true,
-	"name": "docs-astro",
+	"name": "astro-ssg",
 	"description": "Documentation site built with Astro for the monobun project",
 	"type": "module",
 	"scripts": {

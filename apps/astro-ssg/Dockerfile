@@ -11,12 +11,12 @@ COPY ./apps ./apps
 COPY ./packages ./packages
 COPY ./scripts ./scripts
 COPY ./package.json ./bun.lock ./
-RUN turbo prune --scope=admin --docker
+RUN bunx turbo prune --scope=astro-ssg --docker
 
 FROM turbo AS installer
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
-RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-admin \
+RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-astro-ssg \
 	bun install --ignore-scripts
 
 FROM turbo AS build
@@ -24,13 +24,13 @@ WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/scripts ./scripts
 COPY --from=installer /app/ .
-RUN bun run build --filter=admin
+RUN bun run build --filter=astro-ssg
 
 FROM nginx:alpine AS runner
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
 ENV NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx/conf.d
-COPY --from=build --chown=nginx:nginx --chmod=644 /app/apps/admin/nginx.conf /etc/nginx/templates/default.conf.template
-COPY --from=build --chown=nginx:nginx /app/apps/admin/dist/ /usr/share/nginx/html
+COPY --from=build --chown=nginx:nginx --chmod=644 /app/apps/astro-ssg/nginx.conf /etc/nginx/templates/default.conf.template
+COPY --from=build --chown=nginx:nginx --chmod=755 /app/apps/astro-ssg/dist/ /usr/share/nginx/html/
 RUN chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d /run && \
     chmod -R 755 /var/cache/nginx /var/log/nginx /etc/nginx/conf.d /run && \
     chmod -R 755 /etc/nginx/templates && \
