@@ -1,4 +1,4 @@
-import { LoginForm, type LoginFormData } from "@repo/ui/login-form";
+import { LoginForm, type LoginFormData } from "@repo/ui/molecules";
 import { useState } from "react";
 
 export function LoginPage() {

@@ -1,16 +1,9 @@
 {
 	"extends": "@repo/config-typescript/vite.json",
 	"compilerOptions": {
-		"rootDir": "../..",
 		"outDir": "./dist"
 	},
-	"include": ["src/**/*", "vite.d.ts", "../../packages/ui/src/**/*"],
-	"exclude": [
-		"../../packages/ui/src/**/*.test.ts",
-		"../../packages/ui/src/**/*.test.tsx",
-		"../../packages/ui/src/**/*.stories.ts",
-		"../../packages/ui/src/**/*.stories.tsx"
-	],
+	"include": ["src", "vite.d.ts"],
 	"references": [
 		{
 			"path": "./tsconfig.node.json"

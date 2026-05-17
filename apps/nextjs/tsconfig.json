@@ -1,12 +1,7 @@
 {
 	"extends": "@repo/config-typescript/nextjs.json",
 	"compilerOptions": {
-		"rootDir": "../..",
-		"outDir": "./dist",
-		"paths": {
-			"@repo/ui": ["../../packages/ui/dist"],
-			"@repo/ui/*": ["../../packages/ui/dist/*"]
-		}
+		"outDir": "./dist"
 	},
 	"include": [
 		"./src",
@@ -15,13 +10,6 @@
 		"../../packages/config-typescript/css.d.ts",
 		"./.next/types/**/*.ts",
 		".next/types/**/*.ts",
-		"../../packages/logger/src/**/*",
-		"../../packages/ui/src/**/*"
-	],
-	"exclude": [
-		"../../packages/ui/src/**/*.test.ts",
-		"../../packages/ui/src/**/*.test.tsx",
-		"../../packages/ui/src/**/*.stories.ts",
-		"../../packages/ui/src/**/*.stories.tsx"
+		"../../packages/logger/src/**/*"
 	]
 }

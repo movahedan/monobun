@@ -1,6 +1,6 @@
 "use client";
 
-import { CounterButton } from "@repo/ui/counter-button";
+import { CounterButton } from "@repo/ui/molecules";
 
 export function CounterButtonWrapper() {
 	return <CounterButton />;

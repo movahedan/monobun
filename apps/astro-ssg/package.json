@@ -13,6 +13,7 @@
 	},
 	"dependencies": {
 		"@astrojs/tailwind": "6.0.2",
+		"@repo/ui": "workspace:*",
 		"@tailwindcss/typography": "0.5.19",
 		"astro": "6.3.3",
 		"lucide-astro": "0.556.0",
@@ -24,6 +25,7 @@
 		"@types/bun": "1.3.14",
 		"@tailwindcss/vite": "4.3.0",
 		"tailwindcss": "4.3.0",
+		"tw-animate-css": "1.3.3",
 		"typescript": "6.0.3"
 	}
 }

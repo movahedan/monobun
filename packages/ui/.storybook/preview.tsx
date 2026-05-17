@@ -1,6 +1,6 @@
 // biome-ignore lint/correctness/noUnusedImports: storybook needs react
 import React from "react";
-import "../src/styles.css";
+import "../src/style.css";
 
 import type { Preview } from "@storybook/react";
 

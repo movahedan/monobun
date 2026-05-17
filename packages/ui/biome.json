@@ -1,0 +1,32 @@
+{
+	"root": false,
+	"$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
+	"extends": "//",
+	"javascript": {
+		"formatter": {
+			"indentStyle": "tab"
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["src/atoms/**", "src/hooks/**"],
+			"linter": {
+				"rules": {
+					"a11y": {
+						"recommended": false
+					},
+					"correctness": {
+						"useExhaustiveDependencies": "off"
+					},
+					"security": {
+						"noDangerouslySetInnerHtml": "off"
+					},
+					"suspicious": {
+						"noArrayIndexKey": "off",
+						"noDocumentCookie": "off"
+					}
+				}
+			}
+		}
+	]
+}
