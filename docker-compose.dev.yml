@@ -212,11 +212,11 @@ services:
       AUTH_ISSUER: ${AUTH_ISSUER:-http://localhost:3007}
       AUTH_AUDIENCE: ${AUTH_AUDIENCE:-monobun-api}
       AUTH_AUDIENCE_EVAL: ${AUTH_AUDIENCE_EVAL:-monobun-eval}
-      AUTH_DATABASE_URL: ${AUTH_DATABASE_URL:-postgresql://monobun:monobun@postgres:5432/monobun_auth}
+      AUTH_DATABASE_URL: ${AUTH_DATABASE_URL}
       AUTH_ACCESS_TTL_SECONDS: ${AUTH_ACCESS_TTL_SECONDS:-900}
       AUTH_COOKIE_SECURE: "false"
       AUTH_SEED_ADMIN_EMAIL: ${AUTH_SEED_ADMIN_EMAIL:-admin@example.com}
-      AUTH_SEED_ADMIN_PASSWORD: ${AUTH_SEED_ADMIN_PASSWORD:-changeme}
+      AUTH_SEED_ADMIN_PASSWORD: ${AUTH_SEED_ADMIN_PASSWORD}
     command: >
       sh -c "cd apps/auth && bun scripts/ensure-db.ts &&
       bun run db:migrate && bun run db:seed &&

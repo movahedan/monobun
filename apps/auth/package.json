@@ -8,7 +8,7 @@
 		"dev": "bun --watch src/index.tsx",
 		"build": "bun run db:generate && bun build src/index.tsx --outdir dist --target bun",
 		"start": "bun dist/index.js",
-		"typecheck": "tsc --noEmit",
+		"typecheck": "bun run db:generate && tsc --noEmit",
 		"test": "bun test src/__tests__",
 		"db:generate": "prisma generate --schema src/prisma/schema.prisma",
 		"db:migrate": "bun scripts/ensure-db.ts && prisma migrate deploy --schema src/prisma/schema.prisma",
