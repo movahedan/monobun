@@ -185,7 +185,7 @@ git log --oneline -20 -- docs/ | rg -i "TERM"
 **Workspace / app / package paths** (example: UI package):
 
 ```bash
-rg -n "packages/ui|@packages/ui|repo/ui" docs/ AGENTS.md README.md .cursor/rules/
+rg -n "packages/ui|@packages/ui" docs/ AGENTS.md README.md .cursor/rules/
 ```
 
 **API app** (adjust `TERM` to your area):

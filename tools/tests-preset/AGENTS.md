@@ -95,7 +95,7 @@ describe('cn utility', () => {
 ### Async Testing
 ```typescript
 import { describe, it, expect } from 'bun:test';
-import { EntityCommit } from '@repo/intershell/entities';
+import { EntityCommit } from 'intershell/entities';
 
 describe('EntityCommit', () => {
   it('validates commit messages correctly', async () => {
