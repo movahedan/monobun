@@ -1,8 +1,8 @@
 import { parseArgs } from "node:util";
 
-import { EntityAffected, type EntityAffectedService, EntityCompose } from "intershell";
+import { EntityAffected } from "intershell";
 
-import { PROD_COMPOSE_FILE } from "../container/stack";
+import { getAffectedComposeServices } from "./get-affected-compose-services";
 
 const MODES = ["docker", "turbo"] as const;
 type AffectedMode = (typeof MODES)[number];
@@ -91,16 +91,16 @@ export async function runCiAttachAffected(rest: readonly string[]): Promise<void
 	const baseSha = await resolveBaseSha(values["base-sha"], quiet);
 	logVerbose(`Comparing changes from ${baseSha} to HEAD`, quiet);
 
-	const affectedList: EntityAffectedService[] | string[] =
+	const affectedList =
 		mode === "docker"
-			? await new EntityCompose(PROD_COMPOSE_FILE).getAffectedServices(baseSha)
+			? await getAffectedComposeServices(baseSha)
 			: await EntityAffected.getAffectedPackages(baseSha);
 
 	logVerbose(`Found ${affectedList.length} affected items`, quiet);
 
 	const affectedOutput =
 		mode === "docker"
-			? affectedList.map((item) => (typeof item === "string" ? item : item.name)).join(" ")
+			? affectedList.join(" ")
 			: affectedList.map((pkg) => `--filter="${pkg}"`).join(" ");
 
 	if (!quiet && affectedOutput.length > 0) {
