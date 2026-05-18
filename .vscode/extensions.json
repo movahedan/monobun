@@ -1,0 +1,16 @@
+{
+	"recommendations": [
+		"ms-vscode.vscode-typescript-next",
+		"YoavBls.pretty-ts-errors",
+		"steoates.autoimport",
+		"oven.bun-vscode",
+		"github.vscode-github-actions",
+		"maptz.camelcasenavigation",
+		"streetsidesoftware.code-spell-checker",
+		"biomejs.biome",
+		"vivaxy.vscode-conventional-commits",
+		"ms-azuretools.vscode-docker",
+		"bierner.markdown-preview-github-styles",
+		"astro-build.astro-vscode"
+	]
+}
