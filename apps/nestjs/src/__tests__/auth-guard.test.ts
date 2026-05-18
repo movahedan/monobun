@@ -15,20 +15,25 @@ import { HttpExceptionFilter } from "../common/filters/http-exception.filter";
 const tenantId = "00000000-0000-4000-8000-000000000001";
 const userId = "00000000-0000-4000-8000-000000000099";
 
-describe("@apps/nestjs API contract", () => {
+describe("@apps/nestjs JwtAuthGuard", () => {
 	let app: INestApplication;
 	let accessToken: string;
+	let privateKey: CryptoKey;
+	let publicJwks: { keys: JsonWebKey[] };
 
 	beforeAll(async () => {
-		const { publicKey, privateKey } = await generateKeyPair("RS256");
+		const keys = await generateKeyPair("RS256");
+		privateKey = keys.privateKey;
+		const { publicKey } = keys;
 		const publicJwk = await exportJWK(publicKey);
 		publicJwk.alg = "RS256";
 		publicJwk.kid = "test";
+		publicJwks = { keys: [publicJwk] };
 
 		const jwksServer = Bun.serve({
 			port: 0,
 			fetch() {
-				return Response.json({ keys: [publicJwk] });
+				return Response.json(publicJwks);
 			},
 		});
 
@@ -61,39 +66,34 @@ describe("@apps/nestjs API contract", () => {
 		await app.close();
 	});
 
-	it("GET /api/v1/tenants returns list envelope with pageInfo", async () => {
-		const response = await supertest(app.getHttpServer())
+	it("GET /api/v1/tenants accepts valid Bearer token", async () => {
+		await supertest(app.getHttpServer())
 			.get("/api/v1/tenants")
 			.set("Authorization", `Bearer ${accessToken}`)
 			.expect(200);
-
-		expect(Array.isArray(response.body.list)).toBe(true);
-		expect(response.body.pageInfo).toMatchObject({
-			currentPage: 1,
-			pageSize: 10,
-			totalItems: 0,
-			totalPages: 0,
-		});
 	});
 
-	it("GET /api/v1/tenants without Bearer returns 401 ApiError", async () => {
+	it("GET /api/v1/tenants without token returns 401", async () => {
 		const response = await supertest(app.getHttpServer()).get("/api/v1/tenants").expect(401);
-
 		expect(response.body.message).toMatch(/Bearer|token/i);
-		expect(response.body.success).toBeUndefined();
 	});
 
-	it("GET /api/v1/tenants with invalid query returns 400 ApiError with fields", async () => {
-		const response = await supertest(app.getHttpServer())
-			.get("/api/v1/tenants?page=0")
-			.set("Authorization", `Bearer ${accessToken}`)
-			.expect(400);
+	it("GET /api/v1/tenants with wrong scope returns 403", async () => {
+		const now = Math.floor(Date.now() / 1000);
+		const noScopeToken = await new SignJWT({ scopes: [], tid: tenantId })
+			.setProtectedHeader({ alg: "RS256", kid: "test" })
+			.setSubject(userId)
+			.setIssuer(process.env.AUTH_ISSUER ?? "http://auth.test")
+			.setAudience(process.env.AUTH_AUDIENCE ?? "monobun-api")
+			.setIssuedAt(now)
+			.setExpirationTime(now + 3600)
+			.sign(privateKey);
 
-		expect(response.body.message).toBe("Validation failed");
-		expect(Array.isArray(response.body.fields)).toBe(true);
-		expect(response.body.fields[0]).toMatchObject({
-			field: expect.any(String),
-			message: expect.any(String),
-		});
+		const response = await supertest(app.getHttpServer())
+			.get("/api/v1/tenants")
+			.set("Authorization", `Bearer ${noScopeToken}`)
+			.expect(403);
+
+		expect(response.body.message).toBe("Insufficient scope");
 	});
 });

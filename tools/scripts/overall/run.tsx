@@ -52,7 +52,7 @@ function getOverallSteps(): readonly StepProgressStep[] {
 		{
 			label: "Test (affected)",
 			run: async () => {
-				assertShellOk("Test", await $`bun run test --affected`.nothrow().quiet());
+				assertShellOk("Test", await $`bun run turbo run test --affected`.nothrow().quiet());
 			},
 		},
 		{

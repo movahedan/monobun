@@ -36,6 +36,7 @@ Run from repo root. Filters use workspace `name` (`@apps/vite-spa`, `@packages/u
 | `bun run turbo run dev --filter=@apps/nextjs` | Next.js :3002 |
 | `bun run turbo run dev --filter=@apps/express` | Demo API :3003 |
 | `bun run turbo run dev --filter=@apps/nestjs` | Control-plane API :3006 |
+| `bun run turbo run dev --filter=@apps/auth` | Auth service :3007 |
 | `bun run turbo run dev --filter=@packages/ui` | UI / Storybook :3004 |
 | `bun run turbo run dev --filter=@apps/astro-ssg` | Docs site :3005 |
 | `cd apps/nestjs && bun test` | Nest API tests (use app `bunfig.toml`) |
@@ -61,6 +62,7 @@ Run from repo root. Filters use workspace `name` (`@apps/vite-spa`, `@packages/u
 | `bun run container --prod up` | Prod-shaped compose file |
 | `bun run container compose -- ps` | `docker compose ps` |
 | `bun run container up -- --profile nestjs` | Postgres + `@apps/nestjs` :3006 |
+| `bun run container up -- --profile auth` | Postgres + `@apps/auth` :3007 (migrate + seed) |
 
 ## Release & CI
 
