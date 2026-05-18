@@ -50,7 +50,7 @@ Use each workspace’s `package.json#name` in Turbo `--filter`, compose, and com
 | Area | Examples |
 |------|----------|
 | `apps/*` | `@apps/vite-spa`, `@apps/nextjs`, `@apps/express`, `@apps/astro-ssg` |
-| `packages/*` | `@packages/ui`, `@packages/utils` |
+| `packages/*` | `@packages/ui`, `@packages/utils`, `@packages/shared-react`, `@packages/shared-tanstack` |
 | `tools/*` | `@tools/scripts`, `@tools/typescript`, `@tools/tests-preset` |
 
 ### Repo layout
@@ -74,6 +74,8 @@ Nested `AGENTS.md` under each app, package, and tool workspace.
 | `apps/astro-ssg` | `@apps/astro-ssg` | 3005 | Docs site | [AGENTS.md](apps/astro-ssg/AGENTS.md) |
 | `packages/ui` | `@packages/ui` | 3004 | React + Storybook | [AGENTS.md](packages/ui/AGENTS.md) |
 | `packages/utils` | `@packages/utils` | — | Shared utilities | [AGENTS.md](packages/utils/AGENTS.md) |
+| `packages/shared-react` | `@packages/shared-react` | — | Shared React hooks | [AGENTS.md](packages/shared-react/AGENTS.md) |
+| `packages/shared-tanstack` | `@packages/shared-tanstack` | — | TanStack list/virtual helpers | [AGENTS.md](packages/shared-tanstack/AGENTS.md) |
 
 ### Tools (`tools/`)
 

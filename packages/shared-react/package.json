@@ -1,0 +1,26 @@
+{
+	"private": true,
+	"name": "@packages/shared-react",
+	"type": "module",
+	"version": "0.1.0",
+	"description": "Shared React hooks and utilities",
+	"imports": {
+		"#*": "./src/*"
+	},
+	"exports": {
+		".": "./src/index.ts",
+		"./useDebouncedCallback": "./src/useDebouncedCallback.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@tools/typescript": "workspace:*",
+		"@types/bun": "1.3.14",
+		"@types/react": "19.2.14",
+		"react": "19.2.6"
+	},
+	"peerDependencies": {
+		"react": "^19.0.0"
+	}
+}
