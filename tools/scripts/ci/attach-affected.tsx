@@ -1,6 +1,8 @@
 import { parseArgs } from "node:util";
 
-import { EntityAffected, type EntityAffectedService, EntityCompose } from "intershell";
+import { EntityAffected } from "intershell";
+
+import { getAffectedComposeServices } from "./get-affected-compose-services";
 
 const MODES = ["docker", "turbo"] as const;
 type AffectedMode = (typeof MODES)[number];
@@ -89,23 +91,26 @@ export async function runCiAttachAffected(rest: readonly string[]): Promise<void
 	const baseSha = await resolveBaseSha(values["base-sha"], quiet);
 	logVerbose(`Comparing changes from ${baseSha} to HEAD`, quiet);
 
-	const affectedList: EntityAffectedService[] | string[] =
+	const affectedList =
 		mode === "docker"
-			? await new EntityCompose("docker-compose.yml").getAffectedServices(baseSha)
+			? await getAffectedComposeServices(baseSha)
 			: await EntityAffected.getAffectedPackages(baseSha);
 
 	logVerbose(`Found ${affectedList.length} affected items`, quiet);
 
-	const affectedServicesNames = affectedList
-		.map((i: EntityAffectedService | string) =>
-			mode === "docker" ? (typeof i !== "string" ? i.name : i) : `--filter="${i}"`,
-		)
-		.join(" ");
+	const affectedOutput =
+		mode === "docker"
+			? affectedList.join(" ")
+			: affectedList.map((pkg) => `--filter="${pkg}"`).join(" ");
+
+	if (!quiet && affectedOutput.length > 0) {
+		console.log(affectedOutput);
+	}
 
 	const githubOutput = process.env.GITHUB_OUTPUT;
 	if (githubOutput) {
-		const output = `${outputId}<<EOF\n${affectedServicesNames}\nEOF\n`;
+		const output = `${outputId}<<EOF\n${affectedOutput}\nEOF\n`;
 		await Bun.write(githubOutput, output);
-		logVerbose(`Attached: ${outputId}=${affectedServicesNames}`, quiet);
+		logVerbose(`Attached: ${outputId}=${affectedOutput}`, quiet);
 	}
 }

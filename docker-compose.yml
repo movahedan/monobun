@@ -113,3 +113,25 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+  nestjs:
+    build:
+      context: .
+      dockerfile: apps/nestjs/Dockerfile
+    ports:
+      - "5006:${NESTJS_PORT:-3006}"
+    networks:
+      - prod-network
+    environment:
+      PORT: ${NESTJS_PORT:-3006}
+      NESTJS_PORT: ${NESTJS_PORT:-3006}
+      HOST: ${HOST:-0.0.0.0}
+      NODE_ENV: production
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3001,http://localhost:3002}
+      DATABASE_URL: ${DATABASE_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${NESTJS_PORT:-3006}/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
