@@ -17,11 +17,11 @@
 		"@nestjs/common": "11.1.21",
 		"@nestjs/core": "11.1.21",
 		"@nestjs/platform-express": "11.1.21",
-		"@nestjs/swagger": "11.2.3",
+		"@nestjs/swagger": "11.4.3",
 		"@packages/utils": "workspace:*",
 		"reflect-metadata": "0.2.2",
 		"rxjs": "7.8.2",
-		"zod": "4.1.13"
+		"zod": "4.4.3"
 	},
 	"devDependencies": {
 		"@nestjs/testing": "11.1.21",
