@@ -10,10 +10,10 @@ alwaysApply: true
 | Need | Read |
 |------|------|
 | Repo layout, packages | [`AGENTS.md`](../../AGENTS.md) |
-| Quick setup | [`README.md`](../../README.md) |
 | Compose / layout / troubleshooting | [`AGENTS.md`](../../AGENTS.md) |
-| Commands (tables) | [`docs/CHEATSHEET.md`](../../docs/CHEATSHEET.md) |
+| Commands (tables) / troubleshooting | [`docs/CHEATSHEET.md`](../../docs/CHEATSHEET.md) |
 | Area you edit | Nested `AGENTS.md` under that `apps/` or `packages/` path |
+| Security | [`security.mdc`](security.mdc) |
 | TypeScript / React deltas | [`typescript.mdc`](typescript.mdc) when editing `.ts` / `.tsx` |
 | Multi-phase work | [initiative-workflow](../skills/initiative-workflow/SKILL.md) |
 
