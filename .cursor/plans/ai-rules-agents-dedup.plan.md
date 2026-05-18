@@ -213,7 +213,6 @@ bun run precommit -- --branch
 - `.cursor/skills/builder-workflow/subagent-output-contract.md`
 - `.cursor/skills/initiative-workflow/SKILL.md` (context budget table: remove agent.mdc row)
 - `.cursor/skills/documentation-sync/SKILL.md`
-- `.cursor/skills/maintain-cursor-rules-skills/SKILL.md` (rule vs skill table; no agent rule)
 - `.cursor/skills/planning-workflow/SKILL.md` (orient: rules are standards only)
 - `.cursor/rules/agent.mdc` | confirm absent |
 
