@@ -19,7 +19,7 @@
 		"@packages/auth-contract": "workspace:*",
 		"@packages/utils": "workspace:*",
 		"@prisma/client": "6.19.0",
-		"@trpc/server": "11.7.1",
+		"@trpc/server": "11.8.0",
 		"jose": "6.1.0",
 		"react": "19.2.6",
 		"react-dom": "19.2.6",

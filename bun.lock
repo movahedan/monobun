@@ -38,7 +38,7 @@
         "@packages/auth-contract": "workspace:*",
         "@packages/utils": "workspace:*",
         "@prisma/client": "6.19.0",
-        "@trpc/server": "11.7.1",
+        "@trpc/server": "11.8.0",
         "jose": "6.1.0",
         "react": "19.2.6",
         "react-dom": "19.2.6",
@@ -1168,7 +1168,7 @@
 
     "@tools/typescript": ["@tools/typescript@workspace:tools/typescript"],
 
-    "@trpc/server": ["@trpc/server@11.7.1", "", { "peerDependencies": { "typescript": ">=5.7.2" } }, "sha512-N3U8LNLIP4g9C7LJ/sLkjuPHwqlvE3bnspzC4DEFVdvx2+usbn70P80E3wj5cjOTLhmhRiwJCSXhlB+MHfGeCw=="],
+    "@trpc/server": ["@trpc/server@11.8.0", "", { "peerDependencies": { "typescript": ">=5.7.2" } }, "sha512-DphyQnLuyX2nwJCQGWQ9zYz4hZGvRhSBqDhQ0SH3tDhQ3PU4u68xofA0pJ741Ir4InEAFD+TtJVLAQy+wVOkiQ=="],
 
     "@turbo/darwin-64": ["@turbo/darwin-64@2.9.14", "", { "os": "darwin", "cpu": "x64" }, "sha512-t7QiPflaEyBE4oayeZtSmu4mEfjgIrcNlNNl1z1dmIVPqEdtA7+CfTf8d7KXsOGPh6aNgWjKxyvQg9uGfDQF+A=="],
 
