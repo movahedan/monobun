@@ -1,6 +1,6 @@
 ---
 name: documentation-sync
-description: Documentation tiers (rules, AGENTS, README, docs), relationships, sync with package.json/tsconfig, when to update what, rg/git discovery commands, and update checklist. Use when updating docs, finding stale references, or aligning README and AGENTS with code.
+description: Use after builder-workflow checkup passes for a plan phase and before git-pr-workflow, to sync docs/AGENTS/README/skills with code per the plan Documentation before PR list. Not during builder implement.
 ---
 
 # Documentation sync
@@ -10,6 +10,20 @@ description: Documentation tiers (rules, AGENTS, README, docs), relationships, s
 - Scripts, workspaces, Docker, CI, or public commands changed and docs may drift.
 - Editing or reviewing `README.md`, `AGENTS.md`, `docs/**`, or `.cursor/rules/*.mdc`.
 - User asks which docs to update or to refresh onboarding and command references.
+
+## Position in the initiative pipeline
+
+**Run after [builder-workflow](../builder-workflow/SKILL.md) completes a plan phase (checkup PASS). Run before [git-pr-workflow](../git-pr-workflow/SKILL.md).**
+
+Full order: [initiative-workflow](../initiative-workflow/SKILL.md).
+
+| Do | Do not |
+|----|--------|
+| Sync docs once code/config for the phase is stable | Edit docs during builder scout/implement/checkup |
+| Use the plan’s **Documentation before PR** path list | Drive-by doc edits outside that list |
+| Re-run targeted `rg` for stale paths/commands | Replace the plan’s verify gate |
+
+**Prerequisite message from user:** “Phase N build complete. documentation-sync per plan doc list.”
 
 ## Four-tier documentation structure
 

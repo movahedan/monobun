@@ -18,6 +18,10 @@ These references contain detailed guidance on coding standards, security practic
 
 ## Cursor skills
 
+- **[.cursor/skills/initiative-workflow/SKILL.md](.cursor/skills/initiative-workflow/SKILL.md)** — Order: plan → build → docs → PR (per phase).
+- **[.cursor/skills/planning-workflow/SKILL.md](.cursor/skills/planning-workflow/SKILL.md)** — Phased `.cursor/plans/*.plan.md` specs (todos, gates, doc list before PR).
+- **[.cursor/skills/builder-workflow/SKILL.md](.cursor/skills/builder-workflow/SKILL.md)** — Code/config execution via subagents; ends before doc sync and commit.
+- **[.cursor/skills/documentation-sync/SKILL.md](.cursor/skills/documentation-sync/SKILL.md)** — Update docs after build, before PR (not during builder).
 - **[.cursor/skills/monorepo-script-commands/SKILL.md](.cursor/skills/monorepo-script-commands/SKILL.md)** — Bun subcommand CLIs with `parseArgs`, Ink step progress; reference `scripts/local/`, `scripts/container/`, and `scripts/render-and-exit.tsx` / `scripts/step-progress.tsx`.
 
 ## Essential Commands

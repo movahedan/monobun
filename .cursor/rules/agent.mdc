@@ -31,7 +31,9 @@ Spawn a **child agent** (Task) with a **single role**, **readonly** where the jo
 
 4. **Follow-up after checkup / debugging (High)** — Interpreting failures, root-cause analysis, non-obvious fixes, and risky changes. Follow **systematic-debugging** from the user’s superpowers plugin cache; use **receiving-code-review** when feedback needs rigor before changing code.
 
-5. **Normal coding** — Default parent or a **generalPurpose** / **explore** child **without** forcing a high model unless complexity spikes mid-task.
+5. **Initiative pipeline** — [initiative-workflow](../skills/initiative-workflow/SKILL.md): plan → build (code only) → documentation-sync → git-pr per phase.
+
+6. **Normal coding** — Default parent or a **generalPurpose** / **explore** child **without** forcing a high model unless complexity spikes mid-task.
 
 ## Subagent types (Cursor)
 

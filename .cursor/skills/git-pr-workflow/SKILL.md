@@ -5,6 +5,8 @@ description: Monobun ship path — bun overall, working tree, branch gate, stage
 
 # Git + PR (monobun)
 
+**Prerequisite (phased initiatives):** [builder-workflow](../builder-workflow/SKILL.md) checkup PASS for this phase, then [documentation-sync](../documentation-sync/SKILL.md) for the plan’s **Documentation before PR** list. Pipeline: [initiative-workflow](../initiative-workflow/SKILL.md).
+
 ## 1. Verify
 
 ```bash
