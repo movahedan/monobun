@@ -90,7 +90,7 @@
 		"recharts": "2.15.4",
 		"sonner": "1.7.4",
 		"tailwind-merge": "3.6.0",
-		"vaul": "0.9.9"
+		"vaul": "1.1.2"
 	},
 	"devDependencies": {
 		"@tools/tests-preset": "workspace:*",
