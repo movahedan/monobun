@@ -1,0 +1,5 @@
+{
+	"extends": "@tools/typescript/react-library.json",
+	"include": ["."],
+	"references": [{ "path": "../../tools/tests-preset" }]
+}
