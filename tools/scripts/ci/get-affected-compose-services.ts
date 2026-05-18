@@ -1,9 +1,19 @@
-import { EntityAffected, EntityCompose, EntityPackage, stripWorkspaceScope } from "intershell";
+import { EntityAffected, EntityCompose, EntityPackage } from "intershell";
 
 import { DEV_COMPOSE_FILE, PROD_COMPOSE_FILE } from "../container/stack";
 
 /** Dev-only compose services — not built by production CI (`container --prod compose build`). */
 const NON_PROD_BUILD_SERVICES = new Set(["apps", "postgres"]);
+
+/** Matches intershell compose mapping: `@apps/nestjs` → `nestjs` (not exported from intershell entry). */
+function packageNameToComposeServiceKey(packageName: string): string {
+	if (!packageName.startsWith("@") || !packageName.includes("/")) {
+		return packageName;
+	}
+	const withoutScope = packageName.slice(1);
+	const slashIndex = withoutScope.lastIndexOf("/");
+	return slashIndex === -1 ? withoutScope : withoutScope.slice(slashIndex + 1);
+}
 
 function isAffectedPackage(packageName: string, affectedPackages: readonly string[]): boolean {
 	return affectedPackages.includes(packageName);
@@ -13,7 +23,9 @@ function findPackageForService(
 	serviceName: string,
 	allPackages: readonly string[],
 ): string | undefined {
-	return allPackages.find((packageName) => stripWorkspaceScope(packageName) === serviceName);
+	return allPackages.find(
+		(packageName) => packageNameToComposeServiceKey(packageName) === serviceName,
+	);
 }
 
 async function collectAffectedFromCompose(
