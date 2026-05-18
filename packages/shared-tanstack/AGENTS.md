@@ -8,6 +8,7 @@ Depends on **@packages/shared-react** (`useDebouncedCallback`).
 
 ```bash
 bun run typecheck --filter=@packages/shared-tanstack
+bun test packages/shared-tanstack
 ```
 
 ## Exports

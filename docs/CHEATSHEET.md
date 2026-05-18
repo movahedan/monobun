@@ -42,6 +42,7 @@ Run from repo root. Filters use workspace `name` (`@apps/vite-spa`, `@packages/u
 | `bun run test --filter=@packages/utils` | Test one workspace |
 | `bun run typecheck --filter=@packages/shared-react` | Typecheck shared React hooks |
 | `bun run typecheck --filter=@packages/shared-tanstack` | Typecheck TanStack list helpers |
+| `bun test packages/shared-react packages/shared-tanstack` | Unit tests for list hooks packages |
 
 ## Docker Compose
 

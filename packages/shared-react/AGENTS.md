@@ -6,6 +6,7 @@ Guidance for **@packages/shared-react** — small React hooks shared across pack
 
 ```bash
 bun run typecheck --filter=@packages/shared-react
+bun test packages/shared-react
 ```
 
 ## Exports
