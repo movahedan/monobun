@@ -6,7 +6,7 @@ export const prerender = true;
 export async function getStaticPaths() {
 	const docs = [
 		'0_QUALITY_CHECKLIST',
-		'GETTING_STARTED',
+		'CHEATSHEET',
 		'SCRIPTING',
 		'AUTO_VERSIONING',
 		'TESTING',
@@ -31,8 +31,8 @@ const doc = Astro.props.doc;
 let content = '';
 let title = doc;
 
-const movedToGettingStarted =
-	'<p>Content moved to <a href="/docs/GETTING_STARTED">Getting started</a>. Read <code>docs/GETTING_STARTED.md</code> in the repo for the full guide.</p>';
+const movedToRepoDocs =
+	'<p>Setup: <code>README.md</code> (Quick start). Repo map and compose: <code>AGENTS.md</code>. Commands: <a href="/docs/CHEATSHEET">CHEATSHEET</a> or <code>docs/CHEATSHEET.md</code>.</p>';
 
 const movedToScripting =
 	'<p>Scripting documentation moved to <a href="/docs/SCRIPTING">Scripting</a>. Read <code>docs/SCRIPTING.md</code> in the repo.</p>';
@@ -41,7 +41,7 @@ const movedToAutoVersioning =
 	'<p>Auto versioning documentation moved to <a href="/docs/AUTO_VERSIONING">Auto versioning</a>. Read <code>docs/AUTO_VERSIONING.md</code> in the repo.</p>';
 
 const dockerComposeNote =
-	'<p>Docker and Compose usage for this repo live in <a href="/docs/GETTING_STARTED">Getting started</a> (dev stack on the host). Authoritative copy: <code>docs/GETTING_STARTED.md</code>.</p>';
+	'<p>Docker and Compose usage: <code>README.md</code> (Quick start) and <code>AGENTS.md</code> (dev stack on the host).</p>';
 
 const renovateNote =
 	'<p>Renovate is configured in <code>renovate.json</code> at the repo root. See <a href="https://docs.renovatebot.com/">Renovate documentation</a> for DSL and options.</p>';
@@ -52,10 +52,10 @@ const docContent: Record<string, { title: string; content: string }> = {
 		content:
 			'<h1>Quality Checklist</h1><p>This page contains the quality checklist for the project.</p>',
 	},
-	GETTING_STARTED: {
-		title: '📖 Getting started',
+	CHEATSHEET: {
+		title: '⚡ Command cheatsheet',
 		content:
-			'<h1>Getting started</h1><p>Local install, Docker Compose dev stack, <code>bun run overall</code>, command cheat sheet, and <code>tools/scripts/</code> map. Open <code>docs/GETTING_STARTED.md</code> in the repository for the authoritative copy.</p>',
+			'<h1>Command cheatsheet</h1><p>All root <code>bun run</code> commands in tables. Authoritative copy: <code>docs/CHEATSHEET.md</code> in the repository. Setup: <code>README.md</code> · Map: <code>AGENTS.md</code>.</p>',
 	},
 	SCRIPTING: {
 		title: '🧩 Scripting',
@@ -69,15 +69,15 @@ const docContent: Record<string, { title: string; content: string }> = {
 	},
 	'1_INSTALLATION_GUIDE': {
 		title: '📦 Installation guide (moved)',
-		content: `<h1>Installation guide</h1>${movedToGettingStarted}`,
+		content: `<h1>Installation guide</h1>${movedToRepoDocs}`,
 	},
 	'2_SETUP_FLOWS': {
 		title: '⚙️ Setup flows (moved)',
-		content: `<h1>Setup flows</h1>${movedToGettingStarted}`,
+		content: `<h1>Setup flows</h1>${movedToRepoDocs}`,
 	},
 	'3_DEV_FLOWS': {
 		title: '🔄 Development flows (moved)',
-		content: `<h1>Development flows</h1>${movedToGettingStarted}`,
+		content: `<h1>Development flows</h1>${movedToRepoDocs}`,
 	},
 	'4_INTERSHELL': {
 		title: '📝 Scripting (moved)',

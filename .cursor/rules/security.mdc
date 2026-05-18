@@ -1,7 +1,7 @@
 ---
-description: Security patterns - ReDoS prevention, input validation, authentication
+description: Security patterns - REGEX, environment, env vars, env, secrets, cookies, ReDoS prevention, input validation, authentication, auth
 globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Security

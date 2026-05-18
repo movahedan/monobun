@@ -25,12 +25,27 @@ Full order: [initiative-workflow](../initiative-workflow/SKILL.md).
 
 **Prerequisite message from user:** “Phase N build complete. documentation-sync per plan doc list.”
 
-## Four-tier documentation structure
+## Content ownership (do not duplicate)
 
-1. **`.cursor/rules/`** — Code standards, patterns, workflows (AI-focused)
-2. **`AGENTS.md`** — Project context, commands, architecture (AI-focused)
-3. **`README.md`** — Project description, architecture ideas, development tips (Human-focused)
-4. **`docs/`** — Developer guides, setup, technical details (Human-focused)
+| Topic | Owner | documentation-sync may… |
+|-------|--------|-------------------------|
+| Plan → build → docs → PR | [initiative-workflow](../initiative-workflow/SKILL.md) | Link one line only |
+| Subagents, model tiers | [builder-workflow/orchestration.md](../builder-workflow/orchestration.md) | Not edit unless on plan doc list |
+| Commit / branch / PR | [git-pr-workflow](../git-pr-workflow/SKILL.md) | Not describe steps |
+| TS strict / `noExplicitAny` | `tools/typescript/base.json`, `biome.json` | Reference paths in rules/AGENTS if renamed |
+| Command tables | [docs/CHEATSHEET.md](../../../docs/CHEATSHEET.md) | Sync when root `package.json` scripts change |
+| Quick setup | [README.md](../../../README.md) | Single bootstrap section; link CHEATSHEET for commands |
+| Compose / layout / troubleshooting | [AGENTS.md](../../../AGENTS.md) | Workspaces table, ports column, nested guides |
+| This phase’s doc files | Plan **Documentation before PR** | Edit **only** listed paths |
+
+**Do not** edit `.cursor/skills/` or `.cursor/rules/` unless the plan’s doc list explicitly includes them.
+
+## Four tiers (what to touch)
+
+1. **`.cursor/rules/`** — Code standards (compact); not workflows
+2. **`AGENTS.md`** — Map: layout, pointers, nested `AGENTS.md` links
+3. **`README.md`** — Human overview; keep aligned with architecture changes
+4. **`docs/`** — Human guides (`CHEATSHEET`, `SCRIPTING`, etc.); setup in **README**, map in **AGENTS**
 
 ## Documentation relationships
 
@@ -77,15 +92,11 @@ docs/ ──→ Human reads → README.md (for overview)
 ### AGENTS.md (AI-focused context)
 
 ```markdown
-# Project context and commands
-- List essential commands with examples
-- Document package/app structure
-- Reference .cursor/rules/ for standards
-- Include key files and their purposes
-- Document project-specific workflows
-- Keep commands grouped by purpose
-- Link to nested AGENTS.md files in packages/apps
-- Sync commands with package.json scripts
+# Map, not encyclopedia
+- Package/app structure and nested AGENTS.md links
+- Pointer to .cursor/rules/, README (quick setup), AGENTS (map), CHEATSHEET (commands)
+- Cursor skills index (one line each) — not skill bodies
+- Do not paste TypeScript/testing/security prose (rules + biome/tsconfig own that)
 ```
 
 ### README.md (Human-focused overview)
@@ -122,7 +133,7 @@ docs/ ──→ Human reads → README.md (for overview)
 
 - **Scripts**: Sync AGENTS.md commands with `package.json` scripts (root and workspace packages you mention)
 - **Dependencies**: Reference actual dependencies from `package.json` when documenting installs
-- **When scripts change**: Update AGENTS.md and `docs/` to match
+- **When scripts change**: Update [CHEATSHEET.md](../../../docs/CHEATSHEET.md) and pointers in README / AGENTS.md
 - **Verification**: Open `package.json` when documenting commands
 
 ### tsconfig.json
@@ -210,7 +221,7 @@ rg -n "TERM" docs/ README.md AGENTS.md
 ### Cross-links between guides
 
 ```bash
-rg -n "GETTING_STARTED|SCRIPTING|AUTO_VERSIONING|AGENTS\.md|README\.md" docs/
+rg -n "CHEATSHEET|SCRIPTING|AUTO_VERSIONING|AGENTS\.md|README\.md" docs/
 ```
 
 ### List documentation surfaces (audit)

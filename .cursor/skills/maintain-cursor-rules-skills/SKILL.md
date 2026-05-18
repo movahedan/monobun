@@ -15,8 +15,9 @@ description: Creates or edits Cursor project rules (.cursor/rules/*.mdc) and pro
 | Use **`.cursor/rules/*.mdc`** | Use **`.cursor/skills/<name>/SKILL.md`** |
 |------------------------------|------------------------------------------|
 | Constraints on **how code/docs are written** (style, security, testing, DOM) | **Step-by-step workflows** (commit, plan, multi-phase checklists) |
-| Should attach via **`globs`** when possible; **avoid** huge always-on bodies | Long procedures, templates; loaded when **`description`** matches the task |
-| Imperative **must / do not**, short examples | Checklists, bash blocks, “do these steps in order” |
+| Should attach via **`globs`** when possible; **one** thin `repo-invariants.mdc` may use `alwaysApply: true` | Long procedures, templates; loaded when **`description`** matches the task |
+| Imperative **must / do not**; reference `@biome.json` / tsconfig — no `no-any` prose | Checklists, bash blocks, “do these steps in order” |
+| **No** multi-agent spawn tables (use **builder-workflow/orchestration.md**) | Initiative pipeline (**initiative-workflow**) |
 
 **Do not** duplicate the same long procedure in both a rule and a skill — **one canonical file**, the other links in one line.
 
@@ -43,7 +44,7 @@ description: Creates or edits Cursor project rules (.cursor/rules/*.mdc) and pro
 |--------|-----------------------------|
 | New/changed **skill** or rule that agents should discover | Root [`AGENTS.md`](../../../AGENTS.md) **Cursor skills** / standards bullets so the next session finds it |
 | Touches **docs ownership** / when-to-update / discovery commands | [`.cursor/skills/documentation-sync/SKILL.md`](../../skills/documentation-sync/SKILL.md) (canonical) |
-| New **commands** / scripts for humans | [`AGENTS.md`](../../../AGENTS.md) and [`docs/GETTING_STARTED.md`](../../../docs/GETTING_STARTED.md) — **not** duplicated inside rule bodies |
+| New **commands** / scripts for humans | [`docs/CHEATSHEET.md`](../../../docs/CHEATSHEET.md) + pointers in [`AGENTS.md`](../../../AGENTS.md) — **not** duplicated inside rule bodies |
 
 **Default:** If you add a **skill**, add a **single bullet** under **Cursor skills** in root `AGENTS.md` so the next session finds it. Skip if the change is a minor tweak to an existing file only.
 

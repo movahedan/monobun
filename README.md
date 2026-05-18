@@ -37,7 +37,7 @@ Take complete command of your monorepo! We've built powerful entity classes and 
 
 > **Compose-driven dev and prod-shaped stacks** from your normal shell
 
-Docker is the foundation for running the full multi-service layout: use **`bun run container …`** against `docker-compose.dev.yml` on your machine (no “Reopen in Container” required). Pass **`--prod` before the subcommand** for the production-shaped `docker-compose.yml`. Install flow, health checks, and teardown live in [docs/GETTING_STARTED.md](./docs/GETTING_STARTED.md).
+Docker is the foundation for running the full multi-service layout: use **`bun run container …`** against `docker-compose.dev.yml` on your machine (no “Reopen in Container” required). Pass **`--prod` before the subcommand** for the production-shaped `docker-compose.yml`. Install flow, health checks, and teardown: [Quick start](#quick-start) and [AGENTS.md](./AGENTS.md).
 
 </div>
 
@@ -70,7 +70,7 @@ We've curated the ultimate framework stack that just works! Vite, Astro, and Sve
 
 > **Developer-first documentation** with **dedicated docs site** and **AI assistant optimization**
 
-We don't just write docs - we build them! Our dedicated astro-ssg site makes learning effortless, while our AI-optimized code structure means Cursor and other AI tools instantly understand your project. It's like having a brilliant pair programming partner who never gets confused. The repo uses a **four-tier documentation system**: **`.cursor/rules/`** for standards, **`AGENTS.md`** for AI-oriented commands and structure, **`README.md`** for human onboarding, and **`docs/`** for guides. [Renovate](./renovate.json) keeps dependencies pinned; quality gates run through Biome, TypeScript, and Bun tests.
+We don't just write docs - we build them! Our dedicated astro-ssg site makes learning effortless, while our AI-optimized code structure means Cursor and other AI tools instantly understand your project. It's like having a brilliant pair programming partner who never gets confused. The repo uses a **four-tier documentation system**: **`.cursor/rules/`** for standards, **`AGENTS.md`** for AI-oriented structure, **`README.md`** for human onboarding, and **`docs/`** for guides — with **[CHEATSHEET.md](./docs/CHEATSHEET.md)** for every root command. [Renovate](./renovate.json) keeps dependencies pinned; quality gates run through Biome, TypeScript, and Bun tests.
 
 </div>
 
@@ -102,19 +102,21 @@ Everything you need to build rock-solid applications is right here! We've kept i
 ## 📚 Documentation
 
 ### **🚀 Getting Started**
-[![Getting started](https://img.shields.io/badge/📖%20Getting%20Started-495057?style=for-the-badge)](./docs/GETTING_STARTED.md)
+[![Quick start](https://img.shields.io/badge/📖%20Quick%20start-495057?style=for-the-badge)](#quick-start)
+[![AGENTS map](https://img.shields.io/badge/🤖%20AGENTS-495057?style=for-the-badge)](./AGENTS.md)
+[![Command cheatsheet](https://img.shields.io/badge/⚡%20Cheatsheet-495057?style=for-the-badge)](./docs/CHEATSHEET.md)
 
 ### **🛠️ Development tools**
 [![Scripting](https://img.shields.io/badge/🧩%20Scripting-495057?style=for-the-badge)](./docs/SCRIPTING.md)
 [![Auto versioning](https://img.shields.io/badge/🏷️%20Auto%20versioning-495057?style=for-the-badge)](./docs/AUTO_VERSIONING.md)
-[![Dev stack (compose)](https://img.shields.io/badge/🐳%20Dev%20stack%20(compose)-495057?style=for-the-badge)](./docs/GETTING_STARTED.md#fast-path-dev-docker-compose-host)
+[![Dev stack (compose)](https://img.shields.io/badge/🐳%20Dev%20stack%20(compose)-495057?style=for-the-badge)](#quick-start)
 
 ### **🤖 AI and automation**
 [![Renovate (config)](https://img.shields.io/badge/🔄%20Renovate%20config-495057?style=for-the-badge)](./renovate.json)
 [![MCP integration](https://img.shields.io/badge/🔌%20MCP%20integration-495057?style=for-the-badge)](./.mcp.json)
 
 ### **📋 Cursor rules**
-[![Coding standards](https://img.shields.io/badge/🧭%20Coding%20standards-495057?style=for-the-badge)](./.cursor/rules/coding.mdc)
+[![TypeScript standards](https://img.shields.io/badge/🧭%20TypeScript%20standards-495057?style=for-the-badge)](./.cursor/rules/typescript.mdc)
 [![Testing](https://img.shields.io/badge/🧪%20Testing-495057?style=for-the-badge)](./.cursor/rules/testing.mdc)
 [![Security](https://img.shields.io/badge/🔒%20Security-495057?style=for-the-badge)](./.cursor/rules/security.mdc)
 [![Advisor](https://img.shields.io/badge/🧭%20Advisor-495057?style=for-the-badge)](./.cursor/rules/advisor.mdc)
@@ -137,22 +139,27 @@ Everything you need to build rock-solid applications is right here! We've kept i
 
 <div align="center">
 
-## 🚀 Lightning-Fast Setup <img src="https://img.shields.io/badge/Setup%20Time-30%20Seconds-00D4AA?style=flat&logo=bun&logoColor=white" alt="Setup time - 30 Seconds" style="vertical-align: middle;" />
+## Quick start
+
+**Prerequisites:** Git, [Bun](https://bun.sh/) 1.3.x, [Docker](https://docs.docker.com/desktop/), Node **≥ 25**.
 
 ```bash
-# Install Bun first (if not already installed)
-# macOS/Linux:
-curl -fsSL https://bun.com/install | bash
-
-# Windows (PowerShell):
-# powershell -c "irm bun.sh/install.ps1|iex"
-
-# Clone and go! 🏃‍♂️
 git clone https://github.com/movahedan/monobun.git && cd monobun
-
-bun nuke
-bun overall
+bun install
+bun run local setup
+bun run overall
 ```
+
+`bun run local setup -- --skip-tests` skips tests while iterating. `bun run local vscode` syncs VS Code workspace settings.
+
+**Docker dev stack** (recommended day-to-day):
+
+```bash
+bun run container setup
+bun run container up
+```
+
+All commands: [docs/CHEATSHEET.md](./docs/CHEATSHEET.md) · Repo map, ports, troubleshooting: [AGENTS.md](./AGENTS.md).
 
 [![Star](https://img.shields.io/badge/⭐%20Star%20This%20Repo-Support%20Us-00D4AA?style=for-the-badge)](https://github.com/movahedan/monobun)
 [![Fork](https://img.shields.io/badge/🍴%20Fork%20%26%20Customize-Make%20It%20Yours-646CFF?style=for-the-badge)](https://github.com/movahedan/monobun/fork)

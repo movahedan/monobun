@@ -21,7 +21,7 @@ This will start Storybook on `http://localhost:3006` with hot reloading enabled.
 
 **With the dev Compose stack:**
 
-When the repo’s dev stack is up (`bun run container up` from the repo root), Storybook is published on the same host port the compose file maps for the UI service (see `docker-compose.dev.yml` and [docs/GETTING_STARTED.md](../../docs/GETTING_STARTED.md)).
+When the repo’s dev stack is up (`bun run container up` from the repo root), Storybook is published on the same host port the compose file maps for the UI service (port **3004** — see `docker-compose.dev.yml` and [AGENTS.md](../../AGENTS.md)).
 
 ### Production Build
 

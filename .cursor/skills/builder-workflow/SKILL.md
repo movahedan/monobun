@@ -16,7 +16,7 @@ disable-model-invocation: true
 
 **REQUIRED:** [planning-workflow](../planning-workflow/SKILL.md); **verification-before-completion** (superpowers cache).
 
-Read [`AGENTS.md`](../../../AGENTS.md) and [`.cursor/rules/agent.mdc`](../../../.cursor/rules/agent.mdc) by path — never paste into child prompts.
+Read [`AGENTS.md`](../../../AGENTS.md), this skill, and [orchestration.md](orchestration.md) by path — never paste into child prompts.
 
 ## Token discipline (non-negotiable)
 
@@ -134,6 +134,7 @@ Next: {A–E step, or “documentation-sync” after E}
 
 ## References
 
+- [orchestration.md](orchestration.md) — model tiers, Task spawn, which skill when
 - [prompt-templates.md](prompt-templates.md)
 - [subagent-output-contract.md](subagent-output-contract.md)
 - [initiative-workflow](../initiative-workflow/SKILL.md)

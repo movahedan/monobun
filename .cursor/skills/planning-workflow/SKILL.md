@@ -26,7 +26,7 @@ disable-model-invocation: true
 
 ## Phase 0 — Orient
 
-Read root [`AGENTS.md`](../../../AGENTS.md), relevant package `AGENTS.md`, and [`.cursor/rules/`](../../../.cursor/rules/) that apply.
+Read root [`AGENTS.md`](../../../AGENTS.md), relevant package `AGENTS.md`, and scoped [`.cursor/rules/`](../../../.cursor/rules/) (standards only — workflows live in skills).
 
 Produce a short **impact sketch**: workspaces, config roots (`package.json`, `turbo.json`, CI, docker, `bunfig.toml`), docs/skills, tests.
 
