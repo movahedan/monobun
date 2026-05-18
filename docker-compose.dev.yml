@@ -13,6 +13,8 @@ volumes:
     driver: local
   vscode_cache:
     driver: local
+  postgres_data:
+    driver: local
 
 services:
   # Apps runtime environment - shared container for all applications
@@ -49,6 +51,52 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+
+  postgres:
+    image: postgres:17-alpine
+    profiles: ["nestjs", "all"]
+    networks:
+      - dev-network
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-monobun}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-monobun}
+      POSTGRES_DB: ${POSTGRES_DB:-monobun}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-monobun} -d ${POSTGRES_DB:-monobun}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  nestjs:
+    extends:
+      service: apps
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "${NESTJS_PORT:-3006}"
+    ports:
+      - "${NESTJS_PORT:-3006}:${NESTJS_PORT:-3006}"
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "${NESTJS_PORT:-3006}"
+      NESTJS_PORT: "${NESTJS_PORT:-3006}"
+      NODE_ENV: development
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3001,http://localhost:3002}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://monobun:monobun@postgres:5432/monobun}
+    command: bun run turbo run dev --filter=@apps/nestjs
+    profiles: ["nestjs", "all"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://nestjs:${NESTJS_PORT:-3006}/status | grep -q '\"ok\":true'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
 
   express:
     extends:

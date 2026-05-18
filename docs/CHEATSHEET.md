@@ -34,12 +34,18 @@ Run from repo root. Filters use workspace `name` (`@apps/vite-spa`, `@packages/u
 |---------|-------------|
 | `bun run turbo run dev --filter=@apps/vite-spa` | Vite admin :3001 |
 | `bun run turbo run dev --filter=@apps/nextjs` | Next.js :3002 |
-| `bun run turbo run dev --filter=@apps/express` | API :3003 |
+| `bun run turbo run dev --filter=@apps/express` | Demo API :3003 |
+| `bun run turbo run dev --filter=@apps/nestjs` | Control-plane API :3006 |
 | `bun run turbo run dev --filter=@packages/ui` | UI / Storybook :3004 |
 | `bun run turbo run dev --filter=@apps/astro-ssg` | Docs site :3005 |
+| `cd apps/nestjs && bun test` | Nest API tests (use app `bunfig.toml`) |
+| `cd packages/nestjs-sdk && bun run kubb` | Regenerate SDK from `openapi.yaml` |
 | `bun run turbo run build:storybook --filter=@packages/ui` | Build Storybook |
 | `bun run build --filter=@packages/ui` | Build one workspace |
 | `bun run test --filter=@packages/utils` | Test one workspace |
+| `bun run typecheck --filter=@packages/shared-react` | Typecheck shared React hooks |
+| `bun run typecheck --filter=@packages/shared-tanstack` | Typecheck TanStack list helpers |
+| `bun test packages/shared-react packages/shared-tanstack` | Unit tests for list hooks packages |
 
 ## Docker Compose
 
@@ -54,6 +60,7 @@ Run from repo root. Filters use workspace `name` (`@apps/vite-spa`, `@packages/u
 | `bun run container cleanup` | Stop + remove volumes |
 | `bun run container --prod up` | Prod-shaped compose file |
 | `bun run container compose -- ps` | `docker compose ps` |
+| `bun run container up -- --profile nestjs` | Postgres + `@apps/nestjs` :3006 |
 
 ## Release & CI
 

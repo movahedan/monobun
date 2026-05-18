@@ -1,0 +1,1 @@
+{"type":"object","properties":{"ok":{"type":"boolean","example":true},"timestamp":{"type":"string","format":"date-time"}},"required":["ok","timestamp"],"x-readme-ref-name":"HealthStatusDto"}

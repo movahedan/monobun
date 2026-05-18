@@ -1,0 +1,1 @@
+{"type":"object","properties":{"id":{"type":"string","format":"uuid"},"name":{"type":"string"},"slug":{"type":"string"},"createdAt":{"type":"string","format":"date-time"}},"required":["id","name","slug","createdAt"],"x-readme-ref-name":"TenantDto"}
