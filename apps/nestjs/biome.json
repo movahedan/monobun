@@ -1,0 +1,19 @@
+{
+	"root": false,
+	"extends": "//",
+	"files": {
+		"includes": ["src/**/*.ts"]
+	},
+	"javascript": {
+		"parser": {
+			"unsafeParameterDecoratorsEnabled": true
+		}
+	},
+	"linter": {
+		"rules": {
+			"correctness": {
+				"useHookAtTopLevel": "off"
+			}
+		}
+	}
+}

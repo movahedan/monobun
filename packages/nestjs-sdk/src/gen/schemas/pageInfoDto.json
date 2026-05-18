@@ -1,0 +1,1 @@
+{"type":"object","properties":{"currentPage":{"type":"number","example":1,"minimum":1},"totalPages":{"type":"number","example":3,"minimum":0},"totalItems":{"type":"number","example":25,"minimum":0},"pageSize":{"type":"number","example":10,"minimum":1}},"required":["currentPage","totalPages","totalItems","pageSize"],"x-readme-ref-name":"PageInfoDto"}

@@ -1,0 +1,44 @@
+{
+	"private": true,
+	"name": "@packages/nestjs-sdk",
+	"type": "module",
+	"version": "0.1.0",
+	"description": "Kubb-generated client for @apps/nestjs OpenAPI",
+	"files": [
+		"src/**"
+	],
+	"main": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts",
+		"./mutator.client": "./src/mutator.client.ts",
+		"./mutator.server": "./src/mutator.server.ts",
+		"./hooks": "./src/gen/hooks/index.ts",
+		"./server": "./src/gen/server/index.ts",
+		"./types": "./src/gen/types/index.ts",
+		"./zod": "./src/gen/zod/index.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"generate": "kubb",
+		"lint:fix": "biome check --write ."
+	},
+	"dependencies": {
+		"@packages/utils": "workspace:*",
+		"swr": "2.3.7",
+		"zod": "4.1.13"
+	},
+	"devDependencies": {
+		"@kubb/cli": "4.8.1",
+		"@kubb/core": "4.8.1",
+		"@kubb/plugin-client": "4.8.1",
+		"@kubb/plugin-oas": "4.8.1",
+		"@kubb/plugin-swr": "4.8.1",
+		"@kubb/plugin-ts": "4.8.1",
+		"@kubb/plugin-zod": "4.8.1",
+		"@tools/typescript": "workspace:*",
+		"@types/bun": "1.3.14"
+	},
+	"peerDependencies": {
+		"zod": "4.1.13"
+	}
+}

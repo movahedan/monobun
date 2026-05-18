@@ -127,7 +127,9 @@ Everything you need to build rock-solid applications is right here! We've kept i
 
 **🛍️ nextjs** (`apps/nextjs`) <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-15-000000?style=flat&logo=next.js&logoColor=white" alt="Next.js" style="vertical-align: middle;" /></a> - **Port 3002** - E-commerce frontend
 
-**🔌 express** (`apps/express`) <a href="https://expressjs.com/"><img src="https://img.shields.io/badge/Express-4.18-000000?style=flat&logo=express&logoColor=white" alt="Express" style="vertical-align: middle;" /></a> + <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.0-007ACC?style=flat&logo=typescript&logoColor=white" alt="TypeScript" style="vertical-align: middle;" /></a> - **Port 3003** - Backend API server
+**🔌 express** (`apps/express`) <a href="https://expressjs.com/"><img src="https://img.shields.io/badge/Express-4.18-000000?style=flat&logo=express&logoColor=white" alt="Express" style="vertical-align: middle;" /></a> + <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.0-007ACC?style=flat&logo=typescript&logoColor=white" alt="TypeScript" style="vertical-align: middle;" /></a> - **Port 3003** - Demo REST API
+
+**🚩 nestjs** (`apps/nestjs`) — **Port 3006** - Feature flags control plane (NestJS, OpenAPI → `@packages/nestjs-sdk`)
 
 **🎨 UI Package** <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=white" alt="React" style="vertical-align: middle;" /></a> + <a href="https://storybook.js.org/"><img src="https://img.shields.io/badge/Storybook-7.0-FF4785?style=flat&logo=storybook&logoColor=white" alt="Storybook" style="vertical-align: middle;" /></a> - **Port 3004** - Shared components
 
@@ -158,6 +160,8 @@ bun run overall
 bun run container setup
 bun run container up
 ```
+
+Control-plane API (optional): `bun run container up -- --profile nestjs` then open `http://localhost:3006/api/docs`.
 
 All commands: [docs/CHEATSHEET.md](./docs/CHEATSHEET.md) · Repo map, ports, troubleshooting: [AGENTS.md](./AGENTS.md).
 

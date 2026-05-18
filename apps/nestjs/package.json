@@ -1,0 +1,35 @@
+{
+	"private": false,
+	"version": "0.1.0",
+	"name": "@apps/nestjs",
+	"description": "NestJS control-plane API for multi-tenant feature flags",
+	"type": "module",
+	"scripts": {
+		"dev": "NODE_ENV=development tsup --watch --onSuccess 'bun dist/index.js'",
+		"build": "tsup",
+		"start": "bun dist/index.js",
+		"typecheck": "tsc --noEmit",
+		"test": "bun test src/__tests__",
+		"openapi:emit": "NODE_ENV=development bun dist/index.js --emit-openapi"
+	},
+	"dependencies": {
+		"@anatine/esbuild-decorators": "0.2.19",
+		"@nestjs/common": "11.1.9",
+		"@nestjs/core": "11.1.9",
+		"@nestjs/platform-express": "11.1.9",
+		"@nestjs/swagger": "11.2.3",
+		"@packages/utils": "workspace:*",
+		"reflect-metadata": "0.2.2",
+		"rxjs": "7.8.2",
+		"zod": "4.1.13"
+	},
+	"devDependencies": {
+		"@nestjs/testing": "11.1.9",
+		"@tools/tests-preset": "workspace:*",
+		"@tools/typescript": "workspace:*",
+		"@types/express": "5.0.6",
+		"@types/supertest": "7.2.0",
+		"supertest": "7.2.2",
+		"tsup": "8.5.1"
+	}
+}

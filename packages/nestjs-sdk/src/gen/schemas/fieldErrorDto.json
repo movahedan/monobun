@@ -1,0 +1,1 @@
+{"type":"object","properties":{"field":{"type":"string","example":"key"},"message":{"type":"string","example":"Key is required"}},"required":["field","message"],"x-readme-ref-name":"FieldErrorDto"}
