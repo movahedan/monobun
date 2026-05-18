@@ -15,7 +15,7 @@
 	"dependencies": {
 		"@anatine/esbuild-decorators": "0.2.19",
 		"@nestjs/common": "11.1.21",
-		"@nestjs/core": "11.1.18",
+		"@nestjs/core": "11.1.21",
 		"@nestjs/platform-express": "11.1.21",
 		"@nestjs/swagger": "11.2.3",
 		"@packages/utils": "workspace:*",
