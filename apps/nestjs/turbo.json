@@ -1,9 +1,20 @@
 {
 	"extends": ["//"],
 	"tasks": {
+		"db:generate": {
+			"inputs": ["prisma/**", "prisma.config.ts"],
+			"outputs": ["../../node_modules/.prisma/**"]
+		},
+		"typecheck": {
+			"dependsOn": ["db:generate"]
+		},
 		"build": {
-			"env": ["PORT", "NESTJS_PORT", "HOST", "ALLOWED_ORIGINS", "NODE_ENV"],
+			"dependsOn": ["db:generate"],
+			"env": ["PORT", "NESTJS_PORT", "HOST", "ALLOWED_ORIGINS", "NODE_ENV", "DATABASE_URL"],
 			"outputs": ["dist/**"]
+		},
+		"test": {
+			"dependsOn": ["db:generate"]
 		}
 	}
 }

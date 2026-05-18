@@ -31,6 +31,22 @@ bun test                 # run from this directory (see bunfig.toml)
 bun run openapi:emit     # build + write packages/nestjs-sdk/src/openapi.yaml
 ```
 
+## Database (Prisma 7 + PostgreSQL)
+
+Set `DATABASE_URL` (see `.env.sample`). With Docker: `bun run container up -- --profile nestjs`.
+
+```bash
+bun run db:generate        # prisma client (also runs on postinstall)
+bun run db:migrate         # apply migrations (dev)
+bun run db:migrate:deploy  # apply migrations (CI/prod)
+bun run db:seed            # demo tenant, project, envs, sample flags
+bun run db:studio          # Prisma Studio
+```
+
+**Seed IDs:** tenant `00000000-0000-4000-8000-000000000001` (slug `demo`), project `00000000-0000-4000-8000-000000000010` (key `main`).
+
+**Models:** `Tenant` → `Project` → `Environment` / `FeatureFlag`; `AuditLog` scoped by tenant (Phase 3 writes).
+
 ## OpenAPI → @packages/nestjs-sdk
 
 On dev boot (or `openapi:emit`), `src/swagger.setup.ts` writes `packages/nestjs-sdk/src/openapi.yaml` and runs `bun run kubb` in that package when the spec changes.
@@ -47,8 +63,6 @@ bun run container up -- --profile nestjs   # postgres + @apps/nestjs
 curl -sf http://localhost:3006/status
 ```
 
-Requires `DATABASE_URL` in `.env` (see `.env.sample`) for Phase 2+; Phase 1 routes work without DB.
-
 ## Layout
 
 ```
@@ -56,6 +70,7 @@ apps/nestjs/src/
   common/api/       # PageInfo, ApiError, ListQuery, OpenAPI helpers
   common/guards/    # TenantGuard
   health/           # Health checks
+  prisma/           # PrismaService (global)
   tenants/          # Stub list endpoint (Phase 1)
   swagger.setup.ts
   index.ts

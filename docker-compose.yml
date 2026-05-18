@@ -6,6 +6,7 @@ networks:
 
 services:
   express:
+    x-monobun-package: "@apps/express"
     build:
       context: .
       dockerfile: apps/express/Dockerfile
@@ -26,6 +27,7 @@ services:
       start_period: 30s
 
   vite-spa:
+    x-monobun-package: "@apps/vite-spa"
     build:
       context: .
       dockerfile: apps/vite-spa/Dockerfile
@@ -50,6 +52,7 @@ services:
       start_period: 30s
 
   nextjs:
+    x-monobun-package: "@apps/nextjs"
     build:
       context: .
       dockerfile: apps/nextjs/Dockerfile
@@ -74,6 +77,7 @@ services:
       start_period: 30s
 
   ui:
+    x-monobun-package: "@packages/ui"
     build:
       context: .
       dockerfile: packages/ui/Dockerfile
@@ -94,6 +98,7 @@ services:
       start_period: 30s
 
   astro-ssg:
+    x-monobun-package: "@apps/astro-ssg"
     build:
       context: .
       dockerfile: apps/astro-ssg/Dockerfile
@@ -109,6 +114,29 @@ services:
       ASTRO_SITE_PATH: ${ASTRO_SITE_PATH:-localhost:5005}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${ASTRO_SSG_PORT:-3005}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  nestjs:
+    x-monobun-package: "@apps/nestjs"
+    build:
+      context: .
+      dockerfile: apps/nestjs/Dockerfile
+    ports:
+      - "5006:${NESTJS_PORT:-3006}"
+    networks:
+      - prod-network
+    environment:
+      PORT: ${NESTJS_PORT:-3006}
+      NESTJS_PORT: ${NESTJS_PORT:-3006}
+      HOST: ${HOST:-0.0.0.0}
+      NODE_ENV: production
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3001,http://localhost:3002}
+      DATABASE_URL: ${DATABASE_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${NESTJS_PORT:-3006}/status"]
       interval: 30s
       timeout: 10s
       retries: 3
