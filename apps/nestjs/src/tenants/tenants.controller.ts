@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, HttpCode, HttpStatus, Inject, Query, UseGuards } from "@nestjs/common";
 import { ApiHeader, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 
 import { type ListQuery, ListQuerySchema } from "../common/api/list-query.model";
@@ -7,7 +7,7 @@ import { TenantId } from "../common/decorators/tenant-id.decorator";
 import { TenantGuard } from "../common/guards/tenant.guard";
 import { ZodValidationPipe } from "../common/pipes/zod-validation.pipe";
 import { TenantListResponseDto } from "./tenant.model";
-import type { TenantsService } from "./tenants.service";
+import { TenantsService } from "./tenants.service";
 
 @ApiTags("Tenants")
 @Controller("v1/tenants")
@@ -18,7 +18,7 @@ import type { TenantsService } from "./tenants.service";
 	required: true,
 })
 export class TenantsController {
-	constructor(private readonly tenantsService: TenantsService) {}
+	constructor(@Inject(TenantsService) private readonly tenantsService: TenantsService) {}
 
 	@Get()
 	@HttpCode(HttpStatus.OK)
