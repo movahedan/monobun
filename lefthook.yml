@@ -26,6 +26,6 @@ pre-push:
     check:
       run: bun run lint
     test:
-      run: bun test
+      run: sh -c 'bun test apps/express packages tools && cd apps/nestjs && bun test'
     build:
       run: bun run build --affected
