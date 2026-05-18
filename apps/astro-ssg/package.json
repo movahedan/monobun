@@ -15,7 +15,7 @@
 		"@astrojs/tailwind": "6.0.2",
 		"@packages/ui": "workspace:*",
 		"@tailwindcss/typography": "0.5.19",
-		"astro": "6.3.3",
+		"astro": "6.3.5",
 		"lucide-astro": "0.556.0",
 		"marked": "18.0.3"
 	},
