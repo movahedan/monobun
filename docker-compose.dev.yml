@@ -54,7 +54,7 @@ services:
 
   postgres:
     image: postgres:17-alpine
-    profiles: ["nestjs", "all"]
+    profiles: ["nestjs", "auth", "all"]
     networks:
       - dev-network
     environment:
@@ -192,6 +192,41 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 90s
+
+  auth:
+    extends:
+      service: apps
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "${AUTH_PORT:-3007}"
+    ports:
+      - "${AUTH_PORT:-3007}:${AUTH_PORT:-3007}"
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "${AUTH_PORT:-3007}"
+      AUTH_PORT: "${AUTH_PORT:-3007}"
+      NODE_ENV: development
+      AUTH_ISSUER: ${AUTH_ISSUER:-http://localhost:3007}
+      AUTH_AUDIENCE: ${AUTH_AUDIENCE:-monobun-api}
+      AUTH_AUDIENCE_EVAL: ${AUTH_AUDIENCE_EVAL:-monobun-eval}
+      AUTH_DATABASE_URL: ${AUTH_DATABASE_URL}
+      AUTH_ACCESS_TTL_SECONDS: ${AUTH_ACCESS_TTL_SECONDS:-900}
+      AUTH_COOKIE_SECURE: "false"
+      AUTH_SEED_ADMIN_EMAIL: ${AUTH_SEED_ADMIN_EMAIL:-admin@example.com}
+      AUTH_SEED_ADMIN_PASSWORD: ${AUTH_SEED_ADMIN_PASSWORD}
+    command: >
+      sh -c "cd apps/auth && bun scripts/ensure-db.ts &&
+      bun run db:migrate && bun run db:seed &&
+      cd ../.. && bun run turbo run dev --filter=@apps/auth"
+    profiles: ["auth", "all"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://auth:${AUTH_PORT:-3007}/status | grep -q '\"ok\":true'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
       start_period: 90s
 
   astro-ssg:

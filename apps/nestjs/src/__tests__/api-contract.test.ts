@@ -3,23 +3,19 @@ import "reflect-metadata";
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 
 import type { INestApplication } from "@nestjs/common";
-import { Test } from "@nestjs/testing";
 import supertest from "supertest";
 
-import { AppModule } from "../app.module";
-import { HttpExceptionFilter } from "../common/filters/http-exception.filter";
-
-const tenantId = "00000000-0000-4000-8000-000000000001";
+import { createTestJwtEnv, type TestJwtEnv } from "./test-jwt-env";
 
 describe("@apps/nestjs API contract", () => {
+	let env: TestJwtEnv;
 	let app: INestApplication;
+	let accessToken: string;
 
 	beforeAll(async () => {
-		const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-		app = moduleRef.createNestApplication();
-		app.useGlobalFilters(new HttpExceptionFilter());
-		app.setGlobalPrefix("api");
-		await app.init();
+		env = await createTestJwtEnv();
+		app = env.app;
+		accessToken = env.accessToken;
 	});
 
 	afterAll(async () => {
@@ -29,7 +25,7 @@ describe("@apps/nestjs API contract", () => {
 	it("GET /api/v1/tenants returns list envelope with pageInfo", async () => {
 		const response = await supertest(app.getHttpServer())
 			.get("/api/v1/tenants")
-			.set("x-tenant-id", tenantId)
+			.set("Authorization", `Bearer ${accessToken}`)
 			.expect(200);
 
 		expect(Array.isArray(response.body.list)).toBe(true);
@@ -41,17 +37,17 @@ describe("@apps/nestjs API contract", () => {
 		});
 	});
 
-	it("GET /api/v1/tenants without tenant header returns 401 ApiError", async () => {
+	it("GET /api/v1/tenants without Bearer returns 401 ApiError", async () => {
 		const response = await supertest(app.getHttpServer()).get("/api/v1/tenants").expect(401);
 
-		expect(response.body.message).toBe("Missing x-tenant-id header");
+		expect(response.body.message).toMatch(/Bearer|token/i);
 		expect(response.body.success).toBeUndefined();
 	});
 
 	it("GET /api/v1/tenants with invalid query returns 400 ApiError with fields", async () => {
 		const response = await supertest(app.getHttpServer())
 			.get("/api/v1/tenants?page=0")
-			.set("x-tenant-id", tenantId)
+			.set("Authorization", `Bearer ${accessToken}`)
 			.expect(400);
 
 		expect(response.body.message).toBe("Validation failed");

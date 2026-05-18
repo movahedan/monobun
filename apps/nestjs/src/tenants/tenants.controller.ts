@@ -1,17 +1,22 @@
 import { Controller, Get, HttpCode, HttpStatus, Inject, Query, UseGuards } from "@nestjs/common";
 import { ApiHeader, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 
+import { SCOPES } from "@packages/auth-contract";
+
 import { type ListQuery, ListQuerySchema } from "../common/api/list-query.model";
 import { ApiStandardErrors } from "../common/api/openapi-responses";
+import { RequireScopes } from "../common/decorators/require-scopes.decorator";
 import { TenantId } from "../common/decorators/tenant-id.decorator";
-import { TenantGuard } from "../common/guards/tenant.guard";
+import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
+import { ScopesGuard } from "../common/guards/scopes.guard";
 import { ZodValidationPipe } from "../common/pipes/zod-validation.pipe";
 import { TenantListResponseDto } from "./tenant.model";
 import { TenantsService } from "./tenants.service";
 
 @ApiTags("Tenants")
 @Controller("v1/tenants")
-@UseGuards(TenantGuard)
+@UseGuards(JwtAuthGuard, ScopesGuard)
+@RequireScopes(SCOPES.read)
 @ApiHeader({
 	name: "x-tenant-id",
 	description: "Active tenant scope (UUID)",

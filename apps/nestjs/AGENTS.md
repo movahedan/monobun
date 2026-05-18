@@ -8,7 +8,7 @@ Guidance for **@apps/nestjs** — multi-tenant feature flags control-plane API (
 - **Prefix:** `/api` (e.g. `GET /api/v1/health`, `GET /api/v1/tenants`)
 - **Infra alias:** `GET /status` (no `/api` prefix)
 - **Swagger UI:** `/api/docs` · **OpenAPI JSON:** `/api/docs-json`
-- **Tenant header:** `x-tenant-id` (UUID) on management routes
+- **Auth:** Bearer JWT from `@apps/auth` (`JwtAuthGuard` + `@RequireScopes()`). Dev fallback: `x-tenant-id` when `AUTH_ALLOW_HEADER_TENANT=true`.
 
 ## API contract (OpenAPI)
 
@@ -68,7 +68,7 @@ curl -sf http://localhost:3006/status
 ```
 apps/nestjs/src/
   common/api/       # PageInfo, ApiError, ListQuery, OpenAPI helpers
-  common/guards/    # TenantGuard
+  common/guards/    # JwtAuthGuard, ScopesGuard, TenantGuard (legacy header)
   health/           # Health checks
   prisma/           # PrismaService (global)
   tenants/          # Stub list endpoint (Phase 1)

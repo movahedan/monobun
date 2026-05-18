@@ -1,0 +1,17 @@
+{
+	"private": true,
+	"name": "@packages/auth-contract",
+	"version": "0.1.0",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"build": "tsc --noEmit",
+		"test": "bun test src"
+	},
+	"devDependencies": {
+		"@tools/typescript": "workspace:*"
+	}
+}

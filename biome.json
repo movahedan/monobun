@@ -20,7 +20,8 @@
 			"!**/.next",
 			"!**/.vercel",
 			"!**/.act",
-			"!.act-event.json"
+			"!.act-event.json",
+			"!**/src/generated"
 		]
 	},
 	"formatter": {
