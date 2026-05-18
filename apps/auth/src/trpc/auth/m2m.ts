@@ -20,6 +20,7 @@ const tokenRequestSchema = z.object({
 	grant_type: z.literal("client_credentials"),
 	client_assertion_type: z.literal("urn:ietf:params:oauth:client-assertion-type:jwt-bearer"),
 	client_assertion: z.string(),
+	client_id: z.string().min(1),
 	scope: z.string().optional(),
 });
 
@@ -36,7 +37,10 @@ export async function handleTokenRequest(req: Request): Promise<Response> {
 		return Response.json({ error: "invalid_request" }, { status: 400 });
 	}
 
-	const assertionPayload = await verifyClientAssertion(parsed.data.client_assertion);
+	const assertionPayload = await verifyClientAssertion(
+		parsed.data.client_assertion,
+		parsed.data.client_id,
+	);
 	if (!assertionPayload) {
 		return Response.json({ error: "invalid_client" }, { status: 401 });
 	}
@@ -76,31 +80,30 @@ export async function handleTokenRequest(req: Request): Promise<Response> {
 
 async function verifyClientAssertion(
 	assertion: string,
+	clientId: string,
 ): Promise<{ sub: string; iss: string } | null> {
-	const unverified = JSON.parse(Buffer.from(assertion.split(".")[1] ?? "", "base64url").toString());
-	const claims = assertionSchema.safeParse(unverified);
-	if (!claims.success) {
-		return null;
-	}
-
 	const client = await prisma.machineClient.findFirst({
-		where: { clientId: claims.data.sub, revokedAt: null },
+		where: { clientId, revokedAt: null },
 	});
-	if (!client || client.clientId !== claims.data.iss) {
+	if (!client) {
 		return null;
 	}
 
 	const jwk = client.publicKeyJwk as JsonWebKey;
 	const jwks = createLocalJWKSet({ keys: [jwk] });
 	try {
-		await jwtVerify(assertion, jwks, {
+		const { payload } = await jwtVerify(assertion, jwks, {
 			algorithms: ["RS256"],
-			subject: client.clientId,
-			issuer: client.clientId,
+			subject: clientId,
+			issuer: clientId,
 		});
+		const claims = assertionSchema.safeParse(payload);
+		if (!claims.success || claims.data.sub !== clientId || claims.data.iss !== clientId) {
+			return null;
+		}
 	} catch {
 		return null;
 	}
 
-	return { sub: client.clientId, iss: client.clientId };
+	return { sub: clientId, iss: clientId };
 }

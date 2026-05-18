@@ -10,8 +10,10 @@ import { verifyAccessToken } from "../trpc/auth/jwt";
 import { handleTokenRequest } from "../trpc/auth/m2m";
 
 const clientId = "test-m2m-client";
+const databaseUrl = process.env.AUTH_DATABASE_URL?.trim();
+const describeWithDb = databaseUrl ? describe : describe.skip;
 
-describe("POST /api/token M2M", () => {
+describeWithDb("POST /api/token M2M", () => {
 	let privateKey: CryptoKey;
 
 	beforeAll(async () => {
@@ -60,6 +62,7 @@ describe("POST /api/token M2M", () => {
 				grant_type: "client_credentials",
 				client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
 				client_assertion: assertion,
+				client_id: clientId,
 				scope: SCOPES.read,
 			}),
 		});
