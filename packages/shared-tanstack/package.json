@@ -1,0 +1,36 @@
+{
+	"private": true,
+	"name": "@packages/shared-tanstack",
+	"type": "module",
+	"version": "0.1.0",
+	"description": "TanStack Router, Query, and Form helpers",
+	"imports": {
+		"#*": "./src/*"
+	},
+	"exports": {
+		".": "./src/index.ts",
+		"./useList": "./src/useList/index.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"test": "bun --cwd ../.. test packages/shared-tanstack/src"
+	},
+	"dependencies": {
+		"@packages/shared-react": "workspace:*",
+		"@tanstack/react-form": "1.32.0",
+		"@tanstack/react-query": "5.99.2",
+		"@tanstack/react-router": "1.169.1",
+		"@tanstack/react-virtual": "3.13.24"
+	},
+	"devDependencies": {
+		"@tools/tests-preset": "workspace:*",
+		"@tools/typescript": "workspace:*",
+		"@types/bun": "1.3.14",
+		"@types/react": "19.2.14",
+		"react": "19.2.6",
+		"react-dom": "19.2.6"
+	},
+	"peerDependencies": {
+		"react": "^19.0.0"
+	}
+}
