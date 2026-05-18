@@ -2,7 +2,7 @@
 	"extends": ["//"],
 	"tasks": {
 		"build": {
-			"env": ["PORT", "NESTJS_PORT", "HOST", "ALLOWED_ORIGINS", "NODE_ENV"],
+			"env": ["PORT", "NESTJS_PORT", "HOST", "ALLOWED_ORIGINS", "NODE_ENV", "DATABASE_URL"],
 			"outputs": ["dist/**"]
 		}
 	}
