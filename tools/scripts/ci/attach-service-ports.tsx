@@ -2,6 +2,8 @@ import { parseArgs } from "node:util";
 
 import { EntityCompose } from "intershell";
 
+import { PROD_COMPOSE_FILE } from "../container/stack";
+
 function logVerbose(message: string, quiet: boolean): void {
 	if (!quiet) {
 		console.log(message);
@@ -25,7 +27,7 @@ export async function runCiAttachServicePorts(rest: readonly string[]): Promise<
 	}
 
 	const quiet = values.quiet === true;
-	const portMappings = await new EntityCompose("docker-compose.yml").getPortMappings();
+	const portMappings = await new EntityCompose(PROD_COMPOSE_FILE).getPortMappings();
 	const githubOutput = process.env.GITHUB_OUTPUT;
 
 	if (githubOutput) {

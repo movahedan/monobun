@@ -21,7 +21,7 @@ function HelpApp({ errorMessage }: { readonly errorMessage?: string }) {
 			<Text bold>Commands</Text>
 			<Text>
 				<Text color="green">attach-affected</Text> — write affected prod compose services or turbo
-				filters (matches @apps/* / @packages/* names to compose service keys) to GITHUB_OUTPUT
+				filters to GITHUB_OUTPUT (service keys match workspace package names via intershell)
 			</Text>
 			<Text>
 				<Text color="green">attach-service-ports</Text> — write docker-compose port mappings JSON to
