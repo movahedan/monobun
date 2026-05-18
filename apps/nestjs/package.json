@@ -21,16 +21,16 @@
 	"dependencies": {
 		"@anatine/esbuild-decorators": "0.2.19",
 		"@nestjs/common": "11.1.21",
-		"@nestjs/core": "11.1.18",
+		"@nestjs/core": "11.1.21",
 		"@nestjs/platform-express": "11.1.21",
-		"@nestjs/swagger": "11.2.3",
+		"@nestjs/swagger": "11.4.3",
 		"@packages/utils": "workspace:*",
 		"@prisma/adapter-pg": "7.1.0",
 		"@prisma/client": "7.1.0",
 		"pg": "8.16.3",
 		"reflect-metadata": "0.2.2",
 		"rxjs": "7.8.2",
-		"zod": "4.1.13"
+		"zod": "4.4.3"
 	},
 	"devDependencies": {
 		"@types/pg": "8.15.6",
