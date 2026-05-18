@@ -32,7 +32,7 @@ exact = true
 
 [test]
 # Preload centralized test setup from tests-preset package
-preload = ["./tools/tests-preset/happydom.ts", "./tools/tests-preset/testing-library.ts", "./tools/tests-preset/test-setup.ts"]
+preload = ["./tools/tests-preset/reflect-metadata.ts", "./tools/tests-preset/happydom.ts", "./tools/tests-preset/testing-library.ts", "./tools/tests-preset/test-setup.ts"]
 # Environment variables for tests
 env = { 
 	NODE_ENV = "test", 

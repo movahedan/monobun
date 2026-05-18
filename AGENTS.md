@@ -70,10 +70,12 @@ Nested `AGENTS.md` under each app, package, and tool workspace.
 |------|--------|------|------|-------|
 | `apps/vite-spa` | `@apps/vite-spa` | 3001 | Vite admin | [AGENTS.md](apps/vite-spa/AGENTS.md) |
 | `apps/nextjs` | `@apps/nextjs` | 3002 | Next.js storefront | [AGENTS.md](apps/nextjs/AGENTS.md) |
-| `apps/express` | `@apps/express` | 3003 | API | [AGENTS.md](apps/express/AGENTS.md) |
+| `apps/express` | `@apps/express` | 3003 | Demo REST API | [AGENTS.md](apps/express/AGENTS.md) |
+| `apps/nestjs` | `@apps/nestjs` | 3006 | Feature flags control plane (OpenAPI) | [AGENTS.md](apps/nestjs/AGENTS.md) |
 | `apps/astro-ssg` | `@apps/astro-ssg` | 3005 | Docs site | [AGENTS.md](apps/astro-ssg/AGENTS.md) |
 | `packages/ui` | `@packages/ui` | 3004 | React + Storybook | [AGENTS.md](packages/ui/AGENTS.md) |
 | `packages/utils` | `@packages/utils` | — | Shared utilities | [AGENTS.md](packages/utils/AGENTS.md) |
+| `packages/nestjs-sdk` | `@packages/nestjs-sdk` | — | Kubb client for `@apps/nestjs` | [AGENTS.md](packages/nestjs-sdk/AGENTS.md) |
 
 ### Tools (`tools/`)
 

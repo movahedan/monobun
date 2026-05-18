@@ -1,0 +1,246 @@
+openapi: 3.0.0
+paths: 
+  /api/status: 
+    get: 
+      operationId: HealthController_getStatusAlias
+      parameters: 
+        []
+      responses: 
+        "200": 
+          description: Service is healthy
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/HealthStatusDto"
+        "400": 
+          description: Invalid request
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ApiErrorDto"
+        "401": 
+          description: Missing or invalid credentials
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ApiErrorDto"
+        "404": 
+          description: Resource not found
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ApiErrorDto"
+      summary: Health check (infra alias without /api prefix)
+      tags: 
+        &tags
+        - Health
+  /api/v1/health: 
+    get: 
+      operationId: HealthController_getStatus
+      parameters: 
+        []
+      responses: 
+        "200": 
+          description: Service is healthy
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/HealthStatusDto"
+        "400": 
+          description: Invalid request
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ApiErrorDto"
+        "401": 
+          description: Missing or invalid credentials
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ApiErrorDto"
+        "404": 
+          description: Resource not found
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ApiErrorDto"
+      summary: Health check
+      tags: 
+        *tags
+  /api/v1/tenants: 
+    get: 
+      operationId: TenantsController_listTenants
+      parameters: 
+        - name: x-tenant-id
+          in: header
+          description: Active tenant scope (UUID)
+          required: true
+          schema: 
+            type: string
+        - name: search
+          required: false
+          in: query
+          schema: 
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema: 
+            type: number
+        - name: page
+          required: false
+          in: query
+          schema: 
+            type: number
+      responses: 
+        "200": 
+          description: Paginated tenant list
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TenantListResponseDto"
+        "400": 
+          description: Invalid request
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ApiErrorDto"
+        "401": 
+          description: Missing or invalid credentials
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ApiErrorDto"
+        "404": 
+          description: Resource not found
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ApiErrorDto"
+      summary: List tenants visible to the current tenant context
+      tags: 
+        - Tenants
+info: 
+  title: Monobun Feature Flags Control Plane
+  description: "Management API for multi-tenant feature flags and remote config.\n\n**Success shapes**\n- Paginated lists: `{ list: T[], pageInfo: PageInfo }`\n- Single resources: resource schema at the root (no envelope)\n\n**Errors** (4xx/5xx): `{ message?: string, fields?: { field, message }[] }`"
+  version: 1.0.0
+  contact: 
+    {}
+tags: 
+  - name: Health
+    description: Liveness and readiness
+  - name: Tenants
+    description: Tenant directory (management)
+servers: 
+  - url: http://localhost:3006
+    description: Development
+components: 
+  securitySchemes: 
+    TenantAuth: 
+      type: apiKey
+      in: header
+      name: x-tenant-id
+      description: Tenant scope (UUID)
+  schemas: 
+    HealthStatusDto: 
+      type: object
+      properties: 
+        ok: 
+          type: boolean
+          example: true
+        timestamp: 
+          type: string
+          format: date-time
+      required: 
+        - ok
+        - timestamp
+    FieldErrorDto: 
+      type: object
+      properties: 
+        field: 
+          type: string
+          example: key
+        message: 
+          type: string
+          example: Key is required
+      required: 
+        - field
+        - message
+    ApiErrorDto: 
+      type: object
+      properties: 
+        message: 
+          type: string
+          example: Validation failed
+        fields: 
+          type: array
+          items: 
+            $ref: "#/components/schemas/FieldErrorDto"
+    TenantDto: 
+      type: object
+      properties: 
+        id: 
+          type: string
+          format: uuid
+        name: 
+          type: string
+        slug: 
+          type: string
+        createdAt: 
+          type: string
+          format: date-time
+      required: 
+        - id
+        - name
+        - slug
+        - createdAt
+    PageInfoDto: 
+      type: object
+      properties: 
+        currentPage: 
+          type: number
+          example: 1
+          minimum: 1
+        totalPages: 
+          type: number
+          example: 3
+          minimum: 0
+        totalItems: 
+          type: number
+          example: 25
+          minimum: 0
+        pageSize: 
+          type: number
+          example: 10
+          minimum: 1
+      required: 
+        - currentPage
+        - totalPages
+        - totalItems
+        - pageSize
+    TenantListResponseDto: 
+      type: object
+      properties: 
+        list: 
+          type: array
+          items: 
+            $ref: "#/components/schemas/TenantDto"
+        pageInfo: 
+          $ref: "#/components/schemas/PageInfoDto"
+      required: 
+        - list
+        - pageInfo
+    ListQueryDto: 
+      type: object
+      properties: 
+        page: 
+          type: number
+          default: 1
+          minimum: 1
+        limit: 
+          type: number
+          default: 10
+          minimum: 1
+          maximum: 100
+        search: 
+          type: string

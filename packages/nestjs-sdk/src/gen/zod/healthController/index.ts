@@ -1,0 +1,2 @@
+export { healthControllerGetStatusAlias200Schema, healthControllerGetStatusAlias400Schema, healthControllerGetStatusAlias401Schema, healthControllerGetStatusAlias404Schema, healthControllerGetStatusAliasQueryResponseSchema } from "./healthControllerGetStatusAliasSchema";
+export { healthControllerGetStatus200Schema, healthControllerGetStatus400Schema, healthControllerGetStatus401Schema, healthControllerGetStatus404Schema, healthControllerGetStatusQueryResponseSchema } from "./healthControllerGetStatusSchema";
