@@ -13,7 +13,7 @@
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
-		"test": "bun test src"
+		"test": "bun --cwd ../.. test packages/shared-tanstack/src"
 	},
 	"dependencies": {
 		"@packages/shared-react": "workspace:*",

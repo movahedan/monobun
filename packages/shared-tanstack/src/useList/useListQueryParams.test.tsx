@@ -130,6 +130,23 @@ describe("useListQueryParams - URL sync", () => {
 		});
 	});
 
+	it("omits resetScroll when only unwatched search fields change", async () => {
+		routerSearch = { q: "a", page: 1 };
+		const { result } = renderHook(() =>
+			useListQueryParams<TestParams>(["q", "page"], { q: "", page: 1 }, undefined, ["q"]),
+		);
+
+		navigate.mockClear();
+
+		act(() => {
+			result.current[1]({ page: 2 });
+		});
+
+		await waitFor(() => {
+			expect(lastNavigateCall().resetScroll).toBe(false);
+		});
+	});
+
 	it("restores defaults when clearParams is called", async () => {
 		routerSearch = { q: "hello", page: 2 };
 		const { result } = renderHook(() =>

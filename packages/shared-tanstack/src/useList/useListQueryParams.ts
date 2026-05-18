@@ -3,8 +3,16 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { type Dispatch, type SetStateAction, useCallback, useEffect, useMemo } from "react";
 
-import { feedScrollSearchChanged } from "../feedScrollSearch";
 import type { ParsedUrlQueryInput } from "./queryTypes";
+import { stableStringify } from "./types";
+
+function scrollResetSearchChanged(
+	prev: Record<string, unknown>,
+	next: Record<string, unknown>,
+	keys: readonly string[],
+): boolean {
+	return keys.some((key) => stableStringify(prev[key]) !== stableStringify(next[key]));
+}
 
 export type ListQueryParamCodec<TValue> = {
 	readonly parse: (value: string | Array<string> | undefined) => TValue | undefined;
@@ -184,7 +192,7 @@ export function useListQueryParams<TValues extends ParsedUrlQueryInput = ParsedU
 			const resetScroll =
 				scrollResetSearchKeys == null
 					? undefined
-					: feedScrollSearchChanged(
+					: scrollResetSearchChanged(
 							applyCodecsOnRead<TValues>(prevInput, codecs) as Record<string, unknown>,
 							nextValues as Record<string, unknown>,
 							scrollResetSearchKeys,
