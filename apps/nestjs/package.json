@@ -14,9 +14,9 @@
 	},
 	"dependencies": {
 		"@anatine/esbuild-decorators": "0.2.19",
-		"@nestjs/common": "11.1.9",
+		"@nestjs/common": "11.1.21",
 		"@nestjs/core": "11.1.9",
-		"@nestjs/platform-express": "11.1.9",
+		"@nestjs/platform-express": "11.1.21",
 		"@nestjs/swagger": "11.2.3",
 		"@packages/utils": "workspace:*",
 		"reflect-metadata": "0.2.2",
@@ -24,7 +24,7 @@
 		"zod": "4.1.13"
 	},
 	"devDependencies": {
-		"@nestjs/testing": "11.1.9",
+		"@nestjs/testing": "11.1.21",
 		"@tools/tests-preset": "workspace:*",
 		"@tools/typescript": "workspace:*",
 		"@types/express": "5.0.6",
