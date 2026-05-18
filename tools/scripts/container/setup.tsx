@@ -13,6 +13,20 @@ export interface SetupOptions {
 function getSetupSteps(options: SetupOptions): readonly StepProgressStep[] {
 	const steps: StepProgressStep[] = [
 		{
+			label: "Ensuring .env files from .env.sample",
+			run: async () => {
+				const { ensureEnvFiles } = await import("../shared/ensure-env-files");
+				await ensureEnvFiles();
+			},
+		},
+		{
+			label: "Installing dependencies in container",
+			run: async () => {
+				const code = await spawnContainerIndex(["install", "--quiet"]);
+				if (code !== 0) throw new Error(`container install exited with code ${code}`);
+			},
+		},
+		{
 			label: "Starting Docker services",
 			run: async () => {
 				const code = await spawnContainerIndex(["up", "--build"]);
@@ -39,6 +53,7 @@ async function runSetupSteps(options: SetupOptions): Promise<void> {
 async function printServiceHints(): Promise<void> {
 	console.log(colorify.yellow("Run bun run container cleanup to stop services when done"));
 	console.log(colorify.cyan("\nUseful commands:"));
+	console.log(colorify.cyan(" - bun run container install"));
 	console.log(colorify.cyan(" - bun run container check"));
 	console.log(colorify.cyan(" - bun run container logs"));
 	console.log(colorify.cyan(" - bun run container cleanup"));

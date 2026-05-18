@@ -4,6 +4,7 @@ import { printCliErrorAndExit } from "../shared/format-cli-error";
 import { runCheck } from "./check";
 import { runCleanup } from "./cleanup";
 import { printHelpAndExit } from "./help";
+import { runInstall } from "./install";
 import { runRm } from "./rm";
 import { runSetup } from "./setup";
 import {
@@ -26,6 +27,7 @@ const SUBCOMMANDS = [
 	"compose",
 	"logs",
 	"health",
+	"install",
 ] as const;
 type Subcommand = (typeof SUBCOMMANDS)[number];
 
@@ -80,6 +82,11 @@ async function main(): Promise<void> {
 
 	if (sub === "cleanup") {
 		await runCleanup(subRest);
+		return;
+	}
+
+	if (sub === "install") {
+		await runInstall(subRest);
 		return;
 	}
 

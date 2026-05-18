@@ -3,11 +3,16 @@ import { $ } from "bun";
 
 import { type ReactNode, useCallback } from "react";
 
+import { ensureEnvFiles } from "../shared/ensure-env-files";
 import { renderAndExit } from "../shared/render-and-exit";
 import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
 
 function getSetupSteps(skipTests: boolean): readonly StepProgressStep[] {
 	const steps: StepProgressStep[] = [
+		{
+			label: "Ensuring .env files from .env.sample",
+			run: () => ensureEnvFiles(),
+		},
 		{ label: "Installing dependencies", run: () => $`bun install`.quiet() },
 		{ label: "Installing lefthook", run: () => $`lefthook install`.quiet() },
 		{ label: "Running lint --write", run: () => $`bun run lint -- --write`.quiet() },

@@ -2,8 +2,8 @@ import { log } from "@packages/utils/logger";
 
 import { createServer } from "./server";
 
-const host = process.env.HOST || "localhost";
-const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+const host = process.env.HOST ?? "127.0.0.1";
+const port = Number(process.env.EXPRESS_PORT ?? process.env.PORT ?? 3003);
 
 const server = createServer();
 server.listen(port, host, () => {

@@ -1,4 +1,4 @@
-name: repo
+name: monobun-dev
 
 networks:
   dev-network:
@@ -20,20 +20,13 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile.dev
-      # Enable BuildKit for advanced caching
       x-bake:
         contexts:
           buildkit: docker-container://buildkit
-      # Enable BuildKit cache from environment
       cache_from:
         - type=gha
-      # Increase memory limits to help with node_modules I/O
       shm_size: '1gb'
-    env_file:
-      - path: ./.env
-        required: true
     volumes:
-      # Bind mounts for host development; named volumes for heavy paths
       - ${PROJECT_ROOT:-./}/apps:/app/apps:cached
       - ${PROJECT_ROOT:-./}/packages:/app/packages:cached
       - ${PROJECT_ROOT:-./}/tools:/app/tools:cached
@@ -41,13 +34,11 @@ services:
       - ${PROJECT_ROOT:-./}/bun.lock:/app/bun.lock:cached
       - ${PROJECT_ROOT:-./}/turbo.json:/app/turbo.json:cached
       - ${PROJECT_ROOT:-./}/intershell.config.ts:/app/intershell.config.ts:cached
-      # Override volumes
       - node_modules:/app/node_modules:delegated
       - turbo_cache:/app/.turbo:delegated
       - bun_cache:/root/.bun:delegated
       - vscode_cache:/app/.vscode:delegated
     command: sleep infinity
-    # Use init for better signal handling
     init: true
     profiles: ["apps"]
     networks:
@@ -59,108 +50,115 @@ services:
       retries: 3
       start_period: 10s
 
-  # Lightweight app containers that inherit from apps runtime
-  vite-spa:
-    extends:
-      service: apps
-    expose:
-      - "3001"
-    ports:
-      - "3001:3001"
-    env_file:
-      - path: ./.env
-        required: true
-    environment:
-      PORT: "3001"
-      HOST: "0.0.0.0"
-    command: bun run turbo run dev --filter=@apps/vite-spa -- --host 0.0.0.0 --port 3001
-    profiles: ["vite-spa", "all"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://vite-spa:3001"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
-  nextjs:
-    extends:
-      service: apps
-    expose:
-      - "3002"
-    ports:
-      - "3002:3002"
-    env_file:
-      - path: ./.env
-        required: true
-    environment:
-      PORT: "3002"
-      HOST: "0.0.0.0"
-    command: bun run turbo run dev --filter=@apps/nextjs -- --hostname 0.0.0.0 --port 3002
-    profiles: ["nextjs", "all"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://nextjs:3002"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
   express:
     extends:
       service: apps
     expose:
-      - "3003"
+      - "${EXPRESS_PORT:-3003}"
     ports:
-      - "3003:3003"
-    env_file:
-      - path: ./.env
-        required: true
+      - "${EXPRESS_PORT:-3003}:${EXPRESS_PORT:-3003}"
     environment:
-      PORT: "3003"
       HOST: "0.0.0.0"
+      PORT: "${EXPRESS_PORT:-3003}"
+      EXPRESS_PORT: "${EXPRESS_PORT:-3003}"
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3001,http://localhost:3002}
     command: bun run turbo run dev --filter=@apps/express
     profiles: ["express", "all"]
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://express:3003/status | grep -q '\"ok\":true'"]
+      test: ["CMD-SHELL", "curl -sf http://express:${EXPRESS_PORT:-3003}/status | grep -q '\"ok\":true'"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
+
+  vite-spa:
+    extends:
+      service: apps
+    depends_on:
+      express:
+        condition: service_healthy
+    expose:
+      - "${VITE_SPA_PORT:-3001}"
+    ports:
+      - "${VITE_SPA_PORT:-3001}:${VITE_SPA_PORT:-3001}"
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "${VITE_SPA_PORT:-3001}"
+      VITE_SPA_PORT: "${VITE_SPA_PORT:-3001}"
+    command: >
+      sh -c "exec bun run turbo run dev --filter=@apps/vite-spa --
+      --host 0.0.0.0 --port $$PORT"
+    profiles: ["vite-spa", "all"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://vite-spa:${VITE_SPA_PORT:-3001}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  nextjs:
+    extends:
+      service: apps
+    depends_on:
+      express:
+        condition: service_healthy
+    expose:
+      - "${NEXTJS_PORT:-3002}"
+    ports:
+      - "${NEXTJS_PORT:-3002}:${NEXTJS_PORT:-3002}"
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "${NEXTJS_PORT:-3002}"
+      NEXTJS_PORT: "${NEXTJS_PORT:-3002}"
+    command: >
+      sh -c "exec bun run turbo run dev --filter=@apps/nextjs --
+      --hostname 0.0.0.0 --port $$PORT"
+    profiles: ["nextjs", "all"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://nextjs:${NEXTJS_PORT:-3002}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
   ui:
     extends:
       service: apps
     expose:
-      - "3004"
+      - "${UI_PORT:-3004}"
     ports:
-      - "3004:3004"
-    env_file:
-      - path: ./.env
-        required: true
+      - "${UI_PORT:-3004}:${UI_PORT:-3004}"
     environment:
-      PORT: "3004"
       HOST: "0.0.0.0"
+      PORT: "${UI_PORT:-3004}"
+      UI_PORT: "${UI_PORT:-3004}"
     command: bun run turbo run dev --filter=@packages/ui
     profiles: ["ui", "all"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://ui:3004"]
+      test: ["CMD", "curl", "-f", "http://ui:${UI_PORT:-3004}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
 
   astro-ssg:
     extends:
       service: apps
     expose:
-      - "3005"
+      - "${ASTRO_SSG_PORT:-3005}"
     ports:
-      - "3005:3005"
-    env_file:
-      - path: ./.env
-        required: true
+      - "${ASTRO_SSG_PORT:-3005}:${ASTRO_SSG_PORT:-3005}"
     environment:
-      PORT: "3005"
       HOST: "0.0.0.0"
-    command: bun run turbo run dev --filter=@apps/astro-ssg -- --host 0.0.0.0 --port 3005
+      PORT: "${ASTRO_SSG_PORT:-3005}"
+      ASTRO_SSG_PORT: "${ASTRO_SSG_PORT:-3005}"
+    command: >
+      sh -c "exec bun run turbo run dev --filter=@apps/astro-ssg --
+      --host 0.0.0.0 --port $$PORT"
     profiles: ["astro-ssg", "all"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://astro-ssg:3005"]
+      test: ["CMD", "curl", "-f", "http://astro-ssg:${ASTRO_SSG_PORT:-3005}"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 90s

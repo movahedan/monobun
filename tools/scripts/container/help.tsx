@@ -31,7 +31,7 @@ function HelpApp({ errorMessage }: { readonly errorMessage?: string }) {
 			<Text> </Text>
 			<Text bold>Commands</Text>
 			<Text>
-				<Text color="green">setup</Text> — build and start stack, optional health check
+				<Text color="green">setup</Text> — env files, container install, up, optional health check
 			</Text>
 			<Text>
 				<Text color="green">check</Text> — bring stack up, wait for health, optionally tear down
@@ -41,6 +41,13 @@ function HelpApp({ errorMessage }: { readonly errorMessage?: string }) {
 			</Text>
 			<Text>
 				<Text color="green">rm</Text> — stop dev, production, and root compose stacks (host only)
+			</Text>
+			<Text>
+				<Text color="green">install</Text> — bun install into the dev stack node_modules volume
+			</Text>
+			<Text dimColor>
+				{" "}
+				install flags: --quiet, --with-scripts; extra args forwarded to bun install
 			</Text>
 			<Text>
 				<Text color="green">up</Text> — compose up -d; forwards extra args
@@ -67,6 +74,7 @@ function HelpApp({ errorMessage }: { readonly errorMessage?: string }) {
 			<Text dimColor>bun run container check -- --keep-alive</Text>
 			<Text dimColor>bun run container cleanup -- --quiet</Text>
 			<Text dimColor>bun run container rm -- --force</Text>
+			<Text dimColor>bun run container install</Text>
 			<Text dimColor>bun run container up -- --build</Text>
 			<Text dimColor>bun run container --prod up -- --build</Text>
 			<Text dimColor>bun run container down -- --volumes</Text>

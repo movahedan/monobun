@@ -1,27 +1,49 @@
-name: repo-prod
+name: monobun-prod
 
 networks:
   prod-network:
     driver: bridge
 
 services:
+  express:
+    build:
+      context: .
+      dockerfile: apps/express/Dockerfile
+    ports:
+      - "5003:${EXPRESS_PORT:-3003}"
+    networks:
+      - prod-network
+    environment:
+      PORT: ${EXPRESS_PORT:-3003}
+      EXPRESS_PORT: ${EXPRESS_PORT:-3003}
+      HOST: ${HOST:-0.0.0.0}
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${EXPRESS_PORT:-3003}/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   vite-spa:
     build:
       context: .
       dockerfile: apps/vite-spa/Dockerfile
     ports:
-      - "5001:5001"
+      - "5001:${VITE_SPA_PORT:-3001}"
     networks:
       - prod-network
     environment:
-      - PORT=5001
-      - HOST=0.0.0.0
-      - NODE_ENV=production
-      - VITE_API_URL=http://express:5003
+      PORT: ${VITE_SPA_PORT:-3001}
+      VITE_SPA_PORT: ${VITE_SPA_PORT:-3001}
+      HOST: ${HOST:-0.0.0.0}
+      NODE_ENV: production
+      VITE_API_URL: ${VITE_API_URL:-http://express:${EXPRESS_PORT:-3003}}
     depends_on:
-      - express
+      express:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
+      test: ["CMD", "curl", "-f", "http://localhost:${VITE_SPA_PORT:-3001}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -32,37 +54,20 @@ services:
       context: .
       dockerfile: apps/nextjs/Dockerfile
     ports:
-      - "5002:5002"
+      - "5002:${NEXTJS_PORT:-3002}"
     networks:
       - prod-network
     environment:
-      - PORT=5002
-      - HOST=0.0.0.0
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://express:5003
+      PORT: ${NEXTJS_PORT:-3002}
+      NEXTJS_PORT: ${NEXTJS_PORT:-3002}
+      HOST: ${HOST:-0.0.0.0}
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://express:${EXPRESS_PORT:-3003}}
     depends_on:
-      - express
+      express:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
-  express:
-    build:
-      context: .
-      dockerfile: apps/express/Dockerfile
-    ports:
-      - "5003:5003"
-    networks:
-      - prod-network
-    environment:
-      - PORT=5003
-      - HOST=0.0.0.0
-      - NODE_ENV=production
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
+      test: ["CMD", "curl", "-f", "http://localhost:${NEXTJS_PORT:-3002}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -73,15 +78,16 @@ services:
       context: .
       dockerfile: packages/ui/Dockerfile
     ports:
-      - "5006:5006"
+      - "5004:${UI_PORT:-3004}"
     networks:
       - prod-network
     environment:
-      - PORT=5006
-      - HOST=0.0.0.0
-      - NODE_ENV=production
+      PORT: ${UI_PORT:-3004}
+      UI_PORT: ${UI_PORT:-3004}
+      HOST: ${HOST:-0.0.0.0}
+      NODE_ENV: production
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
+      test: ["CMD", "curl", "-f", "http://localhost:${UI_PORT:-3004}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -92,16 +98,17 @@ services:
       context: .
       dockerfile: apps/astro-ssg/Dockerfile
     ports:
-      - "5007:5007"
+      - "5005:${ASTRO_SSG_PORT:-3005}"
     networks:
       - prod-network
     environment:
-      - PORT=5007
-      - HOST=0.0.0.0
-      - NODE_ENV=production
-      - ASTRO_SITE_PATH=localhost:5007
+      PORT: ${ASTRO_SSG_PORT:-3005}
+      ASTRO_SSG_PORT: ${ASTRO_SSG_PORT:-3005}
+      HOST: ${HOST:-0.0.0.0}
+      NODE_ENV: production
+      ASTRO_SITE_PATH: ${ASTRO_SITE_PATH:-localhost:5005}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
+      test: ["CMD", "curl", "-f", "http://localhost:${ASTRO_SSG_PORT:-3005}"]
       interval: 30s
       timeout: 10s
       retries: 3

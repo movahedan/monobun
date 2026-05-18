@@ -20,10 +20,14 @@ const config: StorybookConfig = {
 		},
 	},
 	async viteFinal(config) {
-		if (config.server) {
-			config.server.host = process.env.HOST || "localhost";
-			config.server.allowedHosts = ["localhost", "ui"];
-		}
+		const port = Number(process.env.UI_PORT ?? process.env.PORT ?? 3004);
+		const host = process.env.HOST ?? "127.0.0.1";
+		config.server = {
+			...config.server,
+			port,
+			host: host === "0.0.0.0" ? true : host,
+			allowedHosts: ["localhost", "ui"],
+		};
 		return config;
 	},
 };

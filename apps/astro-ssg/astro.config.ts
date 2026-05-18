@@ -1,8 +1,8 @@
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
-const port = process.env.PORT ? Number(process.env.PORT) : 4321;
-const host = process.env.HOST || "localhost";
+const port = Number(process.env.ASTRO_SSG_PORT ?? process.env.PORT ?? 3005);
+const host = process.env.HOST ?? "127.0.0.1";
 const site = process.env.NODE_ENV === "development" ? `http://${host}:${port}` : `http://${host}`;
 const astroCommand = process.argv[2];
 const quietViteLogs = astroCommand === "check" || astroCommand === "build";
@@ -19,6 +19,7 @@ export default defineConfig({
 	output: "static",
 	site,
 	base: "",
+	server: { port, host: host === "0.0.0.0" ? true : host },
 	vite: {
 		logLevel: quietViteLogs ? "error" : "warn",
 		plugins: [tailwindcss()],
