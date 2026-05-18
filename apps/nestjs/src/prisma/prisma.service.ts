@@ -9,11 +9,13 @@ function getDatabaseUrl(): string | undefined {
 	return url && url.length > 0 ? url : undefined;
 }
 
+/** Placeholder only — no credentials; `onModuleInit` skips connect when `DATABASE_URL` is unset. */
+const UNCONFIGURED_DATABASE_URL = "postgresql://127.0.0.1:5432/monobun";
+
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
 	constructor() {
-		const connectionString =
-			getDatabaseUrl() ?? "postgresql://monobun:monobun@localhost:5432/monobun";
+		const connectionString = getDatabaseUrl() ?? UNCONFIGURED_DATABASE_URL;
 		const adapter = new PrismaPg({ connectionString });
 		super({ adapter });
 	}

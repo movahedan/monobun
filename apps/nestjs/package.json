@@ -9,7 +9,7 @@
 		"dev": "NODE_ENV=development tsup --watch --onSuccess 'bun dist/index.js'",
 		"build": "tsup",
 		"start": "bun dist/index.js",
-		"typecheck": "tsc --noEmit",
+		"typecheck": "bun run db:generate && tsc --noEmit",
 		"test": "bun test src/__tests__",
 		"openapi:emit": "NODE_ENV=development bun dist/index.js --emit-openapi",
 		"db:generate": "bunx --bun prisma generate",
