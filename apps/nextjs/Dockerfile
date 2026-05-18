@@ -9,9 +9,9 @@ FROM turbo AS pruner
 WORKDIR /app
 COPY ./apps ./apps
 COPY ./packages ./packages
-COPY ./scripts ./scripts
+COPY ./tools ./tools
 COPY ./package.json ./bun.lock ./
-RUN turbo prune --scope=nextjs --docker
+RUN turbo prune --scope=@apps/nextjs --docker
 
 FROM turbo AS installer
 WORKDIR /app
@@ -22,9 +22,9 @@ RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-next
 FROM turbo AS build
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
-COPY --from=pruner /app/scripts ./scripts
+COPY --from=pruner /app/tools ./tools
 COPY --from=installer /app/ .
-RUN bun run build --filter=nextjs
+RUN bun run build --filter=@apps/nextjs
 
 FROM turbo AS runner
 WORKDIR /app
@@ -42,4 +42,4 @@ COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/apps/nex
 COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/apps/nextjs/next.config.ts ./apps/nextjs/next.config.ts
 
 USER runner-user
-CMD ["bun", "run", "start", "--filter=nextjs"]
+CMD ["bun", "run", "start", "--filter=@apps/nextjs"]

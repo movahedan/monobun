@@ -22,12 +22,12 @@ This file provides guidance to Agents when working with the nextjs application.
 - **TypeScript** - Type-safe development
 
 ### UI & Styling
-- **@repo/ui** - Shared component library
-- **@repo/utils** - Shared utilities (cn helper, logger)
+- **@packages/ui** - Shared component library
+- **@packages/utils** - Shared utilities (cn helper, logger)
 - Server Components and Client Components patterns
 
 ### Build & Development
-- **@repo/config-typescript** - Shared TypeScript configuration extending Next.js preset
+- **@tools/typescript** - Shared TypeScript configuration extending Next.js preset
 
 ## Architecture
 
@@ -65,8 +65,8 @@ apps/nextjs/
 #### Server Components (Default)
 ```typescript
 // app/products/page.tsx
-import { Card } from '@repo/ui/card';
-import { Button } from '@repo/ui/button';
+import { Card } from '@packages/ui/card';
+import { Button } from '@packages/ui/button';
 import { getProducts } from '@/lib/api';
 
 interface Product {
@@ -116,9 +116,9 @@ async function ProductCard({ product }: { product: Product }) {
 'use client'; // Client Component directive
 
 import { useState } from 'react';
-import { Button } from '@repo/ui/button';
-import { cn } from '@repo/utils/cn';
-import { logger } from '@repo/utils/logger';
+import { Button } from '@packages/ui/button';
+import { cn } from '@packages/utils/cn';
+import { logger } from '@packages/utils/logger';
 
 interface AddToCartButtonProps {
   productId: string;
@@ -170,7 +170,7 @@ export function AddToCartButton({ productId, className }: AddToCartButtonProps) 
 ```typescript
 // app/api/products/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { logger } from '@repo/utils/logger';
+import { logger } from '@packages/utils/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -373,8 +373,8 @@ export async function generateMetadata(
 ## Integration with Monorepo
 
 ### Shared Dependencies
-- **@repo/ui**: Use for consistent UI components
-- **@repo/utils**: cn() for styling, logger for monitoring
+- **@packages/ui**: Use for consistent UI components
+- **@packages/utils**: cn() for styling, logger for monitoring
 
 ### API Integration
 - Communicates with the express API (port 3003) for backend functionality

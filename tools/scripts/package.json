@@ -1,6 +1,6 @@
 {
 	"private": true,
-	"name": "@repo/scripts",
+	"name": "@tools/scripts",
 	"type": "module",
 	"scripts": {
 		"lint": "biome check .",
@@ -13,7 +13,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.15",
-		"@repo/config-typescript": "workspace:*",
+		"@tools/typescript": "workspace:*",
 		"@types/bun": "1.3.14",
 		"@types/react": "19.2.14",
 		"typescript": "6.0.3"

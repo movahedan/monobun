@@ -42,16 +42,16 @@ Production-shaped stack: pass **`--prod` before the subcommand** (same CLI, diff
 
 | Path | Role |
 |------|------|
-| `apps/` | Runnables: `vite-spa`, `express`, `astro-ssg`, `nextjs` |
-| `packages/` | Shared libs (`ui`, `utils`, `config-typescript`, `config-tests`, …) |
-| `scripts/` | Bun CLIs wired from root `package.json` |
+| `apps/` | Runnables: `@apps/vite-spa`, `@apps/express`, `@apps/astro-ssg`, `@apps/nextjs` |
+| `packages/` | Shared libs (`ui`, `utils`, …) |
+| `tools/` | `typescript`, `tests-preset`, and Bun CLIs under `tools/scripts/` |
 | `docs/` | Human guides + planning notes |
 | `turbo.json` | Turborepo pipelines (`build`, `test`, `typecheck`, …) |
 | `biome.json` | Lint/format (`bun run lint`, `bun run lint -- --write`) |
 
 ## Commands (cheat sheet)
 
-Root scripts delegate to `scripts/**` (Ink UI unless `--quiet` where supported). Patterns: `bun run <group> <subcommand> [-- flags]`.
+Root scripts delegate to `tools/scripts/**` (Ink UI unless `--quiet` where supported). Patterns: `bun run <group> <subcommand> [-- flags]`.
 
 **Local**
 
@@ -67,7 +67,7 @@ There is no root `dev` script. From the repo root use the **`turbo`** script plu
 
 | Command | Purpose |
 |---------|---------|
-| `bun run turbo run dev --filter=vite-spa` | One app’s dev server (repeat `--filter` for `nextjs`, `express`, …) |
+| `bun run turbo run dev --filter=@apps/vite-spa` | One app’s dev server (repeat `--filter` for `@apps/nextjs`, `@apps/express`, …) |
 | `bun run turbo run dev` | All workspaces that define a `dev` task (often noisy) |
 
 **Compose (`container`)**
@@ -103,23 +103,23 @@ There is no root `dev` script. From the repo root use the **`turbo`** script plu
 **Turborepo filters**
 
 ```bash
-bun run build --filter=@repo/ui
-bun run test --filter=@repo/utils
+bun run build --filter=@packages/ui
+bun run test --filter=@packages/utils
 ```
 
-## `scripts/` map
+## `tools/scripts/` map
 
 | Directory | Entry (from root) | Notes |
 |-----------|-------------------|-------|
-| `scripts/local/` | `bun run local …` | Host bootstrap |
-| `scripts/container/` | `bun run container …` | Compose (dev file default; `--prod` for prod file) |
-| `scripts/overall/` | `bun run overall` | Quality gate |
-| `scripts/version/` | `bun run release …` | Releases |
-| `scripts/precommit/` | `bun run precommit` | Hooks / manual checks |
-| `scripts/ci/` | `bun run ci …` | GitHub Actions helpers |
-| `scripts/export-modules/` | `bun run export-modules update` | Package export graph |
+| `tools/scripts/local/` | `bun run local …` | Host bootstrap |
+| `tools/scripts/container/` | `bun run container …` | Compose (dev file default; `--prod` for prod file) |
+| `tools/scripts/overall/` | `bun run overall` | Quality gate |
+| `tools/scripts/version/` | `bun run release …` | Releases |
+| `tools/scripts/precommit/` | `bun run precommit` | Hooks / manual checks |
+| `tools/scripts/ci/` | `bun run ci …` | GitHub Actions helpers |
+| `tools/scripts/export-modules/` | `bun run export-modules update` | Package export graph |
 
-Shared helpers live beside these (for example `scripts/render-and-exit.tsx`, `scripts/step-progress.tsx`).
+Shared helpers live beside these (for example `tools/scripts/shared/render-and-exit.tsx`, `tools/scripts/shared/step-progress.tsx`).
 
 ## Intershell (what it is here)
 
@@ -129,7 +129,7 @@ The repo depends on the [`intershell`](https://www.npmjs.com/package/intershell)
 
 - **Docker errors**: ensure the daemon is running; try `bun run container compose -- ps`.
 - **`bun install` / lockfile issues**: remove `node_modules`, rerun `bun install`.
-- **Flaky tests / isolation**: prefer targeted folders (`bun test packages/<pkg>/src/…`); see `packages/config-tests/AGENTS.md`.
+- **Flaky tests / isolation**: prefer targeted folders (`bun test packages/<pkg>/src/…`); see `tools/tests-preset/AGENTS.md`.
 - **Type/lint drift**: `bun run lint -- --write` then `bun run typecheck`.
 
 For deeper topics (Renovate policy, auto-versioning details), read [`renovate.json`](../renovate.json) plus [AUTO_VERSIONING.md](./AUTO_VERSIONING.md); upstream Renovate docs are at [renovatebot.com](https://docs.renovatebot.com/).

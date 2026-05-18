@@ -33,7 +33,7 @@ Before naming or validating the branch, read the **full** patch of what you are 
 git diff HEAD
 ```
 
-If the diff is huge, still scan paths, renames, deletes, and config keys (workflows, `package.json`, `turbo.json`, `scripts/`, etc.). Fold **untracked** paths from `git status` (§2) into the same picture; they are not in `git diff HEAD`.
+If the diff is huge, still scan paths, renames, deletes, and config keys (workflows, `package.json`, `turbo.json`, `tools/scripts/`, etc.). Fold **untracked** paths from `git status` (§2) into the same picture; they are not in `git diff HEAD`.
 
 - **`main`** — do not build a feature/fix commit stack here. Create and switch: `git checkout -b <prefix>/<short-slug>` (prefix + slug from the change; ask the user if the intent is ambiguous).
 - **Any other branch** — validate: `bun run precommit -- --branch` (add `--quiet` if you want no Ink UI). If it fails, move to a valid name: prefer `git branch -m <prefix>/<short-slug>` when the branch is **not** pushed yet; otherwise `git checkout -b <prefix>/<short-slug>` from the current tip so uncommitted work follows.
@@ -78,8 +78,8 @@ Do **not** pick a generic subject before reading the change. Build the message f
 
 2. **Map touched workspaces to scopes**
    - For each path under `apps/<dir>/`, read `apps/<dir>/package.json` → `name` (e.g. `vite-spa`, `express`, `nextjs`, `astro-ssg`).
-   - For each path under `packages/<dir>/`, read `packages/<dir>/package.json` → `name` (e.g. `@repo/ui`).
-   - Root-only files (`.github/`, `docs/`, `scripts/`, root `package.json`, `turbo.json`, `.cursor/`, etc.) → scope **`root`**.
+   - For each path under `packages/<dir>/`, read `packages/<dir>/package.json` → `name` (e.g. `@packages/ui`).
+   - Root-only files (`.github/`, `docs/`, `tools/scripts/`, root `package.json`, `turbo.json`, `.cursor/`, etc.) → scope **`root`**.
    - If many scopes fit, prefer a **comma-separated** list (no spaces after commas) when the subject stays ≤ 72 chars; otherwise use the narrowest scope that matches the **primary** intent and validate with precommit.
 
 3. **Choose `type` from behavior, not habit**
@@ -117,7 +117,7 @@ Format: `type(scope1,scope2): description` (multiple scopes comma-separated, no 
 | `revert` | ⏪ Revert commits |
 | `merge` | Merge commits |
 
-**Scopes:** every scope token must equal the **`name`** field of a workspace `package.json` you touched (e.g. `root`, `vite-spa`, `express`, `nextjs`, `astro-ssg`, `@repo/ui`, `@repo/utils`). Omit scope only when it truly spans names awkwardly—then validate with precommit anyway. Intershell’s validator only knows names under `apps/`, `packages/`, and `root` today—if `precommit` rejects a scope, align with that list or adjust `intershell` config.
+**Scopes:** every scope token must equal the **`name`** field of a workspace `package.json` you touched (e.g. `root`, `vite-spa`, `express`, `nextjs`, `astro-ssg`, `@packages/ui`, `@packages/utils`). Omit scope only when it truly spans names awkwardly—then validate with precommit anyway. Intershell’s validator only knows names under `apps/`, `packages/`, and `root` today—if `precommit` rejects a scope, align with that list or adjust `intershell` config.
 
 **Practices:** imperative description; lowercase type; subject ≤ 72 chars; no trailing `.`; do not repeat the type as the first word of the description; `BREAKING CHANGE:` in body when needed.
 
@@ -146,7 +146,7 @@ git push -u origin HEAD
 1. Read `.github/pull_request_template.md`.
 2. Write a PR body (in chat or a temp file) that includes:
    - **Summary** — goal/problem and outcome (1–2 sentences), grounded in what the branch actually does.
-   - **What has changed?** — bullets tied to real paths/packages (workflows, apps, `scripts/`, etc.), user-visible behavior, breaking changes if any.
+   - **What has changed?** — bullets tied to real paths/packages (workflows, apps, `tools/scripts/`, etc.), user-visible behavior, breaking changes if any.
    - **How to test it?** — concrete steps; keep the `bun overall` checkbox if present; add compose/URLs only when relevant.
 3. Strip `<!-- ... -->` comments from what you submit.
 4. Open the PR with an explicit body, for example:

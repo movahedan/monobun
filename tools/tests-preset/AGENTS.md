@@ -4,7 +4,7 @@ This file provides guidance to Agents when working with the config-tests package
 
 ## Package Overview
 
-**@repo/config-tests** provides shared testing configurations, utilities, and mocks for consistent testing across all packages and applications in the monorepo.
+**@tools/tests-preset** provides shared testing configurations, utilities, and mocks for consistent testing across all packages and applications in the monorepo.
 
 ## Essential Commands
 
@@ -18,22 +18,22 @@ bun test  # Uses this preset automatically
 
 ### Main Test Setup
 ```typescript
-import '@repo/config-tests'; // Main test setup and global configuration
+import '@tools/tests-preset'; // Main test setup and global configuration
 ```
 
 ### Specific Testing Utilities
 ```typescript
-import '@repo/config-tests/mock-modules'; // Module mocking utilities
-import '@repo/config-tests/mock-bun'; // Bun runtime mocking
-import '@repo/config-tests/testing-library'; // React Testing Library setup
-import '@repo/config-tests/happydom'; // HappyDOM browser environment
+import '@tools/tests-preset/mock-modules'; // Module mocking utilities
+import '@tools/tests-preset/mock-bun'; // Bun runtime mocking
+import '@tools/tests-preset/testing-library'; // React Testing Library setup
+import '@tools/tests-preset/happydom'; // HappyDOM browser environment
 ```
 
 ### Debugging Tools
 ```bash
 # Test isolation debugging tool
-bun run @repo/config-tests/test-by-folder [path]
-bun run @repo/config-tests/test-by-folder src/entities/
+bun run @tools/tests-preset/test-by-folder [path]
+bun run @tools/tests-preset/test-by-folder src/entities/
 ```
 
 ## Testing Stack
@@ -76,7 +76,7 @@ describe('Button Component', () => {
 ### Entity/Utility Testing
 ```typescript
 import { describe, it, expect } from 'bun:test';
-import { cn } from '@repo/utils/cn';
+import { cn } from '@packages/utils/cn';
 
 describe('cn utility', () => {
   it('merges classes correctly', () => {
@@ -119,7 +119,7 @@ describe('EntityCommit', () => {
 ### Mocking External Dependencies
 ```typescript
 import { describe, it, expect, mock } from 'bun:test';
-import '@repo/config-tests/mock-modules';
+import '@tools/tests-preset/mock-modules';
 
 // Mock external modules
 const mockFetch = mock(() => Promise.resolve({
@@ -161,13 +161,13 @@ The `test-by-folder.ts` script helps identify cross-test interference issues:
 
 ```bash
 # Run tests by folder to check for isolation issues
-bun run @repo/config-tests/test-by-folder
+bun run @tools/tests-preset/test-by-folder
 
 # Test specific path
-bun run @repo/config-tests/test-by-folder src/entities/
+bun run @tools/tests-preset/test-by-folder src/entities/
 
 # Test specific package
-bun run @repo/config-tests/test-by-folder packages/intershell/src/entities/
+bun run @tools/tests-preset/test-by-folder packages/intershell/src/entities/
 ```
 
 **What it does:**
@@ -262,7 +262,7 @@ Add to your test configuration:
 // In package.json
 {
   "devDependencies": {
-    "@repo/config-tests": "workspace:*"
+    "@tools/tests-preset": "workspace:*"
   }
 }
 ```
@@ -272,7 +272,7 @@ Add to your test configuration:
 // In bunfig.toml or package.json
 {
   "test": {
-    "preload": ["@repo/config-tests"]
+    "preload": ["@tools/tests-preset"]
   }
 }
 ```

@@ -9,9 +9,9 @@ FROM turbo AS pruner
 WORKDIR /app
 COPY ./apps ./apps
 COPY ./packages ./packages
-COPY ./scripts ./scripts
+COPY ./tools ./tools
 COPY ./package.json ./bun.lock ./
-RUN turbo prune --scope=@repo/ui --docker
+RUN turbo prune --scope=@packages/ui --docker
 
 FROM turbo AS installer
 WORKDIR /app
@@ -23,8 +23,8 @@ FROM turbo AS build
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=installer /app/ .
-COPY --from=pruner /app/scripts ./scripts
-RUN bun run turbo run build:storybook --filter=@repo/ui
+COPY --from=pruner /app/tools ./tools
+RUN bun run turbo run build:storybook --filter=@packages/ui
 
 FROM nginx:alpine AS runner
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates

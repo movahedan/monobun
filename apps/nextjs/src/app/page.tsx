@@ -1,5 +1,5 @@
-import { Link } from "@repo/ui/molecules";
-import { log } from "@repo/utils/logger";
+import { Link } from "@packages/ui/molecules";
+import { log } from "@packages/utils/logger";
 
 import { CounterButtonWrapper } from "../components/CounterButtonWrapper";
 

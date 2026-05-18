@@ -2,7 +2,7 @@
 
 import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@repo/utils/cn";
+import { cn } from "@packages/utils/cn";
 
 import { Button } from "./button";
 import { Input } from "./input";

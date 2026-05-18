@@ -1,5 +1,5 @@
 {
-	"extends": ["@repo/config-typescript/base.json", "astro/tsconfigs/strict"],
+	"extends": ["@tools/typescript/base.json", "astro/tsconfigs/strict"],
 	"include": [".astro/types.d.ts", "**/*"],
 	"exclude": ["dist"]
 }

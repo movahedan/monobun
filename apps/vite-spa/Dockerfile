@@ -9,9 +9,9 @@ FROM turbo AS pruner
 WORKDIR /app
 COPY ./apps ./apps
 COPY ./packages ./packages
-COPY ./scripts ./scripts
+COPY ./tools ./tools
 COPY ./package.json ./bun.lock ./
-RUN turbo prune --scope=vite-spa --docker
+RUN turbo prune --scope=@apps/vite-spa --docker
 
 FROM turbo AS installer
 WORKDIR /app
@@ -22,9 +22,9 @@ RUN --mount=type=cache,target=/root/.bun/install/cache,id=monobun-bun-cache-vite
 FROM turbo AS build
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
-COPY --from=pruner /app/scripts ./scripts
+COPY --from=pruner /app/tools ./tools
 COPY --from=installer /app/ .
-RUN bun run build --filter=vite-spa
+RUN bun run build --filter=@apps/vite-spa
 
 FROM nginx:alpine AS runner
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates

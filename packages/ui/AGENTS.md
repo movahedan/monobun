@@ -4,7 +4,7 @@ This file provides guidance to Agents when working with the UI component library
 
 ## Package Overview
 
-**@repo/ui** is a React component library built with modern tools providing tree-shakable, type-safe components. It uses Radix UI primitives, Tailwind CSS, and includes comprehensive Storybook documentation.
+**@packages/ui** is a React component library built with modern tools providing tree-shakable, type-safe components. It uses Radix UI primitives, Tailwind CSS, and includes comprehensive Storybook documentation.
 
 ## Essential Commands
 
@@ -49,13 +49,13 @@ Each component follows a consistent structure:
 
 **Tree-Shakable Imports (Recommended)**:
 ```typescript
-import { Button } from '@repo/ui/button';
-import { Card } from '@repo/ui/card';
+import { Button } from '@packages/ui/button';
+import { Card } from '@packages/ui/card';
 ```
 
 **Barrel Imports (Convenience)**:
 ```typescript
-import { Button, Card, Input } from '@repo/ui';
+import { Button, Card, Input } from '@packages/ui';
 ```
 
 ### Technology Stack
@@ -71,7 +71,7 @@ import { Button, Card, Input } from '@repo/ui';
 ### Component Structure
 ```typescript
 // Example component pattern
-import { cn } from '@repo/utils';
+import { cn } from '@packages/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { forwardRef } from 'react';
 
@@ -180,7 +180,7 @@ export const Primary: Story = {
 ### Dependencies
 - **Radix UI**: Use for complex interactive components
 - **Lucide React**: Use for consistent iconography
-- **clsx/tailwind-merge**: Use via `@repo/utils` cn() helper
+- **clsx/tailwind-merge**: Use via `@packages/utils` cn() helper
 - **Class Variance Authority**: Use for variant management
 
 ## Type Safety

@@ -7,7 +7,7 @@
 	"workspaces": [
 		"apps/*",
 		"packages/*",
-		"scripts"
+		"tools/*"
 	],
 	"packageManager": "bun@1.3.1",
 	"engines": {
@@ -18,19 +18,19 @@
 	},
 	"scripts": {
 		"postinstall": "lefthook install",
-		"nuke": "bun scripts/nuke/index.tsx",
-		"local": "bun scripts/local/index.tsx",
+		"nuke": "bun tools/scripts/nuke/index.tsx",
+		"local": "bun tools/scripts/local/index.tsx",
 		"turbo": "turbo",
 		"lint": "biome check .",
 		"typecheck": "turbo run typecheck",
 		"test": "bun test",
 		"build": "turbo run build",
-		"overall": "bun scripts/overall/index.tsx",
-		"container": "bun scripts/container/index.tsx",
-		"release": "bun scripts/version/index.tsx",
-		"export-modules": "bun scripts/export-modules/index.tsx",
-		"precommit": "bun scripts/precommit/index.tsx",
-		"ci": "bun scripts/ci/index.tsx"
+		"overall": "bun tools/scripts/overall/index.tsx",
+		"container": "bun tools/scripts/container/index.tsx",
+		"release": "bun tools/scripts/version/index.tsx",
+		"export-modules": "bun tools/scripts/export-modules/index.tsx",
+		"precommit": "bun tools/scripts/precommit/index.tsx",
+		"ci": "bun tools/scripts/ci/index.tsx"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.15",

@@ -58,7 +58,9 @@
 		{
 			"enabled": false,
 			"matchPackageNames": [
-				"/^@repo//"
+				"/^@packages//",
+				"/^@tools//",
+				"/^@apps//"
 			]
 		},
 		{
@@ -116,7 +118,8 @@
 		},
 		{
 			"matchFileNames": [
-				"packages/*/package.json"
+				"packages/*/package.json",
+				"tools/*/package.json"
 			],
 			"groupName": "shared packages",
 			"groupSlug": "shared-packages",

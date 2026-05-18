@@ -30,7 +30,7 @@ This file provides guidance to Agents when working with the astro-ssg applicatio
 ### Development Tools
 - **@astrojs/tailwind** - Tailwind CSS integration
 - **@astrojs/check** - Astro type checking
-- **@repo/config-typescript** - Shared TypeScript configuration
+- **@tools/typescript** - Shared TypeScript configuration
 
 ## Architecture
 
@@ -210,7 +210,7 @@ The monorepo is organized as follows:
 
 - `apps/` - Applications (vite-spa, nextjs, express, astro-ssg)
 - `packages/` - Shared packages (ui, utils, config)
-- `scripts/` - Development and automation scripts
+- `tools/scripts/` - Development and automation scripts
 - `docs/` - Additional documentation files
 
 ## Next Steps
@@ -358,7 +358,7 @@ src/content/docs/
 ## Integration with Monorepo
 
 ### Shared Configuration
-- **@repo/config-typescript**: Shared TypeScript settings
+- **@tools/typescript**: Shared TypeScript settings
 - **Tailwind CSS**: Consistent with other apps
 - **Documentation syncing**: Pull content from package READMEs
 

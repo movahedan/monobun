@@ -44,7 +44,7 @@ describe('UserService - getUser', () => {
 
 ## Stack
 - **Runner**: `bun:test` (describe, it, expect, mock, spyOn)
-- **Preset**: `packages/config-tests` (HappyDOM, Testing Library, auto cleanup)
+- **Preset**: `tools/tests-preset` (HappyDOM, Testing Library, auto cleanup)
 - **React**: `@testing-library/react` + `@testing-library/jest-dom`
 - **NestJS**: `@nestjs/testing` for integration
 
@@ -161,7 +161,7 @@ Start with unit tests, add 1-2 integration tests where wiring matters.
 
 ## Test Utilities
 ```ts
-// Cross-package → packages/config-tests
+// Cross-package → tools/tests-preset
 // Single package → src/__tests__/test-utils.ts or src/__tests__/__utils__/
 // Single file → keep inline
 
@@ -173,7 +173,7 @@ export const createMockApi = () => ({
 ```
 
 **Placement:**
-- Cross-package → packages/config-tests
+- Cross-package → tools/tests-preset
 - Single package → src/__tests__/test-utils.ts or src/__tests__/__utils__/
 - Single file → keep inline
 
@@ -265,6 +265,6 @@ Write high-quality tests for the provided code.
 
 ## Related Documentation
 - `docs/GETTING_STARTED.md` - Testing commands and quality gate (`bun run overall`, `bun test`)
-- `packages/config-tests/AGENTS.md` - Shared test utilities and setup
+- `tools/tests-preset/AGENTS.md` - Shared test utilities and setup
 - `AGENTS.md` - Repo-level architecture + where standards live
 - `bunfig.toml` - Preloaded test setup files
