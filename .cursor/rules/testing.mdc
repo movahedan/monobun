@@ -1,270 +1,40 @@
 ---
-description: Testing Prompt & Bun test standards for writing tests in this monorepo (readable, searchable, modular, minimal LoC)
+description: Bun test style for this monorepo — naming, AAA, mocks, file placement. Keywords: bun:test, describe, it, mock, config-tests
 globs: ["**/*.test.ts", "**/*.spec.ts"]
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Testing
 
-## 🚨 CRITICAL: Self-Documenting Code
+## Stack (configured — do not restate)
 
-**Code should speak for itself. Test names and structure are your documentation.**
+- Runner: `bun:test` — see [`bunfig.toml`](../../bunfig.toml) preload
+- Preset: [`tools/tests-preset`](../../tools/tests-preset) — HappyDOM, Testing Library, cleanup
+- Details: [`tools/tests-preset/AGENTS.md`](../../tools/tests-preset/AGENTS.md)
 
-### Principles
-- **No inline comments** - Test names and code structure should be clear enough
-- **No JSDoc in tests** - Test descriptions and names should explain intent
-- **Use spacing for organization** - Related test cases together (no blank line), separate logical groups (blank line)
-- **Test names explain behavior** - `it('<expected outcome> when <condition>')` tells the story
+## Naming and structure
 
-### Test Organization Through Spacing
-```ts
-describe('UserService - getUser', () => {
-  it('returns user when found', () => {
-    const userId = 1;
-    const expected = { id: 1, name: 'John' };
-    
-    const result = getUser(userId);
-    
-    expect(result).toEqual(expected);
-  });
+- `describe('<module> - <unit>', () => {})`
+- `it('<expected outcome> when <condition>', () => {})`
+- No inline comments or JSDoc in tests; names document behavior
+- AAA layout; blank line between logical groups inside a test
 
-  it('throws error when user not found', () => {
-    const userId = 999;
-    
-    expect(() => getUser(userId)).toThrow('User not found');
-  });
+## Quality bar
 
-  it('handles null input gracefully', () => {
-    const result = getUser(null);
-    
-    expect(result).toBeNull();
-  });
-});
-```
+- Assert observable behavior, not internals
+- One failure reason per test; no flakiness (mock time/network/random)
+- Mock **boundaries** only (network, DB, fs, env) — not pure logic
+- Restore spies; preset handles most cleanup
 
-## Stack
-- **Runner**: `bun:test` (describe, it, expect, mock, spyOn)
-- **Preset**: `tools/tests-preset` (HappyDOM, Testing Library, auto cleanup)
-- **React**: `@testing-library/react` + `@testing-library/jest-dom`
-- **NestJS**: `@nestjs/testing` for integration
+## File placement
 
-## Bun Documentation
-- https://bun.com/docs/test/configuration
-- https://bun.com/docs/test/runtime-behavior
-- https://bun.com/docs/test/mocks
-- https://bun.com/docs/test/dates-times
-- https://bun.com/docs/test/lifecycle
-- https://bun.com/docs/test/snapshots
-- https://bun.com/docs/test/dom
-- https://bun.com/docs/test/writing-tests
-
-## Bun API Notes
-- **Parameterized tests**: `test.each(...)` and `describe.each(...)` (not `it.each`)
-- **Timeouts**: default 5000ms (configurable via bunfig.toml)
-- **Coverage**: `bun test --coverage` or `bun test --coverage --coverage-reporter=lcov`
-- **DOM typing**: Add `/// <reference lib="dom" />` if TypeScript complains
-
-## File Placement
-```ts
-// Unit tests: co-locate or group
-src/<area>/<thing>.test.ts
-src/__tests__/<thing>.test.ts
-
-// Integration tests
-src/__tests__/<thing>.integration.test.ts
-```
-
-## Naming
-```ts
-describe('<module> - <unit>', () => {});
-it('<expected outcome> when <condition>', () => {});
-// Prefer behavioral names, not implementation names
-```
-
-## Quality Bar
-- Assert observable behavior (not internals)
-- One reason to fail per test
-- No flaky tests (mock time/network/random)
-- No cross-test interference
-- Mock boundaries only (not pure logic)
-- Fast by default
+- Unit: `src/<area>/<thing>.test.ts` or `src/__tests__/`
+- Integration: `src/__tests__/<thing>.integration.test.ts`
 
 ## Patterns
-```ts
-// ✅ AAA + early returns
-it('returns user when found', () => {
-  const userId = 1;
-  const expected = { id: 1, name: 'John' };
-  
-  const result = getUser(userId);
-  
-  expect(result).toEqual(expected);
-});
 
-// ✅ Table-driven tests (map through cases)
-const cases = [
-  { name: 'returns user when found', input: 1, expected: { id: 1, name: 'John' } },
-  { name: 'throws when not found', input: 999, expectedError: 'User not found' as const },
-  { name: 'handles edge case', input: 0, expected: null },
-] as const;
+- Table-driven cases via `cases.forEach` or `test.each` (Bun: `test.each` / `describe.each`, not `it.each`)
 
-cases.forEach((tc) => {
-  it(tc.name, () => {
-    if ('expectedError' in tc) {
-      expect(() => getUser(tc.input)).toThrow(tc.expectedError);
-      return;
-    }
-    expect(getUser(tc.input)).toEqual(tc.expected);
-  });
-});
+## Commands
 
-// ✅ Parameterized (Bun supports test.each)
-test.each([
-  { input: 1, expected: { id: 1 } },
-  { input: 2, expected: { id: 2 } },
-])('returns user $input', ({ input, expected }) => {
-  expect(getUser(input)).toEqual(expected);
-});
-```
-
-## Mocking Strategy
-```ts
-// ✅ Mock boundaries (network, DB, filesystem, env)
-const mockApi = { 
-  get: mock(async () => ({ data: {} })),
-  post: mock(async () => ({ data: {} }))
-};
-
-// ✅ Reset/restore rules (test isolation)
-// Preset handles cleanup, but ensure spies are restored
-const spy = spyOn(globalThis, 'fetch');
-try {
-} finally {
-  spy.mockRestore();
-}
-
-// ❌ Don't mock pure functions or your own logic
-// ❌ Don't leave modified globals (process.env, globalThis.fetch)
-```
-
-**Rules:**
-- Mock boundaries (network, DB, filesystem, env)
-- Preset handles cleanup, but ensure spies are restored
-- Don't mock pure functions or your own logic
-- Don't leave modified globals (process.env, globalThis.fetch)
-
-## Unit vs Integration
-- **Unit test**: deterministic, isolated with mocks, fast failure signals
-- **Integration test**: behavior from wiring, contracts between modules, real serialization
-
-Start with unit tests, add 1-2 integration tests where wiring matters.
-
-## Test Utilities
-```ts
-// Cross-package → tools/tests-preset
-// Single package → src/__tests__/test-utils.ts or src/__tests__/__utils__/
-// Single file → keep inline
-
-// Example: Mock factory
-export const createMockApi = () => ({
-  get: mock(async () => ({ ok: true })),
-  post: mock(async () => ({ ok: true })),
-});
-```
-
-**Placement:**
-- Cross-package → tools/tests-preset
-- Single package → src/__tests__/test-utils.ts or src/__tests__/__utils__/
-- Single file → keep inline
-
-## Templates
-```ts
-// Unit test template (table-driven)
-import { describe, expect, it } from "bun:test";
-
-describe("<module> - <unit>", () => {
-  const cases = [
-    { name: "<expected outcome> when <condition>", input: <input>, expected: <expected> },
-    { name: "throws <error> when <condition>", input: <input>, expectedError: "<message>" as const },
-  ] as const;
-
-  cases.forEach((tc) => {
-    it(tc.name, () => {
-      const run = () => <call(tc.input)>;
-      
-      if ("expectedError" in tc) {
-        expect(run).toThrow(tc.expectedError);
-        return;
-      }
-      
-      expect(run()).toEqual(tc.expected);
-    });
-  });
-});
-```
-
-// Integration test template (NestJS)
-```ts
-import { afterAll, beforeAll, describe, expect, it } from "bun:test";
-import type { INestApplication } from "@nestjs/common";
-import { Test, type TestingModule } from "@nestjs/testing";
-
-describe("<api> - <integration>", () => {
-  let app: INestApplication;
-
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [/* module under test */],
-    }).compile();
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
-
-  afterAll(async () => {
-    await app.close();
-  });
-
-  it("<expected outcome> when <condition>", async () => {
-  });
-});
-```
-
-## AI Test Writer Prompt
-```text
-You are a senior TypeScript test engineer in a Bun + Turborepo monorepo.
-
-## Goal
-Write high-quality tests for the provided code.
-
-## Constraints
-- Use `bun:test` (describe, it, expect, mock, spyOn)
-- Preset preloaded: HappyDOM + Testing Library + cleanup
-- Prefer table-driven cases for similar scenarios
-- Extract shared utilities only when reused
-- Deterministic (no real time/network/random) unless integration test
-- Don't change production code unless it improves testability
-
-## Process
-1) List public behaviors and edge cases
-2) Identify boundaries to mock vs run real
-3) Propose test plan (unit + integration split)
-
-## Output
-- Test code only (and new utilities if needed)
-- Naming: describe('<module> - <unit>'), it('<outcome> when <condition>')
-- AAA structure, focused assertions
-- Table-driven for repeated patterns
-- Cover: happy path, edge cases, errors, integration (if wiring matters)
-
-## Context
-- Files: <PATHS>
-- Related: <PATHS>
-- Changes: <SUMMARY>
-- Test types: [ ] Unit [ ] Integration [ ] Component
-```
-
-## Related Documentation
-- `docs/GETTING_STARTED.md` - Testing commands and quality gate (`bun run overall`, `bun test`)
-- `tools/tests-preset/AGENTS.md` - Shared test utilities and setup
-- `AGENTS.md` - Repo-level architecture + where standards live
-- `bunfig.toml` - Preloaded test setup files
+See [`docs/CHEATSHEET.md`](../../docs/CHEATSHEET.md) — `bun test`, `bun run overall`.

@@ -1,0 +1,56 @@
+---
+description: TypeScript and React conventions not enforced by Biome or tsconfig — naming, unions, self-documenting structure, imports. Keywords: TypeScript, React, discriminated union, interface, naming
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: false
+---
+
+# TypeScript and React (agent deltas)
+
+## Enforced elsewhere — do not restate
+
+Open before debating style:
+
+- [`tools/typescript/base.json`](../../tools/typescript/base.json) — `strict`, unused locals/parameters, module settings
+- [`biome.json`](../../biome.json) — `noExplicitAny`, formatting, suspicious rules
+- [`tools/typescript/AGENTS.md`](../../tools/typescript/AGENTS.md) — which preset (`base`, `vite`, `nextjs`, …) to extend
+
+## Self-documenting code
+
+- No inline comments; names and structure carry intent
+- No JSDoc except on a module’s main file when behavior is non-obvious
+- Group related lines; blank line between logical groups
+
+## Naming
+
+| Kind | Convention |
+|------|------------|
+| Files | kebab-case |
+| Functions, variables | camelCase |
+| Classes, types, interfaces | PascalCase |
+| Constants | ALL_CAPS |
+| Generic params | `T` prefix (`TEntity`) |
+
+## Type patterns (Biome/tsconfig gaps)
+
+- Prefer **discriminated unions** over bags of optionals for state machines
+- Prefer **`interface` extends** over intersection types (`type A & B`) for composition
+- **Explicit return types** on non-component functions; components may omit
+- Use **type guards** for `unknown` narrowing
+- Prefer **`as const` objects** over numeric enums
+- **Named exports**; default export only where the framework requires (e.g. Next.js pages)
+
+## Imports
+
+Order: React → third-party → local (absolute) → relative.
+
+## React
+
+- Functional components with `readonly` props interfaces
+- Custom hooks: explicit return type interfaces
+- Event handlers: `React.FormEvent`, `React.ChangeEvent`, etc.
+- Early return for loading / error UI branches
+
+## Errors
+
+- Prefer `Result<T, E>` for parse/validate paths when throwing would scatter control flow
+- Custom error classes with `name` when throwing domain errors

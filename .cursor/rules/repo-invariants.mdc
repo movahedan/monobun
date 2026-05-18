@@ -1,0 +1,35 @@
+---
+description: Monorepo invariants for every agent session — context map, quality gate, secrets, initiative entry. Keywords: AGENTS, overall, secrets, initiative-workflow
+alwaysApply: true
+---
+
+# Repo invariants
+
+## Context map
+
+| Need | Read |
+|------|------|
+| Repo layout, packages | [`AGENTS.md`](../../AGENTS.md) |
+| Quick setup | [`README.md`](../../README.md) |
+| Compose / layout / troubleshooting | [`AGENTS.md`](../../AGENTS.md) |
+| Commands (tables) | [`docs/CHEATSHEET.md`](../../docs/CHEATSHEET.md) |
+| Area you edit | Nested `AGENTS.md` under that `apps/` or `packages/` path |
+| TypeScript / React deltas | [`typescript.mdc`](typescript.mdc) when editing `.ts` / `.tsx` |
+| Multi-phase work | [initiative-workflow](../skills/initiative-workflow/SKILL.md) |
+
+## Quality gate
+
+Before claiming work is done or opening a PR: `bun run overall` (unless the approved plan lists a narrower gate).
+
+## Secrets and config
+
+- Never commit `.env`, credentials, or API keys.
+- Read required env vars at use site; throw if missing (do not assume defaults for secrets).
+
+## Initiative work
+
+Phased features: **planning-workflow** → **builder-workflow** (code only) → **documentation-sync** (plan doc list) → **git-pr-workflow**. See [initiative-workflow](../skills/initiative-workflow/SKILL.md).
+
+## Subagents
+
+Spawn policy lives in [builder-workflow](../skills/builder-workflow/SKILL.md) and [orchestration.md](../skills/builder-workflow/orchestration.md) — not in rules.

@@ -72,12 +72,12 @@ The app includes all documentation from the main project:
 
 ### Core Documentation
 - **Quality Checklist** (`0_QUALITY_CHECKLIST` placeholder in astro-ssg; rules live under `.cursor/rules/`)
-- **Getting started** (`docs/GETTING_STARTED.md`) — setup, compose, command cheat sheet (legacy numbered install/setup/dev guides redirect here)
+- **Quick start** (`README.md`) — install and compose bootstrap; **AGENTS.md** — repo map, ports, troubleshooting; **CHEATSHEET** — commands
 
 ### Technical documentation
 - **Scripting** (`docs/SCRIPTING.md`) — Bun `tools/scripts/`, Ink, Intershell entities (replaces legacy `4_INTERSHELL.md`)
 - **Auto versioning** (`docs/AUTO_VERSIONING.md`) — `bun run release …` (replaces legacy `7_AUTO_VERSIONING.md`)
-- **Docker / dev stack** — covered in `docs/GETTING_STARTED.md` (replaces standalone `5_DOCKER.md`)
+- **Docker / dev stack** — README quick start + `AGENTS.md` (replaces standalone `5_DOCKER.md`)
 - **Renovate** — `renovate.json` at repo root plus [Renovate docs](https://docs.renovatebot.com/) (replaces `6_RENOVATE.md`)
 
 ### Process documentation

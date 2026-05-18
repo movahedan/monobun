@@ -1,168 +1,114 @@
 # AGENTS.md
 
-This file provides guidance to Agents when working with code in this repository.
+Guidance for agents working in this monorepo. **Map and pointers** — standards in rules; procedures in skills; human setup in [README.md](README.md#quick-start); commands in [docs/CHEATSHEET.md](docs/CHEATSHEET.md).
 
-## 🎯 Development Rules & Standards
+## Standards (`.cursor/rules/`)
 
-**IMPORTANT: Use the standards and guides below (`.cursor/rules/`, human docs, and skills) when working in this repository:**
+| Rule | When |
+|------|------|
+| [repo-invariants.mdc](.cursor/rules/repo-invariants.mdc) | Every session (always) |
+| [typescript.mdc](.cursor/rules/typescript.mdc) | `.ts` / `.tsx` edits |
+| [security.mdc](.cursor/rules/security.mdc) | `.ts` / `.js` (ReDoS, validation, auth) |
+| [testing.mdc](.cursor/rules/testing.mdc) | `*.test.ts` / `*.spec.ts` |
+| [clean-dom.mdc](.cursor/rules/clean-dom.mdc) | UI apps + `packages/ui` |
+| [advisor.mdc](.cursor/rules/advisor.mdc) | Review / trade-offs (`@advisor` or intelligent apply) |
 
-- **[.cursor/rules/coding.mdc](.cursor/rules/coding.mdc)** - TypeScript, React, naming, imports, error handling
-- **[.cursor/rules/testing.mdc](.cursor/rules/testing.mdc)** - Bun test runner, patterns, isolation
-- **[.cursor/rules/clean-dom.mdc](.cursor/rules/clean-dom.mdc)** - Semantic HTML, accessibility, Tailwind
-- **[.cursor/rules/security.mdc](.cursor/rules/security.mdc)** - Security best practices, regex safety, input validation
-- **[.cursor/rules/advisor.mdc](.cursor/rules/advisor.mdc)** - Engineering review, trade-offs, risk
-- **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - Turborepo filters, workspace commands, Docker Compose on the host (`bun run container …`)
-- **[.cursor/skills/documentation-sync/SKILL.md](.cursor/skills/documentation-sync/SKILL.md)** — Documentation tiers, discovery commands, sync checklist
-
-These references contain detailed guidance on coding standards, security practices, and development patterns that should be followed throughout the codebase.
+Enforced by tooling: [`tools/typescript/base.json`](tools/typescript/base.json), [`biome.json`](biome.json).
 
 ## Cursor skills
 
-- **[.cursor/skills/monorepo-script-commands/SKILL.md](.cursor/skills/monorepo-script-commands/SKILL.md)** — Bun subcommand CLIs with `parseArgs`, Ink step progress; reference `tools/scripts/local/`, `tools/scripts/container/`, and `tools/scripts/shared/render-and-exit.tsx` / `tools/scripts/shared/step-progress.tsx`.
+| Skill | Role |
+|-------|------|
+| [initiative-workflow](.cursor/skills/initiative-workflow/SKILL.md) | plan → build → docs → PR (per phase) |
+| [planning-workflow](.cursor/skills/planning-workflow/SKILL.md) | `.cursor/plans/*.plan.md` |
+| [builder-workflow](.cursor/skills/builder-workflow/SKILL.md) | Code/config execution; [orchestration](.cursor/skills/builder-workflow/orchestration.md) for Task spawn |
+| [documentation-sync](.cursor/skills/documentation-sync/SKILL.md) | Plan doc list after build, before PR |
+| [git-pr-workflow](.cursor/skills/git-pr-workflow/SKILL.md) | Commit, push, PR |
+| [monorepo-script-commands](.cursor/skills/monorepo-script-commands/SKILL.md) | Ink CLIs under `tools/scripts/` |
 
-## Essential Commands
+## Essential commands
 
-Human-oriented cheat sheet: **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)**.
+Setup: [README.md](README.md#quick-start) · Commands: [docs/CHEATSHEET.md](docs/CHEATSHEET.md).
 
-### Development
-- `bun run turbo run dev --filter=<pkg>` - Start one workspace’s `dev` task from the repo root (there is no root `bun run dev` script)
-- `bun run build` - Build all packages and applications (`turbo run build`)
+- `bun run overall` — quality gate before commit/PR
+- `bun test` — tests (`bunfig.toml` + `tools/tests-preset`)
+- `bun run turbo run dev --filter=@apps/vite-spa` — one app dev server
+- `bun run precommit` — staged files, branch name, commit message
 
-### Code Quality
-- `bun run overall` - Run comprehensive quality check (lint --write, typecheck affected, test affected, build affected)
+## Architecture overview
 
-### Testing
-- `bun test` - Run tests across all packages
-- `bun test tools/scripts/my-script.test.ts` - Run specific test
-- `bun test --coverage` - Run tests with coverage report
-- `bun test --coverage-reporter=lcov` - Run tests with coverage reporter lcov
+**Turborepo** monorepo, **Bun** package manager and runtime.
 
-### Commit Management
-- `bun run precommit` - Validate staged files, branch name, or commit message (`--help` for flags)
+**Prerequisites:** Git, [Bun](https://bun.sh/) 1.3.x, [Docker](https://docs.docker.com/desktop/) (full stack), Node **≥ 25**, ~8GB+ RAM.
 
-### Version Management
-- `bun run release prepare` - Prepare version bumps and changelog
-- `bun run release apply` - Apply prepared version changes
-- `bun run release ci` - Full CI version workflow
+**Day-to-day:** dev stack on the host with `bun run container …` — `docker-compose.dev.yml` at repo root ([Docker Compose](#docker-compose-host)).
 
-### Local development
-- `bun run local setup` - Install deps, lint (write), typecheck, tests, build
-- `bun run local vscode` - Regenerate `.vscode/settings.json` and `.vscode/extensions.json` from the workspace (package scopes and existing config)
-- `bun run local cleanup` - Remove build artifacts and `node_modules`
+### Workspace names
+
+Use each workspace’s `package.json#name` in Turbo `--filter`, compose, and commit scopes.
+
+| Area | Examples |
+|------|----------|
+| `apps/*` | `@apps/vite-spa`, `@apps/nextjs`, `@apps/express`, `@apps/astro-ssg` |
+| `packages/*` | `@packages/ui`, `@packages/utils` |
+| `tools/*` | `@tools/scripts`, `@tools/typescript`, `@tools/tests-preset` |
+
+### Repo layout
+
+| Path | Role |
+|------|------|
+| `apps/`, `packages/` | Applications and shared libraries |
+| `tools/` | TS presets (`typescript/`), test preset (`tests-preset/`), Bun CLIs (`scripts/`) |
+| `docs/` | Guides — [CHEATSHEET](docs/CHEATSHEET.md), [SCRIPTING](docs/SCRIPTING.md), [AUTO_VERSIONING](docs/AUTO_VERSIONING.md) |
+| `turbo.json`, `biome.json`, `bunfig.toml` | Build, lint, test preload |
+
+Nested `AGENTS.md` under each app, package, and tool workspace.
+
+### Workspaces
+
+| Path | `name` | Port | Role | Guide |
+|------|--------|------|------|-------|
+| `apps/vite-spa` | `@apps/vite-spa` | 3001 | Vite admin | [AGENTS.md](apps/vite-spa/AGENTS.md) |
+| `apps/nextjs` | `@apps/nextjs` | 3002 | Next.js storefront | [AGENTS.md](apps/nextjs/AGENTS.md) |
+| `apps/express` | `@apps/express` | 3003 | API | [AGENTS.md](apps/express/AGENTS.md) |
+| `apps/astro-ssg` | `@apps/astro-ssg` | 3005 | Docs site | [AGENTS.md](apps/astro-ssg/AGENTS.md) |
+| `packages/ui` | `@packages/ui` | 3004 | React + Storybook | [AGENTS.md](packages/ui/AGENTS.md) |
+| `packages/utils` | `@packages/utils` | — | Shared utilities | [AGENTS.md](packages/utils/AGENTS.md) |
+
+### Tools (`tools/`)
+
+| Path | Role |
+|------|------|
+| `tools/scripts` | Bun CLIs (`local`, `container`, `overall`, …) — [SCRIPTING.md](docs/SCRIPTING.md) |
+| `tools/typescript` | TS presets — [AGENTS.md](tools/typescript/AGENTS.md) |
+| `tools/tests-preset` | Test preload + Testing Library — [AGENTS.md](tools/tests-preset/AGENTS.md) |
+
+Root `package.json` delegates to **`tools/scripts/`** for Ink CLIs.
 
 ### Docker Compose (host)
-- `bun run container …` - Single entry for compose: `docker-compose.dev.yml` by default, or `docker-compose.yml` when you pass **`--prod` before the subcommand** (`setup`, `up`, `down`, `build`, `check`, `compose`, `health`, `logs`, `cleanup`, `rm`); run `bun run container` alone for help
-- `bun run container --prod up` - Production-shaped stack (`COMPOSE_PROJECT_NAME=repo-prod`)
-- In CI, call the same CLI, e.g. `bun run container --prod compose build …` / `bun run container --prod build …` (no separate `prod:*` package scripts)
 
-### CI helpers
-- `bun run ci attach-affected` / `bun run ci attach-service-ports` - GitHub Actions outputs (see `bun run ci` with no args for help)
+```bash
+bun run container setup
+bun run container up
+bun run container check
+```
 
-### Storybook
-- `bun run turbo run build:storybook --filter=@packages/ui` - Build Storybook for the UI package (see `packages/ui/package.json`)
+Prod-shaped file: `bun run container --prod up`. Extra compose flags after `--`: `bun run container up -- --build`. Help: `bun run container`.
 
-### Single Package Development
-Use Turbo from the repo root (`bun run turbo …`):
+### Troubleshooting
 
-- `bun run build --filter=@packages/ui` - Build only the UI package
-- `bun run test --filter=@packages/utils` - Test only the utils package
-- `bun run turbo run dev --filter=@apps/vite-spa` - Run only the vite-spa (Vite admin) app dev script
+- **Docker** — `bun run container compose -- ps`
+- **Deps** — `bun run local cleanup` + `bun install`, or `bun run nuke`
+- **Tests** — `bun test packages/ui/src/…`; preset: [tools/tests-preset/AGENTS.md](tools/tests-preset/AGENTS.md)
+- **Filters** — workspace `name` from `package.json`, not folder name alone
+- **Lint/types** — `bun run lint -- --write`, `bun run typecheck`
 
-## Architecture Overview
+Renovate: [renovate.json](renovate.json).
 
-This is a **Turborepo monorepo** using **Bun** as the package manager and runtime, designed with entity-driven architecture and CLI tooling.
+### Stack notes
 
-### Package Structure
-- **`packages/`** - Shared packages and libraries
-  - `ui` - Shared React component library with Storybook (port 3004)
-  - `utils` - Shared utility functions
+React 19, Next.js 15, Astro, Express, Tailwind, Biome, Lefthook, Docker Compose (`bun run container …`).
 
-- **`tools/`** - Repo tooling workspaces
-  - `typescript` - Shared TypeScript configurations (`@tools/typescript`)
-  - `tests-preset` - Shared testing configurations and mocks (`@tools/tests-preset`)
-  - `scripts` - Bun CLIs for local, container, CI, release (`@tools/scripts`)
+Read the **nested `AGENTS.md`** for the area you touch before editing.
 
-- **`apps/`** - Applications
-  - `@apps/vite-spa` - React + Vite admin dashboard (port 3001)
-  - `@apps/nextjs` - Next.js e-commerce storefront (port 3002)
-  - `@apps/express` - Express + TypeScript backend API (port 3003)
-  - `@apps/astro-ssg` - Astro documentation site
-
-### Key Technologies
-- **Build System**: Turborepo with Bun package manager
-- **Frontend**: React 19, Next.js 15, Astro, Svelte
-- **Backend**: Express.js with TypeScript
-- **Styling**: Tailwind CSS, CSS modules
-- **Testing**: Bun test runner with custom test presets
-- **Code Quality**: Biome for linting/formatting
-- **Containers**: Docker Compose for local dev and production-style stacks
-- **Git Hooks**: Lefthook for pre-commit automation
-
-### CLI & Automation
-Repository scripts provide tooling for validation, automation, and versioning. Internal implementation details are not part of this repository; refer to script usage in package.json.
-
-### Capabilities
-- Affected package detection for CI/CD optimization
-- Git branch operations and management
-- Staged file checking, commit parsing, and conventional commit support
-- Docker Compose parsing and service health monitoring
-- Package management and operations
-- Changelog auto-generation and version management
-
-### Development Workflow
-1. **Docker-First**: Use `bun run container …` when you want services in Compose; otherwise work on the host with Bun
-2. **Entity-Driven**: Use provided scripts/utilities for managing packages, branches, commits, etc.
-3. **Quality Gates**: All code goes through Biome linting, TypeScript checking, and testing
-4. **Automation**: Git hooks handle commit formatting, version management, and changelog generation
-
-### TypeScript Configuration
-- Strict TypeScript with explicit return types required
-- No `any` types allowed - use proper typing with type guards
-- Interface definitions required for all data structures
-- Import organization: React → Third-party → Local (absolute) → Relative
-
-### Testing Conventions
-- Use Bun test runner with custom test presets from `tools/tests-preset`
-- Follow AAA pattern (Arrange, Act, Assert)
-- Create reusable test utilities and mock factories
-- Group tests logically with descriptive `describe` blocks
-
-### Security Guidelines
-- All user input must be validated and sanitized
-- Environment variables for sensitive configuration
-- Parameterized queries to prevent SQL injection
-- JWT tokens for authentication with refresh mechanisms
-- CORS properly configured for allowed origins
-
-### Component Development
-- Functional components with TypeScript interfaces
-- Custom hooks for reusable logic
-- Consistent import/export organization
-- Props interfaces with explicit typing
-
-## Package-Specific Documentation
-
-For detailed information about working with specific packages and applications, refer to their individual AGENTS.md files:
-
-### Package Management
-
-- Keep dependencies up to date
-- Use exact versions for stability
-- Test package compatibility
-- Document breaking changes
-
-### Packages
-- **[packages/ui/AGENTS.md](packages/ui/AGENTS.md)** - React component library with Storybook
-- **[packages/utils/AGENTS.md](packages/utils/AGENTS.md)** - Shared utility functions (cn, logger)
-- **[tools/typescript/AGENTS.md](tools/typescript/AGENTS.md)** - TypeScript configuration presets
-- **[tools/tests-preset/AGENTS.md](tools/tests-preset/AGENTS.md)** - Testing configuration and utilities
-
-### Applications  
-- **[apps/vite-spa/AGENTS.md](apps/vite-spa/AGENTS.md)** - Vite + React admin dashboard (port 3001)
-- **[apps/nextjs/AGENTS.md](apps/nextjs/AGENTS.md)** - Next.js e-commerce storefront (port 3002)
-- **[apps/express/AGENTS.md](apps/express/AGENTS.md)** - Express.js backend API (port 3003)
-- **[apps/astro-ssg/AGENTS.md](apps/astro-ssg/AGENTS.md)** - Astro documentation site
-
-**When working on a specific package or application, always read its AGENTS.md file first for detailed guidance, architecture patterns, and development practices specific to that component.**
-
-When working with this codebase, always run `bun run overall` before committing to ensure code quality and type safety.
+When working with this codebase, run **`bun run overall`** before committing unless a narrower plan gate applies.

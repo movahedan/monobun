@@ -1,7 +1,7 @@
 ---
-description: HTML semantic elements, DOM structure, responsive images, forms, CSS, and Tailwind best practices with accessibility
-globs: ["**/*.html", "**/*.tsx", "**/*.jsx", "**/*.css"]
-alwaysApply: true
+description: HTML semantic elements, DOM structure, responsive images, forms, CSS, and Tailwind best practices with accessibility a11y
+globs: ["apps/**/*.tsx","packages/ui/**/*.tsx", "**/*.css"]
+alwaysApply: false
 ---
 
 # Clean DOM & Styling
