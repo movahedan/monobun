@@ -1,0 +1,96 @@
+generator client {
+  provider   = "prisma-client-js"
+  output     = "../../../node_modules/.prisma/client"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum FlagValueType {
+  boolean
+  string
+  number
+  json
+}
+
+model Tenant {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  projects  Project[]
+  auditLogs AuditLog[]
+
+  @@map("tenants")
+}
+
+model Project {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  name      String
+  key       String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  environments Environment[]
+  featureFlags FeatureFlag[]
+
+  @@unique([tenantId, key])
+  @@index([tenantId])
+  @@map("projects")
+}
+
+model Environment {
+  id        String   @id @default(uuid()) @db.Uuid
+  projectId String   @map("project_id") @db.Uuid
+  name      String
+  key       String
+  sdkKey    String   @unique @map("sdk_key")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, key])
+  @@map("environments")
+}
+
+model FeatureFlag {
+  id              String        @id @default(uuid()) @db.Uuid
+  projectId       String        @map("project_id") @db.Uuid
+  key             String
+  name            String
+  description     String?
+  valueType       FlagValueType @map("value_type")
+  isEnabled       Boolean       @default(false) @map("is_enabled")
+  targetingRules  Json          @default("{\"rules\":[]}") @map("targeting_rules")
+  defaultOnValue  String        @map("default_on_value")
+  defaultOffValue String        @map("default_off_value")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, key])
+  @@index([projectId])
+  @@index([targetingRules], type: Gin)
+  @@map("feature_flags")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  actorId      String   @map("actor_id")
+  action       String
+  resourceType String   @map("resource_type")
+  resourceId   String   @map("resource_id") @db.Uuid
+  changes      Json
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt(sort: Desc)])
+  @@map("audit_logs")
+}

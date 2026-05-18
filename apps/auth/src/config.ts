@@ -26,5 +26,5 @@ export const authConfig = {
 	jwtPrivateKey: () => optionalEnv("AUTH_JWT_PRIVATE_KEY", "./dev-keys/private.pem"),
 	jwtPublicKey: () => optionalEnv("AUTH_JWT_PUBLIC_KEY", "./dev-keys/public.pem"),
 	seedAdminEmail: optionalEnv("AUTH_SEED_ADMIN_EMAIL", "admin@example.com"),
-	seedAdminPassword: optionalEnv("AUTH_SEED_ADMIN_PASSWORD", "changeme"),
+	seedAdminPassword: () => requireEnv("AUTH_SEED_ADMIN_PASSWORD"),
 } as const;

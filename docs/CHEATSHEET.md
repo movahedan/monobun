@@ -41,6 +41,9 @@ Run from repo root. Filters use workspace `name` (`@apps/vite-spa`, `@packages/u
 | `bun run turbo run dev --filter=@apps/astro-ssg` | Docs site :3005 |
 | `cd apps/nestjs && bun test` | Nest API tests (use app `bunfig.toml`) |
 | `cd packages/nestjs-sdk && bun run kubb` | Regenerate SDK from `openapi.yaml` |
+| `cd apps/nestjs && bun run db:migrate` | Apply Prisma migrations (needs `DATABASE_URL`) |
+| `cd apps/nestjs && bun run db:seed` | Seed demo tenant/project/flags |
+| `cd apps/nestjs && bun run db:studio` | Prisma Studio |
 | `bun run turbo run build:storybook --filter=@packages/ui` | Build Storybook |
 | `bun run build --filter=@packages/ui` | Build one workspace |
 | `bun run test --filter=@packages/utils` | Test one workspace |

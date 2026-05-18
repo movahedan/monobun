@@ -1,8 +1,12 @@
 #!/usr/bin/env bun
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { printCliErrorAndExit } from "../shared/format-cli-error";
-import { runCiAttachAffected } from "./attach-affected";
-import { runCiAttachServicePorts } from "./attach-service-ports";
-import { printHelpAndExit } from "./help";
+
+/** Monorepo root — intershell compose must resolve workspaces from here, not tools/scripts. */
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
+process.chdir(REPO_ROOT);
 
 const CI_SUBCOMMANDS = ["attach-affected", "attach-service-ports"] as const;
 type CiSubcommand = (typeof CI_SUBCOMMANDS)[number];
@@ -17,14 +21,17 @@ async function main(): Promise<void> {
 	const rest = argv.slice(1);
 
 	if (!isCiSubcommand(sub)) {
+		const { printHelpAndExit } = await import("./help");
 		await printHelpAndExit(sub === undefined ? undefined : `Unknown command: ${sub}`);
 	}
 
 	if (sub === "attach-affected") {
+		const { runCiAttachAffected } = await import("./attach-affected");
 		await runCiAttachAffected(rest);
 		return;
 	}
 
+	const { runCiAttachServicePorts } = await import("./attach-service-ports");
 	await runCiAttachServicePorts(rest);
 }
 

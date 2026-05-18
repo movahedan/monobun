@@ -1,4 +1,10 @@
-export function LoginPage(props: { csrfToken: string; error?: string; email?: string }) {
+type LoginPageProps = Readonly<{
+	csrfToken: string;
+	error?: string;
+	email?: string;
+}>;
+
+export function LoginPage(props: LoginPageProps) {
 	return (
 		<html lang="en">
 			<head>
@@ -20,10 +26,12 @@ export function LoginPage(props: { csrfToken: string; error?: string; email?: st
 					<input type="hidden" name="csrf" value={props.csrfToken} />
 					<label>
 						Email
+						<br />
 						<input name="email" type="email" required defaultValue={props.email ?? ""} />
 					</label>
 					<label>
 						Password
+						<br />
 						<input name="password" type="password" required minLength={8} />
 					</label>
 					<button type="submit">Sign in</button>

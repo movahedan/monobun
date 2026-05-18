@@ -5,7 +5,7 @@ import type { TenantRole } from "@packages/auth-contract";
 
 import { prisma } from "../../db";
 import { protectedProcedure, publicProcedure, router } from "../init";
-import { signHumanAccessToken } from "./jwt";
+import { humanAccessTokenForMembership } from "./access-token";
 import { verifyPassword } from "./password";
 import { createSession, revokeSession } from "./session";
 
@@ -46,9 +46,9 @@ export const authRouter = router({
 				userId: user.id,
 				activeTenantId: membership.tenantId,
 			});
-			const accessToken = await signHumanAccessToken({
-				sub: user.id,
-				tid: membership.tenantId,
+			const accessToken = await humanAccessTokenForMembership({
+				userId: user.id,
+				tenantId: membership.tenantId,
 				role: membership.role as TenantRole,
 			});
 			return {
@@ -107,9 +107,9 @@ export const authRouter = router({
 					data: { activeTenantId: input.tenantId },
 				});
 			}
-			const accessToken = await signHumanAccessToken({
-				sub: ctx.userId,
-				tid: input.tenantId,
+			const accessToken = await humanAccessTokenForMembership({
+				userId: ctx.userId,
+				tenantId: input.tenantId,
 				role: membership.role as TenantRole,
 			});
 			return { accessToken, tenantId: input.tenantId };

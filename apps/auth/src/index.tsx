@@ -11,31 +11,38 @@ import { clearCookieHeader, refreshCookieHeader, sessionCookieHeader } from "./t
 import { createCaller } from "./trpc/caller";
 import { createContext, getCsrfFromRequest } from "./trpc/context";
 import { handleTrpcRequest } from "./trpc/handler";
+import { getFormField } from "./utils/form-fields";
 import { renderPage } from "./utils/render-page";
 
 const maxAge = authConfig.refreshTtlDays * 24 * 60 * 60;
 
-async function handleLoginGet(_req: Request): Promise<Response> {
-	const csrfToken = createCsrfToken();
+function loginHtmlResponse(
+	csrfToken: string,
+	options: { status?: number; error?: string; email?: string } = {},
+): Response {
 	const headers = new Headers({ "content-type": "text/html; charset=utf-8" });
 	headers.append("set-cookie", csrfCookieHeader(csrfToken, maxAge));
-	const html = renderPage(<LoginPage csrfToken={csrfToken} />);
-	return new Response(html, { headers });
+	return new Response(
+		renderPage(<LoginPage csrfToken={csrfToken} error={options.error} email={options.email} />),
+		{ status: options.status ?? 200, headers },
+	);
+}
+
+async function handleLoginGet(_req: Request): Promise<Response> {
+	return loginHtmlResponse(createCsrfToken());
 }
 
 async function handleLoginPost(req: Request): Promise<Response> {
 	const form = await req.formData();
-	const email = String(form.get("email") ?? "");
-	const password = String(form.get("password") ?? "");
-	const csrf = String(form.get("csrf") ?? "");
+	const email = getFormField(form, "email");
+	const password = getFormField(form, "password");
+	const csrf = getFormField(form, "csrf");
 	if (!validateCsrf(getCsrfFromRequest(req), csrf)) {
-		const csrfToken = createCsrfToken();
-		const headers = new Headers({ "content-type": "text/html; charset=utf-8" });
-		headers.append("set-cookie", csrfCookieHeader(csrfToken, maxAge));
-		return new Response(
-			renderPage(<LoginPage csrfToken={csrfToken} error="Invalid CSRF token" email={email} />),
-			{ status: 403, headers },
-		);
+		return loginHtmlResponse(createCsrfToken(), {
+			status: 403,
+			error: "Invalid CSRF token",
+			email,
+		});
 	}
 
 	try {
@@ -46,15 +53,11 @@ async function handleLoginPost(req: Request): Promise<Response> {
 		headers.append("set-cookie", refreshCookieHeader(result.refreshToken, maxAge));
 		return new Response(null, { status: 302, headers });
 	} catch {
-		const csrfToken = createCsrfToken();
-		const headers = new Headers({ "content-type": "text/html; charset=utf-8" });
-		headers.append("set-cookie", csrfCookieHeader(csrfToken, maxAge));
-		return new Response(
-			renderPage(
-				<LoginPage csrfToken={csrfToken} error="Invalid email or password" email={email} />,
-			),
-			{ status: 401, headers },
-		);
+		return loginHtmlResponse(createCsrfToken(), {
+			status: 401,
+			error: "Invalid email or password",
+			email,
+		});
 	}
 }
 
@@ -70,47 +73,43 @@ async function handleLogoutGet(req: Request): Promise<Response> {
 	return new Response(renderPage(<LogoutPage />), { headers });
 }
 
+type RouteHandler = (req: Request) => Response | Promise<Response>;
+
+const routes: Array<{ method: string; path: string; handle: RouteHandler }> = [
+	{
+		method: "GET",
+		path: "/status",
+		handle: () => Response.json({ ok: true, timestamp: new Date().toISOString() }),
+	},
+	{
+		method: "GET",
+		path: "/.well-known/jwks.json",
+		handle: async () => Response.json(await getJwks()),
+	},
+	{ method: "POST", path: "/api/refresh", handle: handleRefreshRequest },
+	{ method: "POST", path: "/api/token", handle: handleTokenRequest },
+	{ method: "GET", path: "/login", handle: handleLoginGet },
+	{ method: "POST", path: "/login", handle: handleLoginPost },
+	{ method: "GET", path: "/logout", handle: handleLogoutGet },
+	{
+		method: "GET",
+		path: "/",
+		handle: () => Response.json({ service: "@apps/auth", docs: "/login" }),
+	},
+];
+
 const server = Bun.serve({
 	hostname: authConfig.host,
 	port: authConfig.port,
 	async fetch(req) {
 		const url = new URL(req.url);
-		const { pathname } = url;
-
-		if (pathname === "/status" && req.method === "GET") {
-			return Response.json({ ok: true, timestamp: new Date().toISOString() });
+		const route = routes.find((r) => r.path === url.pathname && r.method === req.method);
+		if (route) {
+			return route.handle(req);
 		}
 
-		if (pathname === "/.well-known/jwks.json" && req.method === "GET") {
-			return Response.json(await getJwks());
-		}
-
-		if (pathname === "/api/refresh" && req.method === "POST") {
-			return handleRefreshRequest(req);
-		}
-
-		if (pathname === "/api/token" && req.method === "POST") {
-			return handleTokenRequest(req);
-		}
-
-		if (pathname === "/login" && req.method === "GET") {
-			return handleLoginGet(req);
-		}
-
-		if (pathname === "/login" && req.method === "POST") {
-			return handleLoginPost(req);
-		}
-
-		if (pathname === "/logout" && req.method === "GET") {
-			return handleLogoutGet(req);
-		}
-
-		if (pathname.startsWith("/api")) {
+		if (url.pathname.startsWith("/api")) {
 			return handleTrpcRequest(req);
-		}
-
-		if (pathname === "/" && req.method === "GET") {
-			return Response.json({ service: "@apps/auth", docs: "/login" });
 		}
 
 		return new Response("Not Found", { status: 404 });

@@ -2,7 +2,7 @@ import type { TenantRole } from "@packages/auth-contract";
 
 import { authConfig } from "../../config";
 import { prisma } from "../../db";
-import { signHumanAccessToken } from "./jwt";
+import { humanAccessTokenForMembership } from "./access-token";
 import {
 	hashRefreshToken,
 	parseCookies,
@@ -12,6 +12,24 @@ import {
 } from "./session";
 
 const GENERIC_ERROR = { error: "invalid_grant" as const };
+
+async function accessTokenFromActiveMembership(session: {
+	userId: string;
+	activeTenantId: string;
+	user: {
+		memberships: Array<{ tenantId: string; role: string }>;
+	};
+}): Promise<string | null> {
+	const membership = session.user.memberships.find((m) => m.tenantId === session.activeTenantId);
+	if (!membership) {
+		return null;
+	}
+	return humanAccessTokenForMembership({
+		userId: session.userId,
+		tenantId: session.activeTenantId,
+		role: membership.role as TenantRole,
+	});
+}
 
 export async function handleRefreshRequest(req: Request): Promise<Response> {
 	const cookies = parseCookies(req.headers.get("cookie"));
@@ -38,8 +56,12 @@ export async function handleRefreshRequest(req: Request): Promise<Response> {
 		return Response.json(GENERIC_ERROR, { status: 401 });
 	}
 
-	const membership = session.user.memberships.find((m) => m.tenantId === session.activeTenantId);
-	if (!membership) {
+	const accessToken = await accessTokenFromActiveMembership({
+		userId: session.userId,
+		activeTenantId: session.activeTenantId,
+		user: session.user,
+	});
+	if (!accessToken) {
 		return Response.json(GENERIC_ERROR, { status: 401 });
 	}
 
@@ -47,12 +69,6 @@ export async function handleRefreshRequest(req: Request): Promise<Response> {
 	if (!rotated) {
 		return Response.json(GENERIC_ERROR, { status: 401 });
 	}
-
-	const accessToken = await signHumanAccessToken({
-		sub: session.userId,
-		tid: session.activeTenantId,
-		role: membership.role as TenantRole,
-	});
 
 	const maxAge = authConfig.refreshTtlDays * 24 * 60 * 60;
 	const headers = new Headers({ "content-type": "application/json" });
@@ -73,14 +89,14 @@ export async function refreshFromSessionCookie(req: Request) {
 	if (!session?.activeTenantId) {
 		return null;
 	}
-	const membership = session.user.memberships.find((m) => m.tenantId === session.activeTenantId);
-	if (!membership) {
+	const accessToken = await accessTokenFromActiveMembership({
+		userId: session.userId,
+		activeTenantId: session.activeTenantId,
+		user: session.user,
+	});
+	if (!accessToken) {
 		return null;
 	}
-	const accessToken = await signHumanAccessToken({
-		sub: session.userId,
-		tid: session.activeTenantId,
-		role: membership.role as TenantRole,
-	});
+	const membership = session.user.memberships.find((m) => m.tenantId === session.activeTenantId);
 	return { accessToken, session, membership };
 }

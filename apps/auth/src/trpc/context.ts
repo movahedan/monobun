@@ -1,5 +1,4 @@
 import { authConfig } from "../config";
-import { prisma } from "../db";
 import { parseCookies, resolveSessionFromCookies } from "./auth/session";
 
 export type AuthContext = {
@@ -25,5 +24,3 @@ export async function createContext(req: Request): Promise<AuthContext> {
 export function getCsrfFromRequest(req: Request): string | undefined {
 	return parseCookies(req.headers.get("cookie"))[authConfig.cookieCsrf];
 }
-
-export { prisma };

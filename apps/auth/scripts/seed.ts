@@ -10,7 +10,7 @@ const tenantId = "00000000-0000-4000-8000-000000000010";
 const adminUserId = "00000000-0000-4000-8000-000000000011";
 
 async function seedMachineClient(): Promise<void> {
-	const { publicKey, privateKey } = await generateKeyPair("RS256", { extractable: true });
+	const { publicKey } = await generateKeyPair("RS256", { extractable: true });
 	const publicKeyJwk = await exportJWK(publicKey);
 	publicKeyJwk.alg = "RS256";
 	publicKeyJwk.use = "sig";
@@ -29,12 +29,10 @@ async function seedMachineClient(): Promise<void> {
 			revokedAt: null,
 		},
 	});
-
-	void privateKey;
 }
 
 async function seedHuman(): Promise<void> {
-	const passwordHash = await hashPassword(authConfig.seedAdminPassword);
+	const passwordHash = await hashPassword(authConfig.seedAdminPassword());
 	await prisma.user.upsert({
 		where: { email: authConfig.seedAdminEmail },
 		create: {

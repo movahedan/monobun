@@ -1,27 +1,38 @@
 import { jwtVerify, SignJWT } from "jose";
 
-import type { TenantRole } from "@packages/auth-contract";
-import { ROLE_SCOPES, type Scope } from "@packages/auth-contract";
+import { ROLE_SCOPES, type Scope, type TenantRole } from "@packages/auth-contract";
 
 import { authConfig } from "../../config";
 import { getSigningMaterial } from "./keys";
+
+async function signAccessToken(input: {
+	sub: string;
+	claims: Record<string, unknown>;
+	audience: string;
+}): Promise<string> {
+	const { privateKey, kid } = await getSigningMaterial();
+	const now = Math.floor(Date.now() / 1000);
+	return new SignJWT(input.claims)
+		.setProtectedHeader({ alg: "RS256", kid })
+		.setSubject(input.sub)
+		.setIssuer(authConfig.issuer)
+		.setAudience(input.audience)
+		.setIssuedAt(now)
+		.setExpirationTime(now + authConfig.accessTtlSeconds)
+		.sign(privateKey);
+}
 
 export async function signHumanAccessToken(input: {
 	sub: string;
 	tid: string;
 	role: TenantRole;
 }): Promise<string> {
-	const { privateKey, kid } = await getSigningMaterial();
 	const scopes = [...ROLE_SCOPES[input.role]] as Scope[];
-	const now = Math.floor(Date.now() / 1000);
-	return new SignJWT({ scopes, tid: input.tid })
-		.setProtectedHeader({ alg: "RS256", kid })
-		.setSubject(input.sub)
-		.setIssuer(authConfig.issuer)
-		.setAudience(authConfig.audience)
-		.setIssuedAt(now)
-		.setExpirationTime(now + authConfig.accessTtlSeconds)
-		.sign(privateKey);
+	return signAccessToken({
+		sub: input.sub,
+		claims: { scopes, tid: input.tid },
+		audience: authConfig.audience,
+	});
 }
 
 export async function signMachineAccessToken(input: {
@@ -29,16 +40,11 @@ export async function signMachineAccessToken(input: {
 	scopes: Scope[];
 	audience?: string;
 }): Promise<string> {
-	const { privateKey, kid } = await getSigningMaterial();
-	const now = Math.floor(Date.now() / 1000);
-	return new SignJWT({ scopes: input.scopes })
-		.setProtectedHeader({ alg: "RS256", kid })
-		.setSubject(input.clientId)
-		.setIssuer(authConfig.issuer)
-		.setAudience(input.audience ?? authConfig.audienceEval)
-		.setIssuedAt(now)
-		.setExpirationTime(now + authConfig.accessTtlSeconds)
-		.sign(privateKey);
+	return signAccessToken({
+		sub: input.clientId,
+		claims: { scopes: input.scopes },
+		audience: input.audience ?? authConfig.audienceEval,
+	});
 }
 
 export async function verifyAccessToken(token: string, audience: string) {
