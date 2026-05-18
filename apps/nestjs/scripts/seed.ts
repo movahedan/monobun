@@ -18,7 +18,7 @@ function createSdkKey(): string {
 	return randomBytes(32).toString("hex");
 }
 
-async function main(): Promise<void> {
+try {
 	const prisma = new PrismaClient({
 		adapter: new PrismaPg({ connectionString: requireDatabaseUrl() }),
 	});
@@ -125,9 +125,7 @@ async function main(): Promise<void> {
 
 	await prisma.$disconnect();
 	console.log("Seed complete: demo tenant, project, 3 environments, 2 feature flags");
-}
-
-main().catch((error: unknown) => {
+} catch (error: unknown) {
 	console.error(error);
 	process.exit(1);
-});
+}

@@ -38,5 +38,5 @@ export async function getAffectedComposeServices(baseSha?: string, to = "HEAD"):
 		}
 	}
 
-	return [...matched].sort();
+	return [...matched].sort((a, b) => a.localeCompare(b));
 }
