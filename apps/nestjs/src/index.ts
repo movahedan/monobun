@@ -48,7 +48,9 @@ async function bootstrap(): Promise<void> {
 	log(`@apps/nestjs listening on http://${host}:${port}`);
 }
 
-bootstrap().catch((error: unknown) => {
+try {
+	await bootstrap();
+} catch (error: unknown) {
 	log(`Failed to start @apps/nestjs: ${String(error)}`);
 	process.exit(1);
-});
+}

@@ -5,6 +5,12 @@ import { ApiException } from "../exceptions/api.exception";
 
 const tenantIdSchema = z.uuid();
 
+function firstHeaderValue(raw: string | string[] | undefined): string | undefined {
+	if (typeof raw === "string") return raw;
+	if (Array.isArray(raw)) return raw[0];
+	return undefined;
+}
+
 @Injectable()
 export class TenantGuard implements CanActivate {
 	canActivate(context: ExecutionContext): boolean {
@@ -13,8 +19,7 @@ export class TenantGuard implements CanActivate {
 			tenantId?: string;
 		}>();
 
-		const raw = request.headers["x-tenant-id"];
-		const tenantId = typeof raw === "string" ? raw : Array.isArray(raw) ? raw[0] : undefined;
+		const tenantId = firstHeaderValue(request.headers["x-tenant-id"]);
 
 		if (!tenantId) {
 			throw new ApiException(401, { message: "Missing x-tenant-id header" });

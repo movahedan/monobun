@@ -93,7 +93,7 @@ async function emitOpenApi(document: OpenAPIObject): Promise<void> {
 
 async function runKubbGenerate(): Promise<void> {
 	return new Promise((resolvePromise, reject) => {
-		const child = spawn("bun", ["run", "kubb"], {
+		const child = spawn(process.execPath, ["run", "kubb"], {
 			cwd: NESTJS_SDK_PATH,
 			stdio: "inherit",
 		});

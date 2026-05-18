@@ -37,7 +37,7 @@ export async function customFetch<TData>(url: string, options?: RequestInit): Pr
 		throw body;
 	}
 
-	return body as TData;
+	return body;
 }
 
 export const client = async <TData, _TError = unknown, TRequest = unknown>(config: {
@@ -53,7 +53,9 @@ export const client = async <TData, _TError = unknown, TRequest = unknown>(confi
 	if (params) {
 		const search = new URLSearchParams();
 		for (const [key, value] of Object.entries(params)) {
-			if (value !== undefined && value !== null) search.set(key, String(value));
+			if (value === undefined || value === null) continue;
+			const serialized = typeof value === "string" ? value : JSON.stringify(value);
+			search.set(key, serialized);
 		}
 		const qs = search.toString();
 		if (qs) fullUrl += `?${qs}`;
