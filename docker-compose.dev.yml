@@ -43,6 +43,10 @@ services:
     command: sleep infinity
     init: true
     profiles: ["apps"]
+    environment:
+      # Bind mounts from macOS often miss inotify; polling makes Vite/Next/Storybook HMR work in containers.
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
     networks:
       - dev-network
     healthcheck:
@@ -212,14 +216,13 @@ services:
       AUTH_ISSUER: ${AUTH_ISSUER:-http://localhost:3007}
       AUTH_AUDIENCE: ${AUTH_AUDIENCE:-monobun-api}
       AUTH_AUDIENCE_EVAL: ${AUTH_AUDIENCE_EVAL:-monobun-eval}
-      AUTH_DATABASE_URL: ${AUTH_DATABASE_URL}
+      AUTH_DATABASE_URL: ${AUTH_DATABASE_URL:-postgresql://monobun:monobun@postgres:5432/monobun_auth}
       AUTH_ACCESS_TTL_SECONDS: ${AUTH_ACCESS_TTL_SECONDS:-900}
       AUTH_COOKIE_SECURE: "false"
       AUTH_SEED_ADMIN_EMAIL: ${AUTH_SEED_ADMIN_EMAIL:-admin@example.com}
-      AUTH_SEED_ADMIN_PASSWORD: ${AUTH_SEED_ADMIN_PASSWORD}
+      AUTH_SEED_ADMIN_PASSWORD: ${AUTH_SEED_ADMIN_PASSWORD:-changeme}
     command: >
-      sh -c "cd apps/auth && bun scripts/ensure-db.ts &&
-      bun run db:migrate && bun run db:seed &&
+      sh -c "cd apps/auth && bun run db:generate && bun run db:migrate && bun run db:seed &&
       cd ../.. && bun run turbo run dev --filter=@apps/auth"
     profiles: ["auth", "all"]
     healthcheck:
