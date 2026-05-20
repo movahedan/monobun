@@ -23,5 +23,11 @@ export default defineConfig({
 	vite: {
 		logLevel: quietViteLogs ? "error" : "warn",
 		plugins: [tailwindcss()],
+		server: {
+			watch: {
+				usePolling: process.env.CHOKIDAR_USEPOLLING === "true",
+				interval: 1000,
+			},
+		},
 	},
 });

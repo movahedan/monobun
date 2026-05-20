@@ -53,6 +53,8 @@ Run from repo root. Filters use workspace `name` (`@apps/vite-spa`, `@packages/u
 
 ## Docker Compose
 
+Hot reload in containers is limited on macOS: bind mounts often do not propagate file-watch events, so Bun/tsup may not restart on save. Vite/Next/Astro use polling when `CHOKIDAR_USEPOLLING` is set (compose dev stack). For the fastest loop while editing, run the app on the host ([Dev (host)](#dev-host)) and use Docker for Postgres and the full stack.
+
 | Command | Description |
 |---------|-------------|
 | `bun run container setup` | Dev stack setup |
