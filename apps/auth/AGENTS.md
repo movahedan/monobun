@@ -17,6 +17,8 @@
 | `/api/refresh` | POST |
 | `/api/token` | POST (M2M) |
 | `/login`, `/logout` | GET/POST (SSR) |
+| `/register` | GET/POST (SSR password sign-up) |
+| `/otp`, `/otp/verify` | GET/POST (SSR email OTP; codes logged when `AUTH_OTP_LOG=true`) |
 | `/api/*` | tRPC |
 
 ## Essential commands

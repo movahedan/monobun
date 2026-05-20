@@ -20,7 +20,7 @@ services:
       HOST: ${HOST:-0.0.0.0}
       NODE_ENV: production
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${EXPRESS_PORT:-3003}/status"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:${EXPRESS_PORT:-3003}/status"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -45,7 +45,7 @@ services:
       express:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${VITE_SPA_PORT:-3001}"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:${VITE_SPA_PORT:-3001}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -70,7 +70,7 @@ services:
       express:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${NEXTJS_PORT:-3002}"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:${NEXTJS_PORT:-3002}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -91,7 +91,7 @@ services:
       HOST: ${HOST:-0.0.0.0}
       NODE_ENV: production
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${UI_PORT:-3004}"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:${UI_PORT:-3004}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -113,7 +113,7 @@ services:
       NODE_ENV: production
       ASTRO_SITE_PATH: ${ASTRO_SITE_PATH:-localhost:5005}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${ASTRO_SSG_PORT:-3005}"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:${ASTRO_SSG_PORT:-3005}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -136,7 +136,7 @@ services:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3001,http://localhost:3002}
       DATABASE_URL: ${DATABASE_URL}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${NESTJS_PORT:-3006}/status"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:${NESTJS_PORT:-3006}/status"]
       interval: 30s
       timeout: 10s
       retries: 3

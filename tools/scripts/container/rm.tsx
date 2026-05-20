@@ -6,52 +6,37 @@ import { colorify } from "../shared/colorify";
 import { applyPlainComposeArgv, getPlainComposeSpawnEnv } from "../shared/compose-plain-progress";
 import { renderAndExit } from "../shared/render-and-exit";
 import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
+import { spawnWithVisibleOutput } from "../shared/subprocess-visible";
 import { DEV_COMPOSE_FILE, PROD_COMPOSE_FILE, PROD_COMPOSE_PROJECT_NAME } from "./stack";
 
-async function spawnDocker(
-	args: readonly string[],
-	env: NodeJS.ProcessEnv,
-	verbose: boolean,
-): Promise<number> {
-	const argv = applyPlainComposeArgv(args);
-	const spawnEnv = getPlainComposeSpawnEnv(env);
-	const proc = verbose
-		? Bun.spawn(argv, {
-				stdio: ["inherit", "inherit", "inherit"],
-				cwd: process.cwd(),
-				env: spawnEnv,
-			})
-		: Bun.spawn(argv, {
-				stdio: ["ignore", "pipe", "pipe"],
-				cwd: process.cwd(),
-				env: spawnEnv,
-			});
-	return await proc.exited;
+async function spawnDocker(args: readonly string[], env: NodeJS.ProcessEnv): Promise<void> {
+	await spawnWithVisibleOutput({
+		argv: applyPlainComposeArgv(args),
+		cwd: process.cwd(),
+		env: getPlainComposeSpawnEnv(env),
+	});
 }
 
-function getRmSteps(force: boolean): readonly StepProgressStep[] {
-	const verbose = force;
+function getRmSteps(): readonly StepProgressStep[] {
 	const devPrefix = ["docker", "compose", "-f", DEV_COMPOSE_FILE, "--profile", "all"];
 	const prodEnv = { ...process.env, COMPOSE_PROJECT_NAME: PROD_COMPOSE_PROJECT_NAME };
 	const prodPrefix = ["docker", "compose", "-f", PROD_COMPOSE_FILE];
 
 	const devDown = () =>
-		spawnDocker([...devPrefix, "down", "--volumes", "--remove-orphans"], process.env, verbose);
-	const devRm = () => spawnDocker([...devPrefix, "rm", "-f", "--volumes"], process.env, verbose);
+		spawnDocker([...devPrefix, "down", "--volumes", "--remove-orphans"], process.env);
+	const devRm = () => spawnDocker([...devPrefix, "rm", "-f", "--volumes"], process.env);
 	const prodDown = () =>
-		spawnDocker([...prodPrefix, "down", "--volumes", "--remove-orphans"], prodEnv, verbose);
-	const prodRm = () => spawnDocker([...prodPrefix, "rm", "-f", "--volumes"], prodEnv, verbose);
+		spawnDocker([...prodPrefix, "down", "--volumes", "--remove-orphans"], prodEnv);
+	const prodRm = () => spawnDocker([...prodPrefix, "rm", "-f", "--volumes"], prodEnv);
 	const rootDown = () =>
 		spawnDocker(
 			["docker", "compose", "-f", "docker-compose.yml", "down", "--volumes", "--remove-orphans"],
 			process.env,
-			verbose,
 		);
 	const rootRm = () =>
 		spawnDocker(
 			["docker", "compose", "-f", "docker-compose.yml", "rm", "-f", "--volumes"],
 			process.env,
-			verbose,
 		);
 
 	return [
@@ -64,12 +49,12 @@ function getRmSteps(force: boolean): readonly StepProgressStep[] {
 	];
 }
 
-async function runRmSteps(force: boolean): Promise<void> {
-	for (const step of getRmSteps(force)) await step.run();
+async function runRmSteps(): Promise<void> {
+	for (const step of getRmSteps()) await step.run();
 }
 
-function RmApp({ force }: { readonly force: boolean }): ReactNode {
-	const resolveSteps = useCallback(() => getRmSteps(force), [force]);
+function RmApp(): ReactNode {
+	const resolveSteps = useCallback(() => getRmSteps(), []);
 	return (
 		<StepProgressApp
 			completedHeading="Compose stack cleanup completed"
@@ -88,13 +73,12 @@ export async function runRm(rest: readonly string[]): Promise<void> {
 		strict: true,
 	});
 
-	const force = values.force === true;
 	const quiet = values.quiet === true;
 
 	if (quiet) {
-		await runRmSteps(force);
+		await runRmSteps();
 	} else {
-		await renderAndExit(<RmApp force={force} />);
+		await renderAndExit(<RmApp />);
 	}
 
 	console.log(colorify.cyan("\nTo start fresh:"));

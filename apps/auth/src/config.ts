@@ -27,4 +27,16 @@ export const authConfig = {
 	jwtPublicKey: () => optionalEnv("AUTH_JWT_PUBLIC_KEY", "./dev-keys/public.pem"),
 	seedAdminEmail: optionalEnv("AUTH_SEED_ADMIN_EMAIL", "admin@example.com"),
 	seedAdminPassword: () => requireEnv("AUTH_SEED_ADMIN_PASSWORD"),
+	allowRegistration:
+		optionalEnv(
+			"AUTH_ALLOW_REGISTRATION",
+			optionalEnv("NODE_ENV", "development") === "production" ? "false" : "true",
+		) === "true",
+	allowOtp:
+		optionalEnv(
+			"AUTH_ALLOW_OTP",
+			optionalEnv("NODE_ENV", "development") === "production" ? "false" : "true",
+		) === "true",
+	otpLogToConsole: optionalEnv("AUTH_OTP_LOG", "false") === "true",
+	otpTtlMinutes: Number(optionalEnv("AUTH_OTP_TTL_MINUTES", "10")),
 } as const;

@@ -28,9 +28,9 @@ RUN bun run build --filter=@apps/express
 
 FROM oven/bun:1.3.14-alpine AS runner
 WORKDIR /app
-RUN addgroup --system --gid 1001 runner-group
-RUN adduser --system --uid 1001 runner-user
-RUN chown -R runner-user:runner-group /app
+RUN addgroup --system --gid 1001 runner-group \
+	&& adduser --system --uid 1001 runner-user \
+	&& chown -R runner-user:runner-group /app
 
 COPY --from=pruner --chown=runner-user:runner-group /app/out/json/ .
 COPY --from=installer --chown=runner-user:runner-group /app/node_modules ./node_modules

@@ -6,25 +6,12 @@ import type { TenantRole } from "@packages/auth-contract";
 import { prisma } from "../../db";
 import { protectedProcedure, publicProcedure, router } from "../init";
 import { humanAccessTokenForMembership } from "./access-token";
+import { loginResultForUser } from "./login-result";
+import { requestEmailOtp, verifyEmailOtp } from "./otp";
 import { verifyPassword } from "./password";
-import { createSession, revokeSession } from "./session";
-
-const loginAttempts = new Map<string, { count: number; resetAt: number }>();
-const MAX_ATTEMPTS = 10;
-const WINDOW_MS = 60_000;
-
-function checkRateLimit(key: string): void {
-	const now = Date.now();
-	const entry = loginAttempts.get(key);
-	if (!entry || entry.resetAt < now) {
-		loginAttempts.set(key, { count: 1, resetAt: now + WINDOW_MS });
-		return;
-	}
-	entry.count += 1;
-	if (entry.count > MAX_ATTEMPTS) {
-		throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many attempts" });
-	}
-}
+import { checkRateLimit } from "./rate-limit";
+import { registerUser } from "./register";
+import { revokeSession } from "./session";
 
 export const authRouter = router({
 	login: publicProcedure
@@ -33,35 +20,47 @@ export const authRouter = router({
 			checkRateLimit(input.email.toLowerCase());
 			const user = await prisma.user.findUnique({
 				where: { email: input.email.toLowerCase() },
-				include: { memberships: { include: { tenant: true } } },
 			});
 			if (!user || !(await verifyPassword(input.password, user.passwordHash))) {
 				throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid credentials" });
 			}
-			const membership = user.memberships[0];
-			if (!membership) {
-				throw new TRPCError({ code: "FORBIDDEN", message: "No tenant membership" });
-			}
-			const { sessionId, refreshToken } = await createSession({
-				userId: user.id,
-				activeTenantId: membership.tenantId,
+			return loginResultForUser(user.id);
+		}),
+
+	register: publicProcedure
+		.input(
+			z.object({
+				email: z.string().email(),
+				password: z.string().min(8).max(128),
+				tenantName: z.string().min(1).max(80).optional(),
+			}),
+		)
+		.mutation(async ({ input }) => {
+			const email = input.email.toLowerCase();
+			checkRateLimit(`register:${email}`);
+			const user = await registerUser({
+				email,
+				password: input.password,
+				tenantName: input.tenantName,
 			});
-			const accessToken = await humanAccessTokenForMembership({
-				userId: user.id,
-				tenantId: membership.tenantId,
-				role: membership.role as TenantRole,
-			});
-			return {
-				accessToken,
-				sessionId,
-				refreshToken,
-				user: {
-					id: user.id,
-					email: user.email,
-					tenantId: membership.tenantId,
-					role: membership.role,
-				},
-			};
+			return loginResultForUser(user.id);
+		}),
+
+	requestOtp: publicProcedure
+		.input(z.object({ email: z.string().email() }))
+		.mutation(async ({ input }) => {
+			const email = input.email.toLowerCase();
+			checkRateLimit(`otp:${email}`);
+			return requestEmailOtp(email);
+		}),
+
+	verifyOtp: publicProcedure
+		.input(z.object({ email: z.string().email(), code: z.string().regex(/^\d{6}$/) }))
+		.mutation(async ({ input }) => {
+			const email = input.email.toLowerCase();
+			checkRateLimit(`otp-verify:${email}`);
+			const user = await verifyEmailOtp(email, input.code);
+			return loginResultForUser(user.id);
 		}),
 
 	logout: protectedProcedure.mutation(async ({ ctx }) => {

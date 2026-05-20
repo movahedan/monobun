@@ -23,7 +23,21 @@ alwaysApply: false
 /(?:a|aa)*/                     // Non-capturing, optimized
 /\d{1,10}/                      // Bounded range
 /^#\d+$/                        // Anchored to start/end
+
+// ❌ VULNERABLE - alternation with repeated quantifiers (super-linear backtracking)
+/^-+|-+$/g                      // trim hyphens — use a linear scan instead
+
+// ✅ SECURE - trim leading/trailing separators without regex
+function trimEdgeHyphens(value: string): string {
+  let start = 0;
+  let end = value.length;
+  while (start < end && value[start] === "-") start++;
+  while (end > start && value[end - 1] === "-") end--;
+  return value.slice(start, end);
+}
 ```
+
+For user-controlled strings (emails, names, slugs), prefer a **single-pass character loop** over chained `.replace(/…/g)` when normalizing or stripping edge characters. Cap input length first (for example email local-part ≤ 64).
 
 ### User-supplied patterns (CLI, config, API)
 
@@ -135,6 +149,12 @@ const getUserByName = async (name: string) => {
 
 ## Regex Security Patterns
 ```ts
+// ❌ Bad - alternation + quantifiers on user input (tenant slug, slugify)
+emailLocal.replace(/^-+|-+$/g, "");
+
+// ✅ Good - linear scan after length cap
+function slugifyLocalPart(local: string): string { /* char loop, no backtracking */ }
+
 // ❌ Bad - greedy quantifier with overlapping patterns
 const badPattern = /.*#\d+.*/;
 

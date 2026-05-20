@@ -1,6 +1,8 @@
 import { Box, Static, Text, useAnimation, useApp } from "ink";
 import { type ReactNode, useEffect, useState } from "react";
 
+import { prepareForSubprocessOutput } from "./subprocess-visible";
+
 const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"] as const;
 
 function StepSpinner(): ReactNode {
@@ -29,6 +31,7 @@ export function StepProgressApp({
 	const [completedSteps, setCompletedSteps] = useState<readonly CompletedStepLine[]>([]);
 	const [activeLabel, setActiveLabel] = useState("Starting…");
 	const [finished, setFinished] = useState(false);
+	const [isStepRunning, setIsStepRunning] = useState(false);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -41,7 +44,14 @@ export function StepProgressApp({
 					if (cancelled) return;
 					setActiveLabel(step.label);
 					await waitUntilRenderFlush();
-					await step.run();
+					prepareForSubprocessOutput();
+					setIsStepRunning(true);
+					await waitUntilRenderFlush();
+					try {
+						await step.run();
+					} finally {
+						setIsStepRunning(false);
+					}
 					const id = nextId++;
 					setCompletedSteps((previous) => [...previous, { id, label: step.label }]);
 					await waitUntilRenderFlush();
@@ -69,21 +79,20 @@ export function StepProgressApp({
 					</Box>
 				)}
 			</Static>
-			<Box flexDirection="row" marginTop={completedSteps.length > 0 ? 1 : 0} gap={1}>
-				{finished ? (
-					<>
-						<Text color="green">✓</Text>
-						<Text bold color="green">
-							{completedHeading}
-						</Text>
-					</>
-				) : (
-					<>
-						<StepSpinner />
-						<Text dimColor>{activeLabel}</Text>
-					</>
-				)}
-			</Box>
+			{!finished && !isStepRunning ? (
+				<Box flexDirection="row" marginTop={completedSteps.length > 0 ? 1 : 0} gap={1}>
+					<StepSpinner />
+					<Text dimColor>{activeLabel}</Text>
+				</Box>
+			) : null}
+			{finished ? (
+				<Box flexDirection="row" marginTop={completedSteps.length > 0 ? 1 : 0} gap={1}>
+					<Text color="green">✓</Text>
+					<Text bold color="green">
+						{completedHeading}
+					</Text>
+				</Box>
+			) : null}
 		</Box>
 	);
 }

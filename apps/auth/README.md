@@ -52,11 +52,19 @@ Seed client: `nestjs-control-plane` with `feature-flags:read`.
 
 ### tRPC (`/api`)
 
-- `auth.login`, `auth.logout`, `auth.me`, `auth.switchTenant`
+- `auth.login`, `auth.register`, `auth.requestOtp`, `auth.verifyOtp`, `auth.logout`, `auth.me`, `auth.switchTenant`
+
+## Registration and OTP
+
+**Password register:** `GET /register` or `auth.register` — creates a user, personal tenant (owner role), and session.
+
+**Email OTP (dev):** `GET /otp` → `auth.requestOtp` → enter code on `/otp/verify`. With `AUTH_OTP_LOG=true`, the 6-digit code is printed to the auth server console (no SMTP yet). New emails auto-register when `AUTH_ALLOW_REGISTRATION=true`.
+
+Env (see `.env.sample`): `AUTH_ALLOW_REGISTRATION`, `AUTH_ALLOW_OTP`, `AUTH_OTP_LOG`, `AUTH_OTP_TTL_MINUTES`. Disabled by default when `NODE_ENV=production`.
 
 ## Browser flow
 
-1. `GET /login` — CSRF cookie + form
+1. `GET /login` — CSRF cookie + form (or `/register`, `/otp`)
 2. `POST /login` — sets `auth_session` + `auth_refresh` (httpOnly)
 3. Use `access_token` from login response or `POST /api/refresh` for Bearer calls
 4. `GET /logout` — revokes session, clears cookies
