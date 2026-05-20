@@ -6,55 +6,45 @@ import { colorify } from "../shared/colorify";
 import { applyPlainComposeArgv } from "../shared/compose-plain-progress";
 import { renderAndExit } from "../shared/render-and-exit";
 import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
+import { spawnWithVisibleOutput } from "../shared/subprocess-visible";
 import { getComposePrefix, getComposeSpawnEnv } from "./stack";
 
 export interface CleanupOptions {
-	readonly verbose: boolean;
 	readonly quiet: boolean;
 }
 
-async function spawnCompose(args: readonly string[], verbose: boolean): Promise<number> {
-	const argv = applyPlainComposeArgv(args);
-	const proc = verbose
-		? Bun.spawn(argv, {
-				stdio: ["inherit", "inherit", "inherit"],
-				cwd: process.cwd(),
-				env: getComposeSpawnEnv(),
-			})
-		: Bun.spawn(argv, {
-				stdio: ["ignore", "pipe", "pipe"],
-				cwd: process.cwd(),
-				env: getComposeSpawnEnv(),
-			});
-	return await proc.exited;
+async function spawnCompose(args: readonly string[]): Promise<void> {
+	await spawnWithVisibleOutput({
+		argv: applyPlainComposeArgv(args),
+		cwd: process.cwd(),
+		env: getComposeSpawnEnv(),
+	});
 }
 
-function getCleanupSteps(verbose: boolean): readonly StepProgressStep[] {
+function getCleanupSteps(): readonly StepProgressStep[] {
 	const prefix = [...getComposePrefix()];
 	return [
 		{
 			label: "Stopping compose services",
 			run: async () => {
-				const code = await spawnCompose([...prefix, "down", "--volumes"], verbose);
-				if (code !== 0) throw new Error(`compose down exited with code ${code}`);
+				await spawnCompose([...prefix, "down", "--volumes"]);
 			},
 		},
 		{
 			label: "Removing compose containers",
 			run: async () => {
-				const code = await spawnCompose([...prefix, "rm", "-f", "--volumes"], verbose);
-				if (code !== 0) throw new Error(`compose rm exited with code ${code}`);
+				await spawnCompose([...prefix, "rm", "-f", "--volumes"]);
 			},
 		},
 	];
 }
 
-async function runCleanupSteps(options: CleanupOptions): Promise<void> {
-	for (const step of getCleanupSteps(options.verbose)) await step.run();
+async function runCleanupSteps(): Promise<void> {
+	for (const step of getCleanupSteps()) await step.run();
 }
 
-function CleanupApp({ options }: { readonly options: CleanupOptions }): ReactNode {
-	const resolveSteps = useCallback(() => getCleanupSteps(options.verbose), [options.verbose]);
+function CleanupApp(): ReactNode {
+	const resolveSteps = useCallback(() => getCleanupSteps(), []);
 	return (
 		<StepProgressApp
 			completedHeading="Compose stack cleanup completed"
@@ -67,21 +57,19 @@ export async function runCleanup(rest: readonly string[]): Promise<void> {
 	const { values } = parseArgs({
 		args: [...rest],
 		options: {
-			verbose: { type: "boolean", short: "v", default: false },
 			quiet: { type: "boolean", default: false },
 		},
 		strict: true,
 	});
 
 	const options: CleanupOptions = {
-		verbose: values.verbose === true,
 		quiet: values.quiet === true,
 	};
 
 	if (options.quiet) {
-		await runCleanupSteps(options);
+		await runCleanupSteps();
 	} else {
-		await renderAndExit(<CleanupApp options={options} />);
+		await renderAndExit(<CleanupApp />);
 	}
 
 	if (!options.quiet) {

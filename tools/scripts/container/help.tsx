@@ -75,6 +75,10 @@ function HelpApp({ errorMessage }: { readonly errorMessage?: string }) {
 			<Text dimColor>bun run container cleanup -- --quiet</Text>
 			<Text dimColor>bun run container rm -- --force</Text>
 			<Text dimColor>bun run container install</Text>
+			<Text dimColor>
+				{" "}
+				(uses --frozen-lockfile; run bun install on the host to update bun.lock)
+			</Text>
 			<Text dimColor>bun run container up -- --build</Text>
 			<Text dimColor>bun run container --prod up -- --build</Text>
 			<Text dimColor>bun run container down -- --volumes</Text>

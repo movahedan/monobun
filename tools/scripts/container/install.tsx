@@ -5,6 +5,7 @@ import { type ReactNode, useCallback } from "react";
 import { applyPlainComposeArgv } from "../shared/compose-plain-progress";
 import { renderAndExit } from "../shared/render-and-exit";
 import { StepProgressApp, type StepProgressStep } from "../shared/step-progress";
+import { spawnWithVisibleOutput } from "../shared/subprocess-visible";
 import { DEV_COMPOSE_FILE, getComposeSpawnEnv, getContainerStack } from "./stack";
 
 const INSTALL_SERVICE = "apps";
@@ -16,7 +17,7 @@ function getInstallComposeArgv(bunInstallArgs: readonly string[]): string[] {
 		"-f",
 		DEV_COMPOSE_FILE,
 		"--profile",
-		"apps",
+		"all",
 		"run",
 		"--rm",
 		"--no-deps",
@@ -31,13 +32,11 @@ async function spawnBunInstall(bunInstallArgs: readonly string[]): Promise<void>
 		throw new Error("container install is only supported for the dev stack (omit --prod)");
 	}
 
-	const proc = Bun.spawn(getInstallComposeArgv(bunInstallArgs), {
-		stdio: ["inherit", "inherit", "inherit"],
+	await spawnWithVisibleOutput({
+		argv: getInstallComposeArgv(bunInstallArgs),
 		cwd: process.cwd(),
 		env: getComposeSpawnEnv(),
 	});
-	const code = await proc.exited;
-	if (code !== 0) throw new Error(`bun install in container exited with code ${code}`);
 }
 
 function getInstallSteps(bunInstallArgs: readonly string[]): readonly StepProgressStep[] {
@@ -74,8 +73,11 @@ export async function runInstall(rest: readonly string[]): Promise<void> {
 		strict: true,
 	});
 
+	// bun.lock is bind-mounted from the host; replacing it inside the VM often fails with EBUSY
+	// on macOS file shares. Sync the lockfile on the host (`bun install`), then install in-container.
 	const bunInstallArgs = [
 		"install",
+		"--frozen-lockfile",
 		...(values["with-scripts"] === true ? [] : ["--ignore-scripts"]),
 		...positionals,
 	];
