@@ -73,7 +73,7 @@
 		"@radix-ui/react-toggle-group": "1.1.11",
 		"@radix-ui/react-tooltip": "1.2.8",
 		"@packages/utils": "workspace:*",
-		"@types/react": "19.2.14",
+		"@types/react": "19.2.15",
 		"@types/react-dom": "19.2.3",
 		"class-variance-authority": "0.7.1",
 		"clsx": "2.1.1",
