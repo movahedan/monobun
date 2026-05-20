@@ -1,3 +1,2 @@
 .env
 dev-keys/*.pem
-src/generated/

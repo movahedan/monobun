@@ -3,7 +3,7 @@
 	"tasks": {
 		"db:generate": {
 			"inputs": ["src/prisma/**"],
-			"outputs": ["src/generated/**"]
+			"outputs": ["../../node_modules/.prisma/auth-client/**"]
 		},
 		"typecheck": {
 			"dependsOn": ["db:generate"]
