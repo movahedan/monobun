@@ -20,7 +20,7 @@
 		"@tanstack/react-form": "1.32.0",
 		"@tanstack/react-query": "5.99.2",
 		"@tanstack/react-router": "1.169.1",
-		"@tanstack/react-virtual": "3.13.24"
+		"@tanstack/react-virtual": "3.13.25"
 	},
 	"devDependencies": {
 		"@tools/tests-preset": "workspace:*",
