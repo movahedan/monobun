@@ -87,3 +87,5 @@ bun run db:seed
 ```
 
 Default admin: `AUTH_SEED_ADMIN_EMAIL` / `AUTH_SEED_ADMIN_PASSWORD` (see `.env.sample`).
+
+Demo tenant id after seed: `00000000-0000-4000-8000-000000000010` (slug `demo`). Nest control-plane seed uses a different id today — align before tenant-scoped e2e ([plan](../../.cursor/plans/trpc-auth-service.plan.md)).

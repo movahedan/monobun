@@ -41,6 +41,12 @@ curl -sf http://localhost:3007/status
 
 Copy `apps/auth/.env.sample` → `.env`. See [README.md](README.md) for JWT flows and Nest integration.
 
+## Nest integration
+
+- Human JWT `aud` = `AUTH_AUDIENCE` (`monobun-api`); Nest verifies via `AUTH_JWKS_URL` (see `apps/nestjs/AGENTS.md`).
+- Seed demo tenant: `00000000-0000-4000-8000-000000000010` (slug `demo`) — align with `@apps/nestjs` seed before cross-service e2e.
+- M2M client `nestjs-control-plane` (`feature-flags:read`); machine JWT `aud` = `AUTH_AUDIENCE_EVAL` (`monobun-eval`).
+
 ## Layout
 
 ```

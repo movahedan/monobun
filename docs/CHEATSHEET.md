@@ -44,6 +44,9 @@ Run from repo root. Filters use workspace `name` (`@apps/vite-spa`, `@packages/u
 | `cd apps/nestjs && bun run db:migrate` | Apply Prisma migrations (needs `DATABASE_URL`) |
 | `cd apps/nestjs && bun run db:seed` | Seed demo tenant/project/flags |
 | `cd apps/nestjs && bun run db:studio` | Prisma Studio |
+| `cd apps/auth && bun test` | Auth tests (needs `db:generate` + `AUTH_DATABASE_URL`) |
+| `cd apps/auth && bun run db:migrate` | Auth DB migrations (`AUTH_DATABASE_URL`) |
+| `cd apps/auth && bun run db:seed` | Seed admin user + `nestjs-control-plane` M2M client |
 | `bun run turbo run build:storybook --filter=@packages/ui` | Build Storybook |
 | `bun run build --filter=@packages/ui` | Build one workspace |
 | `bun run test --filter=@packages/utils` | Test one workspace |
@@ -68,6 +71,31 @@ Hot reload in containers is limited on macOS: bind mounts often do not propagate
 | `bun run container compose -- ps` | `docker compose ps` |
 | `bun run container up -- --profile nestjs` | Postgres + `@apps/nestjs` :3006 |
 | `bun run container up -- --profile auth` | Postgres + `@apps/auth` :3007 (migrate + seed) |
+| `bun run container up -- --profile auth --profile nestjs` | Both services + Postgres (host dev: set Nest `AUTH_*` in `.env`) |
+
+### Auth + NestJS smoke
+
+Host dev (two terminals or Turbo filters):
+
+```bash
+bun run turbo run dev --filter=@apps/auth --filter=@apps/nestjs
+```
+
+Nest needs `AUTH_JWKS_URL`, `AUTH_ISSUER`, `AUTH_AUDIENCE` (see root `.env.sample` and `apps/nestjs/.env.sample`).
+
+**Quick Nest check without JWT** (dev only): `AUTH_ALLOW_HEADER_TENANT=true` then:
+
+```bash
+curl -sf -H "x-tenant-id: 00000000-0000-4000-8000-000000000001" \
+  http://localhost:3006/api/v1/tenants
+```
+
+**Real JWT:** log in at `http://localhost:3007/login` (seed creds in `.env.sample`), obtain `access_token` via `POST /api/refresh` or tRPC `auth.login`, then:
+
+```bash
+curl -sf -H "Authorization: Bearer <access_token>" \
+  http://localhost:3006/api/v1/tenants
+```
 
 ## Release & CI
 

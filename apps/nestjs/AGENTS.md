@@ -56,12 +56,29 @@ cd apps/nestjs && bun run build && NODE_ENV=development bun dist/index.js --emit
 cd ../../packages/nestjs-sdk && bun run kubb
 ```
 
+## Auth integration (`@apps/auth`)
+
+Nest validates **Bearer JWTs locally** via JWKS (`jose` + `AUTH_JWKS_URL`) — no HTTP call to auth per request.
+
+| Variable | Purpose |
+|----------|---------|
+| `AUTH_JWKS_URL` | e.g. `http://localhost:3007/.well-known/jwks.json` |
+| `AUTH_ISSUER` | Must match JWT `iss` |
+| `AUTH_AUDIENCE` | Human/mgmt tokens: `monobun-api` |
+| `AUTH_ALLOW_HEADER_TENANT` | `true` in dev only — skip JWT, use `x-tenant-id` |
+
+Protected today: `GET /api/v1/tenants` (`JwtAuthGuard` + `feature-flags:read`).
+
+**E2e note:** Auth seed demo tenant id (`…0010`) differs from Nest seed (`…0001`) until aligned — see [trpc-auth-service.plan.md](../../.cursor/plans/trpc-auth-service.plan.md). Compose `nestjs` service does not yet inject `AUTH_*`; set on host `.env` for combined smoke.
+
 ## Docker
 
 ```bash
 bun run container up -- --profile nestjs   # postgres + @apps/nestjs
 curl -sf http://localhost:3006/status
 ```
+
+Combined with auth: `bun run container up -- --profile auth --profile nestjs` (see [CHEATSHEET.md](../../docs/CHEATSHEET.md#auth--nestjs-smoke)).
 
 ## Layout
 
@@ -71,7 +88,7 @@ apps/nestjs/src/
   common/guards/    # JwtAuthGuard, ScopesGuard, TenantGuard (legacy header)
   health/           # Health checks
   prisma/           # PrismaService (global)
-  tenants/          # Stub list endpoint (Phase 1)
+  tenants/          # Stub list endpoint (JWT-protected; Prisma wiring in Phase 3)
   swagger.setup.ts
   index.ts
 ```
