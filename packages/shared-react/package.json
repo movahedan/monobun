@@ -19,7 +19,7 @@
 		"@tools/tests-preset": "workspace:*",
 		"@tools/typescript": "workspace:*",
 		"@types/bun": "1.3.14",
-		"@types/react": "19.2.16",
+		"@types/react": "19.2.17",
 		"react": "19.2.7",
 		"react-dom": "19.2.7"
 	},
