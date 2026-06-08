@@ -83,9 +83,9 @@
       "version": "0.1.0",
       "dependencies": {
         "@anatine/esbuild-decorators": "0.2.19",
-        "@nestjs/common": "11.1.25",
-        "@nestjs/core": "11.1.25",
-        "@nestjs/platform-express": "11.1.25",
+        "@nestjs/common": "11.1.26",
+        "@nestjs/core": "11.1.26",
+        "@nestjs/platform-express": "11.1.26",
         "@nestjs/swagger": "11.4.4",
         "@packages/auth-contract": "workspace:*",
         "@packages/utils": "workspace:*",
@@ -98,7 +98,7 @@
         "zod": "4.4.3",
       },
       "devDependencies": {
-        "@nestjs/testing": "11.1.25",
+        "@nestjs/testing": "11.1.26",
         "@tools/tests-preset": "workspace:*",
         "@tools/typescript": "workspace:*",
         "@types/express": "5.0.6",
@@ -657,17 +657,17 @@
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@1.1.4", "", { "dependencies": { "@tybys/wasm-util": "^0.10.1" }, "peerDependencies": { "@emnapi/core": "^1.7.1", "@emnapi/runtime": "^1.7.1" } }, "sha512-3NQNNgA1YSlJb/kMH1ildASP9HW7/7kYnRI2szWJaofaS1hWmbGI4H+d3+22aGzXXN9IJ+n+GiFVcGipJP18ow=="],
 
-    "@nestjs/common": ["@nestjs/common@11.1.25", "", { "dependencies": { "file-type": "21.3.4", "iterare": "1.2.1", "load-esm": "1.0.3", "tslib": "2.8.1", "uid": "2.0.2" }, "peerDependencies": { "class-transformer": ">=0.4.1", "class-validator": ">=0.13.2", "reflect-metadata": "^0.1.12 || ^0.2.0", "rxjs": "^7.1.0" }, "optionalPeers": ["class-transformer", "class-validator"] }, "sha512-eObNI89zpPEHQWr9BxD5yQe6hcDjzT6sj/jng1tWBL4GXEgZzrVYOnFA4pzk1ZvDNHa3z7GD2Yy0Z06Ihv9y6g=="],
+    "@nestjs/common": ["@nestjs/common@11.1.26", "", { "dependencies": { "file-type": "21.3.4", "iterare": "1.2.1", "load-esm": "1.0.3", "tslib": "2.8.1", "uid": "2.0.2" }, "peerDependencies": { "class-transformer": ">=0.4.1", "class-validator": ">=0.13.2", "reflect-metadata": "^0.1.12 || ^0.2.0", "rxjs": "^7.1.0" }, "optionalPeers": ["class-transformer", "class-validator"] }, "sha512-0VARQyzuGbprvjO+slWq9Jtj1P0jYCSKAUSv9LWFNWD39ZbDzXXM1pMs35kReVXwchra0urMfTQxw4uAOfdSzA=="],
 
-    "@nestjs/core": ["@nestjs/core@11.1.25", "", { "dependencies": { "fast-safe-stringify": "2.1.1", "iterare": "1.2.1", "path-to-regexp": "8.4.2", "tslib": "2.8.1", "uid": "2.0.2" }, "peerDependencies": { "@nestjs/common": "^11.0.0", "@nestjs/microservices": "^11.0.0", "@nestjs/platform-express": "^11.0.0", "@nestjs/websockets": "^11.0.0", "reflect-metadata": "^0.1.12 || ^0.2.0", "rxjs": "^7.1.0" }, "optionalPeers": ["@nestjs/microservices", "@nestjs/platform-express", "@nestjs/websockets"] }, "sha512-tkpoJlSB1CPGWHzEw3AyiUZhazngzhzKw14DbF9Rb5Ny50GP0zV6diTFkahob+HqzDDVjK/2DTt41OMFa4lK5w=="],
+    "@nestjs/core": ["@nestjs/core@11.1.26", "", { "dependencies": { "fast-safe-stringify": "2.1.1", "iterare": "1.2.1", "path-to-regexp": "8.4.2", "tslib": "2.8.1", "uid": "2.0.2" }, "peerDependencies": { "@nestjs/common": "^11.0.0", "@nestjs/microservices": "^11.0.0", "@nestjs/platform-express": "^11.0.0", "@nestjs/websockets": "^11.0.0", "reflect-metadata": "^0.1.12 || ^0.2.0", "rxjs": "^7.1.0" }, "optionalPeers": ["@nestjs/microservices", "@nestjs/platform-express", "@nestjs/websockets"] }, "sha512-K45zUwYpowEsVqm8qNIzsMcl4LJev0MK9zVhDnmym7YRTJ2/caslqVeKYhPRd5+Fh81IkvWUVu6vEo46uZ5mgQ=="],
 
     "@nestjs/mapped-types": ["@nestjs/mapped-types@2.1.1", "", { "peerDependencies": { "@nestjs/common": "^10.0.0 || ^11.0.0", "class-transformer": "^0.4.0 || ^0.5.0", "class-validator": "^0.13.0 || ^0.14.0 || ^0.15.0", "reflect-metadata": "^0.1.12 || ^0.2.0" }, "optionalPeers": ["class-transformer", "class-validator"] }, "sha512-SCCoMEJ6jdeI5h/N+KCVF1+pmg/hmEkNA5nHTS8Gvww7T/LCl4o1gFLinw2iQ60w7slFkszHcGLKGdazVI4F8A=="],
 
-    "@nestjs/platform-express": ["@nestjs/platform-express@11.1.25", "", { "dependencies": { "cors": "2.8.6", "express": "5.2.1", "multer": "2.1.1", "path-to-regexp": "8.4.2", "tslib": "2.8.1" }, "peerDependencies": { "@nestjs/common": "^11.0.0", "@nestjs/core": "^11.0.0" } }, "sha512-a4f4WIGG8oCF4lwh7SlVOZXif0EwC4fsM/JZY5/X7OkHd8rp7Dxnx+sB2lwKAtnP6A29os/IPdH2Rll+wVJ6Qg=="],
+    "@nestjs/platform-express": ["@nestjs/platform-express@11.1.26", "", { "dependencies": { "cors": "2.8.6", "express": "5.2.1", "multer": "2.1.1", "path-to-regexp": "8.4.2", "tslib": "2.8.1" }, "peerDependencies": { "@nestjs/common": "^11.0.0", "@nestjs/core": "^11.0.0" } }, "sha512-MJ5Kwe52Ag4nlIuLK2ekB6TVYu1a22uvDzc0Aq0wIzcLySIz4YK0fMcrDOKGdbGQWpfZtNu1PM3jhlf4hvf6Og=="],
 
     "@nestjs/swagger": ["@nestjs/swagger@11.4.4", "", { "dependencies": { "@microsoft/tsdoc": "0.16.0", "@nestjs/mapped-types": "2.1.1", "js-yaml": "4.1.1", "lodash": "4.18.1", "path-to-regexp": "8.4.2", "swagger-ui-dist": "5.32.6" }, "peerDependencies": { "@fastify/static": "^8.0.0 || ^9.0.0", "@nestjs/common": "^11.0.1", "@nestjs/core": "^11.0.1", "class-transformer": "*", "class-validator": "*", "reflect-metadata": "^0.1.12 || ^0.2.0" }, "optionalPeers": ["@fastify/static", "class-transformer", "class-validator"] }, "sha512-VaIo1ruV2G7b+f2zPzkBSUNy9a/WQ9sg8TLKhWlrTfg4O6U10M/PA7Xi6XMXadOVhwOqoesijba8jH3i/3adrA=="],
 
-    "@nestjs/testing": ["@nestjs/testing@11.1.25", "", { "dependencies": { "tslib": "2.8.1" }, "peerDependencies": { "@nestjs/common": "^11.0.0", "@nestjs/core": "^11.0.0", "@nestjs/microservices": "^11.0.0", "@nestjs/platform-express": "^11.0.0" }, "optionalPeers": ["@nestjs/microservices", "@nestjs/platform-express"] }, "sha512-rvTXbeT6e2IMMShT7aKtbjSE3i3nbS8hejszpjQd5IR1Sh674U/KJ8EioqyI01vcGDbph2fopdzRMsyaeZuyPg=="],
+    "@nestjs/testing": ["@nestjs/testing@11.1.26", "", { "dependencies": { "tslib": "2.8.1" }, "peerDependencies": { "@nestjs/common": "^11.0.0", "@nestjs/core": "^11.0.0", "@nestjs/microservices": "^11.0.0", "@nestjs/platform-express": "^11.0.0" }, "optionalPeers": ["@nestjs/microservices", "@nestjs/platform-express"] }, "sha512-PNf/TSIoF525pb3O9bu06S5QFWl4gArngbjI6yRFKZrF7d85vGjleVkgVVbw879Y95EYDzIS3eel6YlaY4TGFw=="],
 
     "@next/env": ["@next/env@16.2.7", "", {}, "sha512-tMJizPlj6ZYpBMMdK8S0LJufrP4QTdR6pcv9KQ/bVETPAmg0j1mlHE9G2c38UyGHxoBapgwuj7XjbGJ2RcDFOg=="],
 
