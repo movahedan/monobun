@@ -20,9 +20,9 @@
 	},
 	"dependencies": {
 		"@anatine/esbuild-decorators": "0.2.19",
-		"@nestjs/common": "11.1.26",
-		"@nestjs/core": "11.1.26",
-		"@nestjs/platform-express": "11.1.26",
+		"@nestjs/common": "11.1.27",
+		"@nestjs/core": "11.1.27",
+		"@nestjs/platform-express": "11.1.27",
 		"@nestjs/swagger": "11.4.4",
 		"@packages/auth-contract": "workspace:*",
 		"@packages/utils": "workspace:*",
@@ -36,7 +36,7 @@
 	},
 	"devDependencies": {
 		"@types/pg": "8.15.6",
-		"@nestjs/testing": "11.1.26",
+		"@nestjs/testing": "11.1.27",
 		"prisma": "7.1.0",
 		"@tools/tests-preset": "workspace:*",
 		"@tools/typescript": "workspace:*",
