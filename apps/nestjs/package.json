@@ -23,7 +23,7 @@
 		"@nestjs/common": "11.1.27",
 		"@nestjs/core": "11.1.27",
 		"@nestjs/platform-express": "11.1.27",
-		"@nestjs/swagger": "11.4.4",
+		"@nestjs/swagger": "11.4.5",
 		"@packages/auth-contract": "workspace:*",
 		"@packages/utils": "workspace:*",
 		"@prisma/adapter-pg": "7.1.0",
