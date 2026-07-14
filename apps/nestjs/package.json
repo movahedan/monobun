@@ -41,7 +41,7 @@
 		"@tools/tests-preset": "workspace:*",
 		"@tools/typescript": "workspace:*",
 		"@types/express": "5.0.6",
-		"@types/supertest": "7.2.0",
+		"@types/supertest": "7.2.1",
 		"supertest": "7.2.2",
 		"tsup": "8.5.1"
 	}
