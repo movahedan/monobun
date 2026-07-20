@@ -23,7 +23,7 @@ jobs:
       affected-services: ${{ steps.affected-services.outputs.affected-services }}
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v6.1.0
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v6.1.0
         with:
           fetch-depth: 0
 

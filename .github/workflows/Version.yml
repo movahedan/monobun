@@ -17,7 +17,7 @@ jobs:
       packages-to-deploy: ${{ steps.packages-to-deploy.outputs.packages-to-deploy }}
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v6.1.0
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
