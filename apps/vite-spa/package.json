@@ -13,7 +13,7 @@
 		"@packages/ui": "workspace:*",
 		"@packages/utils": "workspace:*",
 		"react": "19.2.8",
-		"react-dom": "19.2.7"
+		"react-dom": "19.2.8"
 	},
 	"devDependencies": {
 		"@tools/typescript": "workspace:*",
