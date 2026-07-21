@@ -47,7 +47,7 @@
 		"@types/react-dom": "19.2.3",
 		"typescript": "6.0.3",
 		"react": "19.2.8",
-		"react-dom": "19.2.7",
+		"react-dom": "19.2.8",
 		"vite": "8.1.5"
 	},
 	"author": "Soheil Movahedan",
