@@ -9,7 +9,7 @@
 	"dependencies": {
 		"ink": "7.0.6",
 		"intershell": "0.6.3",
-		"react": "19.2.7",
+		"react": "19.2.8",
 		"safe-regex": "2.1.1"
 	},
 	"devDependencies": {
