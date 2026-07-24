@@ -16,6 +16,7 @@ export type {
 } from "./fetcher/index";
 export {
 	createFetcher,
+	default,
 	default as fetcher,
 	defaultFetcherSettingsInput,
 	FetcherSettings,
