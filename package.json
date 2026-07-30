@@ -48,7 +48,7 @@
 		"typescript": "6.0.3",
 		"react": "19.2.8",
 		"react-dom": "19.2.8",
-		"vite": "8.1.5"
+		"vite": "8.2.0"
 	},
 	"author": "Soheil Movahedan",
 	"license": "MIT",
