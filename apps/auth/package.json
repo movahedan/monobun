@@ -32,8 +32,8 @@
 		"@tools/typescript": "workspace:*",
 		"@types/bun": "1.3.14",
 		"@types/pg": "8.15.6",
-		"@types/react": "19.2.17",
-		"@types/react-dom": "19.2.3",
+		"@types/react": "19.2.18",
+		"@types/react-dom": "19.2.4",
 		"prisma": "6.19.3"
 	}
 }
