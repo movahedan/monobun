@@ -1,8 +1,25 @@
 import useSWR, { type SWRConfiguration } from "swr";
 
-import { customFetch } from "./mutator.server";
+import fetcher, {
+	fetcherSettings,
+	type RequestConfig,
+	type ResponseConfig,
+	type ResponseErrorConfig,
+} from "@packages/http";
 
-export const swrFetcher = <TData>(url: string): Promise<TData> => customFetch<TData>(url);
+import { getNestjsApiBaseUrl } from "./fetcher.settings.shared";
+
+fetcherSettings.setSettings({
+	mode: "merge",
+	config: {
+		baseRequestConfig: {
+			baseURL: getNestjsApiBaseUrl(),
+		},
+	},
+});
+
+export const swrFetcher = <TData>(url: string): Promise<TData> =>
+	fetcher<TData>({ method: "GET", url }).then((res: ResponseConfig<TData>) => res.data);
 
 export const swrConfig: SWRConfiguration = {
 	fetcher: swrFetcher,
@@ -17,5 +34,5 @@ export function useSWRWithConfig<TData>(
 	return useSWR<TData>(key, { ...swrConfig, ...config });
 }
 
-export type { RequestConfig, ResponseErrorConfig } from "./mutator.server";
-export { client, client as fetch, customFetch, default } from "./mutator.server";
+export type { RequestConfig, ResponseErrorConfig };
+export { fetcher as client, fetcher as fetch, fetcher as default };
