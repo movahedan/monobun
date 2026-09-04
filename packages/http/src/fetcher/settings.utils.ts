@@ -1,4 +1,4 @@
-import type { RequestConfig } from "../kubb-client";
+import type { RequestConfig } from "../base-fetch";
 import type {
 	AfterErrorCallback,
 	AfterResponseCallback,
@@ -16,9 +16,8 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
 
 /** Kubb allows `headers` as a record or `[key, value][]`; `fetch` also accepts `Headers`. Normalize for merge + `toRequestOptions`. */
 function headersToRecord(headers: RequestConfig["headers"] | undefined): Record<string, string> {
-	if (headers === undefined || headers === null) {
-		return {};
-	}
+	if (headers === undefined || headers === null) return {};
+
 	if (typeof Headers !== "undefined" && headers instanceof Headers) {
 		const out: Record<string, string> = {};
 		headers.forEach((value, key) => {
@@ -26,28 +25,9 @@ function headersToRecord(headers: RequestConfig["headers"] | undefined): Record<
 		});
 		return out;
 	}
-	if (Array.isArray(headers)) {
-		const out: Record<string, string> = {};
-		for (const row of headers) {
-			if (Array.isArray(row) && row.length >= 2) {
-				const [k, v] = row;
-				if (typeof k === "string" && typeof v === "string") {
-					out[k] = v;
-				}
-			}
-		}
-		return out;
-	}
-	if (typeof headers === "object") {
-		const out: Record<string, string> = {};
-		for (const [k, v] of Object.entries(headers as Record<string, unknown>)) {
-			if (typeof v === "string") {
-				out[k] = v;
-			}
-		}
-		return out;
-	}
-	return {};
+
+	if (Array.isArray(headers)) return Object.fromEntries(headers);
+	return headers || {};
 }
 
 /** Deep-merge; arrays are concatenated. */
@@ -157,8 +137,7 @@ export const settingsUtils = {
 				(base.refreshConfig ?? {}) as Record<string, unknown>,
 				(scope.refreshConfig ?? {}) as Record<string, unknown>,
 			);
-			refreshConfig =
-				Object.keys(merged).length > 0 ? (merged as unknown as RefreshConfig) : undefined;
+			refreshConfig = Object.keys(merged).length > 0 ? merged : undefined;
 		}
 
 		const execute = scope.execute ?? base.execute;
@@ -167,10 +146,10 @@ export const settingsUtils = {
 
 		return {
 			...(Object.keys(baseRequestConfig).length > 0 ? { baseRequestConfig } : {}),
-			...(execute !== undefined ? { execute } : {}),
-			...(refreshConfig !== undefined ? { refreshConfig } : {}),
-			...(attachAccessToken !== undefined ? { attachAccessToken } : {}),
-		} as FetcherSettingsConfig;
+			...(execute ? { execute } : {}),
+			...(refreshConfig ? { refreshConfig } : {}),
+			...(attachAccessToken ? { attachAccessToken } : {}),
+		};
 	},
 };
 
@@ -196,16 +175,16 @@ export const requestConfigUtils = {
 		const normalized = headersToRecord(config.headers);
 		const headers = Object.keys(normalized).length > 0 ? normalized : undefined;
 		return {
-			...(config.baseURL !== undefined ? { baseURL: config.baseURL } : {}),
+			...(config.baseURL ? { baseURL: config.baseURL } : {}),
 			method: requestConfigUtils.resolveMethod(config.method),
 			url: config.url,
-			...(config.credentials !== undefined ? { credentials: config.credentials } : {}),
-			...(config.data !== undefined ? { data: config.data } : {}),
-			...(config.params !== undefined
+			...(config.credentials ? { credentials: config.credentials } : {}),
+			...(config.data ? { data: config.data } : {}),
+			...(config.params
 				? { params: config.params as Record<string, string | number | boolean | null | undefined> }
 				: {}),
-			...(headers !== undefined ? { headers } : {}),
-			...(config.signal !== undefined ? { signal: config.signal } : {}),
+			...(headers ? { headers } : {}),
+			...(config.signal ? { signal: config.signal } : {}),
 		};
 	},
 

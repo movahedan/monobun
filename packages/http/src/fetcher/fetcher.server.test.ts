@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 
-import type { Client } from "../kubb-client";
+import type { baseFetch } from "../base-fetch";
 import { createFetcher } from "./fetcher";
 import { FetcherSettings } from "./settings";
 
@@ -23,7 +23,7 @@ describe("createFetcher - server mode", () => {
 			executeCalls += 1;
 			await new Promise((resolve) => setTimeout(resolve, 5));
 			return { status: 200, data: { ok: true }, statusText: "OK", headers: new Headers() };
-		}) as Client;
+		}) as typeof baseFetch;
 
 		const settings = new FetcherSettings({
 			config: { execute },
@@ -48,7 +48,7 @@ describe("createFetcher - server mode", () => {
 			data: { message: "Unauthorized" },
 			statusText: "Unauthorized",
 			headers: new Headers(),
-		})) as Client;
+		})) as typeof baseFetch;
 
 		const settings = new FetcherSettings({
 			config: {

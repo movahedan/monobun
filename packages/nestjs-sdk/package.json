@@ -23,7 +23,7 @@
 		"lint:fix": "biome check --write ."
 	},
 	"dependencies": {
-		"@packages/utils": "workspace:*",
+		"@packages/http": "workspace:*",
 		"swr": "2.3.7",
 		"zod": "4.1.13"
 	},

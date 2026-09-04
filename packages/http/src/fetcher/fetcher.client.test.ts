@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import type { Client } from "../kubb-client";
+import type { baseFetch } from "../base-fetch";
 import { createFetcher } from "./fetcher";
 import { FetcherSettings } from "./settings";
 
@@ -32,7 +32,7 @@ describe("createFetcher - client mode", () => {
 		const execute = (async () => {
 			executeStarted = true;
 			return { status: 200, data: { ok: true }, statusText: "OK", headers: new Headers() };
-		}) as Client;
+		}) as typeof baseFetch;
 
 		const settings = new FetcherSettings({
 			config: {

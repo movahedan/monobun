@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import type { Client } from "../kubb-client";
+import type { baseFetch } from "../base-fetch";
 import { FetcherSettings } from "./settings";
 import { defaultFetcherSettingsInput } from "./settings.default";
 
@@ -25,7 +25,7 @@ describe("defaultFetcherSettingsInput", () => {
 			data: { message: "Bad request" },
 			statusText: "Bad Request",
 			headers: new Headers(),
-		})) as Client;
+		})) as typeof baseFetch;
 
 		settings.setSettings({
 			config: { execute },

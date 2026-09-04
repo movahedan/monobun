@@ -1,6 +1,6 @@
+import type { Client } from "./base-fetch";
 import { createFetcher } from "./fetcher/fetcher";
 import type { FetcherSettings } from "./fetcher/settings";
-import type { Client } from "./kubb-client";
 
 /**
  * Refresh-only Kubb client: strips `refreshConfig` and `attachAccessToken` so

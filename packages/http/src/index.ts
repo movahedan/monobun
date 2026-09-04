@@ -1,21 +1,20 @@
 export type { ApiError, ApiFieldErrorRow } from "./api-error";
+export type { Client, RequestConfig, RequestCredentials, ResponseConfig } from "./base-fetch";
+export { baseFetch } from "./base-fetch";
 export { createBareFetcher } from "./create-bare-fetcher";
 export type {
 	AttachAccessToken,
-	Client,
 	FetcherPlainMergeInput,
 	FetcherSettingsConfig,
 	FetcherSettingsRootApplyInput,
 	RefreshConfig,
 	RefreshCoordination,
-	RequestConfig,
 	RequestOptions,
-	ResponseConfig,
 	ResponseErrorConfig,
-	UnifiedFetcherFailure,
 } from "./fetcher/index";
 export {
 	createFetcher,
+	default,
 	default as fetcher,
 	defaultFetcherSettingsInput,
 	FetcherSettings,

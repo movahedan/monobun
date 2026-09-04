@@ -1,4 +1,5 @@
-import { baseFetch, type Client, type RequestConfig, type ResponseConfig } from "../kubb-client";
+import type { RequestConfig, ResponseConfig } from "../base-fetch";
+import { baseFetch } from "../base-fetch";
 import { defaultFetcherSettingsInput } from "./settings.default";
 import { callbacksUtils, requestConfigUtils, runners, settingsUtils } from "./settings.utils";
 import type {
@@ -15,7 +16,7 @@ const EMPTY_CONFIG: FetcherSettingsConfig = {};
 
 export type ResolvedFetcherTransport = {
 	readonly baseRequestConfig: Partial<RequestConfig> | undefined;
-	readonly execute: Client;
+	readonly execute: typeof baseFetch;
 	readonly attachAccessToken: AttachAccessToken;
 	readonly refreshConfig: {
 		readonly refresh: () => Promise<void>;
@@ -73,7 +74,7 @@ export class FetcherSettings {
 		readonly request: RequestConfig<TVariables>;
 		readonly options: RequestOptions;
 	}> {
-		const baseMerged = requestConfigUtils.merge(
+		const baseMerged = requestConfigUtils.merge<TVariables>(
 			this.#settingsConfig.baseRequestConfig,
 			requestConfig,
 		);
