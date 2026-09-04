@@ -2,8 +2,7 @@ import { afterEach, describe, expect, it, mock } from "bun:test";
 
 import { AuthSession } from "./session";
 
-const originalCookieDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, "cookie");
-
+/** Stub `document.cookie` on the instance without replacing the whole document. */
 function stubDocumentCookie(value: string): void {
 	Object.defineProperty(document, "cookie", {
 		configurable: true,
@@ -16,9 +15,6 @@ function stubDocumentCookie(value: string): void {
 }
 
 function restoreDocumentCookie(): void {
-	if (originalCookieDescriptor) {
-		Object.defineProperty(Document.prototype, "cookie", originalCookieDescriptor);
-	}
 	Reflect.deleteProperty(document, "cookie");
 }
 

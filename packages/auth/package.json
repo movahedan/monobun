@@ -19,7 +19,7 @@
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
-		"test": "bun test src"
+		"test": "bun --cwd ../.. test packages/auth/src"
 	},
 	"devDependencies": {
 		"@tools/tests-preset": "workspace:*",
