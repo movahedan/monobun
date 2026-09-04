@@ -35,7 +35,7 @@
       "name": "@apps/auth",
       "version": "0.1.0",
       "dependencies": {
-        "@packages/auth-contract": "workspace:*",
+        "@packages/auth": "workspace:*",
         "@packages/utils": "workspace:*",
         "@prisma/client": "6.19.3",
         "@trpc/server": "11.8.0",
@@ -87,7 +87,7 @@
         "@nestjs/core": "11.1.29",
         "@nestjs/platform-express": "11.1.29",
         "@nestjs/swagger": "11.4.7",
-        "@packages/auth-contract": "workspace:*",
+        "@packages/auth": "workspace:*",
         "@packages/utils": "workspace:*",
         "@prisma/adapter-pg": "7.1.0",
         "@prisma/client": "7.1.0",
@@ -132,10 +132,14 @@
     "apps/vite-spa": {
       "name": "@apps/vite-spa",
       "dependencies": {
+        "@packages/auth": "workspace:*",
+        "@packages/http": "workspace:*",
+        "@packages/nestjs-sdk": "workspace:*",
         "@packages/ui": "workspace:*",
         "@packages/utils": "workspace:*",
         "react": "19.2.8",
         "react-dom": "19.2.8",
+        "swr": "2.3.7",
       },
       "devDependencies": {
         "@tailwindcss/vite": "4.3.3",
@@ -149,12 +153,22 @@
         "vite": "8.0.16",
       },
     },
-    "packages/auth-contract": {
-      "name": "@packages/auth-contract",
+    "packages/auth": {
+      "name": "@packages/auth",
       "version": "0.1.0",
       "devDependencies": {
+        "@tools/tests-preset": "workspace:*",
         "@tools/typescript": "workspace:*",
+        "@types/bun": "1.3.14",
+        "@types/react": "19.2.18",
+        "react": "19.2.8",
       },
+      "peerDependencies": {
+        "react": ">=19.0.0",
+      },
+      "optionalPeers": [
+        "react",
+      ],
     },
     "packages/http": {
       "name": "@packages/http",
@@ -770,7 +784,7 @@
 
     "@oxc-resolver/binding-win32-x64-msvc": ["@oxc-resolver/binding-win32-x64-msvc@11.24.2", "", { "os": "win32", "cpu": "x64" }, "sha512-UqGPmo56KDfLlfXFAFIrNflHT8tFxWGEivWg3Zeyp4Uy2NlKN1FGPr6/BxcLGG3+kZ6Wp14g5Uj+n71boqZfiw=="],
 
-    "@packages/auth-contract": ["@packages/auth-contract@workspace:packages/auth-contract"],
+    "@packages/auth": ["@packages/auth@workspace:packages/auth"],
 
     "@packages/http": ["@packages/http@workspace:packages/http"],
 

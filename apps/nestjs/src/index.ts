@@ -23,10 +23,16 @@ async function bootstrap(): Promise<void> {
 	});
 
 	app.enableCors({
-		origin: process.env.ALLOWED_ORIGINS?.split(",") ?? [
-			"http://localhost:3001",
-			"http://localhost:3002",
-		],
+		origin: (
+			process.env.ALLOWED_ORIGINS?.split(",") ?? [
+				"http://localhost:3001",
+				"http://127.0.0.1:3001",
+				"http://localhost:3002",
+				"http://127.0.0.1:3002",
+			]
+		)
+			.map((origin) => origin.trim())
+			.filter(Boolean),
 		credentials: true,
 		methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 		allowedHeaders: ["Content-Type", "Authorization", "x-tenant-id", "x-actor-id"],

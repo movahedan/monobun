@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 
-import type { TenantRole } from "@packages/auth-contract";
+import type { TenantRole } from "@packages/auth/contract";
 
 import { prisma } from "../../db";
 import { humanAccessTokenForMembership } from "./access-token";

@@ -1,7 +1,7 @@
 import { createLocalJWKSet, jwtVerify } from "jose";
 import { z } from "zod";
 
-import { SCOPES, type Scope } from "@packages/auth-contract";
+import { SCOPES, type Scope } from "@packages/auth/contract";
 
 import { authConfig } from "../../config";
 import { prisma } from "../../db";

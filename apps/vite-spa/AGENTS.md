@@ -14,12 +14,29 @@ This file provides guidance to Agents when working with the vite-spa application
 - `bun run preview` - Preview production build
 - `bun run typecheck` - Run TypeScript type checking
 
+## Auth (quick path)
+
+Use **`@packages/auth`** + **`@packages/http`**:
+
+| Piece | Import |
+|-------|--------|
+| Session / contract | `@packages/auth` (`authSession`, `createAuthFetcherBindings`, scopes) |
+| React | `@packages/auth/react` (`AuthProvider`, `useAuth`) |
+| Nest HTTP | `@packages/http/react` `FetcherSettingsProvider` (composed in `src/auth/api-sdk-provider.tsx`) |
+| Proxy | `vite.config.ts` → `VITE_AUTH_PROXY_TARGET` (default `http://127.0.0.1:3007`) |
+| Nest base URL | empty (Vite proxies `/api` → `:3006`); or set `VITE_NESTJS_API_URL` |
+
+**Smoke:** run auth + nest (+ migrate/seed both), `bun run turbo run dev --filter=@apps/vite-spa`, sign in with seed `admin@example.com` / `changeme`.
+
+See [`packages/auth/AGENTS.md`](../../packages/auth/AGENTS.md).
+
 ## Technology Stack
 
 ### Core Framework
-- **React 19.1.1** - Modern React with latest features
-- **Vite 7.0.6** - Fast development and build tool
+- **React 19** - Modern React with latest features
+- **Vite** - Fast development and build tool
 - **TypeScript** - Type-safe development
+- **@packages/auth** / **@packages/http** / **@packages/nestjs-sdk** — auth + Nest client
 
 ### UI & Styling  
 - **@packages/ui** - Shared component library (Button, Card, Input, etc.)
@@ -36,19 +53,10 @@ This file provides guidance to Agents when working with the vite-spa application
 ```
 apps/vite-spa/
 ├── src/
-│   ├── components/     # Admin-specific components
-│   ├── pages/          # Route/page components  
-│   ├── hooks/          # Custom React hooks
-│   ├── services/       # API services and data fetching
-│   ├── types/          # TypeScript type definitions
-│   ├── utils/          # Admin-specific utilities
-│   ├── App.tsx         # Main application component
-│   └── main.tsx        # Application entry point
-├── public/             # Static assets
-├── index.html          # HTML template
-├── vite.config.ts      # Vite configuration
-├── tsconfig.json       # TypeScript configuration
-└── package.json        # Dependencies and scripts
+│   ├── auth/           # Thin ApiSdkProvider (composes @packages/auth + http)
+│   ├── app/            # Login + dashboard shell
+│   ├── main.tsx
+│   └── index.css
 ```
 
 ### Development Patterns

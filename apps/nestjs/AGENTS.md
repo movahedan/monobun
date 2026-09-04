@@ -69,7 +69,7 @@ Nest validates **Bearer JWTs locally** via JWKS (`jose` + `AUTH_JWKS_URL`) — n
 
 Protected today: `GET /api/v1/tenants` (`JwtAuthGuard` + `feature-flags:read`).
 
-**E2e note:** Auth seed demo tenant id (`…0010`) differs from Nest seed (`…0001`) until aligned — see [trpc-auth-service.plan.md](../../.cursor/plans/trpc-auth-service.plan.md). Compose `nestjs` service does not yet inject `AUTH_*`; set on host `.env` for combined smoke.
+**E2e note:** Auth and Nest seeds share demo tenant id `00000000-0000-4000-8000-000000000001`. Compose `nestjs` service does not yet inject `AUTH_*`; set on host `.env` for combined smoke.
 
 ## Docker
 

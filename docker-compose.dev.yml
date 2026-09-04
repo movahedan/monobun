@@ -92,7 +92,7 @@ services:
       PORT: "${NESTJS_PORT:-3006}"
       NESTJS_PORT: "${NESTJS_PORT:-3006}"
       NODE_ENV: development
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3001,http://localhost:3002}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3001,http://127.0.0.1:3001,http://localhost:3002,http://127.0.0.1:3002}
       DATABASE_URL: ${DATABASE_URL:-postgresql://monobun:monobun@postgres:5432/monobun}
     command: bun run turbo run dev --filter=@apps/nestjs
     profiles: ["nestjs", "all"]
@@ -115,7 +115,7 @@ services:
       HOST: "0.0.0.0"
       PORT: "${EXPRESS_PORT:-3003}"
       EXPRESS_PORT: "${EXPRESS_PORT:-3003}"
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3001,http://localhost:3002}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3001,http://127.0.0.1:3001,http://localhost:3002,http://127.0.0.1:3002}
     command: bun run turbo run dev --filter=@apps/express
     profiles: ["express", "all"]
     healthcheck:

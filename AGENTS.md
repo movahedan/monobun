@@ -76,7 +76,7 @@ Nested `AGENTS.md` under each app, package, and tool workspace.
 | `apps/astro-ssg` | `@apps/astro-ssg` | 3005 | Docs site | [AGENTS.md](apps/astro-ssg/AGENTS.md) |
 | `packages/ui` | `@packages/ui` | 3004 | React + Storybook | [AGENTS.md](packages/ui/AGENTS.md) |
 | `packages/utils` | `@packages/utils` | — | Shared utilities | [AGENTS.md](packages/utils/AGENTS.md) |
-| `packages/auth-contract` | `@packages/auth-contract` | — | Scopes + JWT claim types | [AGENTS.md](packages/auth-contract/AGENTS.md) |
+| `packages/auth` | `@packages/auth` | — | Auth session, React provider, scopes/JWT contract | [AGENTS.md](packages/auth/AGENTS.md) |
 | `packages/http` | `@packages/http` | — | Kubb-shaped fetcher (client / server / static) | [AGENTS.md](packages/http/AGENTS.md) |
 | `packages/nestjs-sdk` | `@packages/nestjs-sdk` | — | Kubb client for `@apps/nestjs` | [AGENTS.md](packages/nestjs-sdk/AGENTS.md) |
 | `packages/shared-react` | `@packages/shared-react` | — | Shared React hooks | [AGENTS.md](packages/shared-react/AGENTS.md) |

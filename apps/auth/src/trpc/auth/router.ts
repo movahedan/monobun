@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import type { TenantRole } from "@packages/auth-contract";
+import type { TenantRole } from "@packages/auth/contract";
 
 import { prisma } from "../../db";
 import { protectedProcedure, publicProcedure, router } from "../init";

@@ -1,0 +1,9 @@
+{
+	"extends": "@tools/typescript/react-library.json",
+	"compilerOptions": {
+		"rootDir": "./src",
+		"outDir": "./dist",
+		"lib": ["ES2022", "DOM", "DOM.Iterable"]
+	},
+	"include": ["src/**/*.ts", "src/**/*.tsx", "../../tools/tests-preset/matchers.d.ts"]
+}
