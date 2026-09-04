@@ -2,9 +2,30 @@ import { afterEach, describe, expect, it, mock } from "bun:test";
 
 import { AuthSession } from "./session";
 
+const originalCookieDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, "cookie");
+
+function stubDocumentCookie(value: string): void {
+	Object.defineProperty(document, "cookie", {
+		configurable: true,
+		enumerable: true,
+		get: () => value,
+		set: () => {
+			/* ignore writes in unit tests */
+		},
+	});
+}
+
+function restoreDocumentCookie(): void {
+	if (originalCookieDescriptor) {
+		Object.defineProperty(Document.prototype, "cookie", originalCookieDescriptor);
+	}
+	Reflect.deleteProperty(document, "cookie");
+}
+
 describe("AuthSession", () => {
 	afterEach(() => {
 		mock.restore();
+		restoreDocumentCookie();
 	});
 
 	it("applyLogin stores token and user", () => {
@@ -87,12 +108,7 @@ describe("AuthSession", () => {
 			sessionCookieName: "auth_session",
 		});
 
-		Object.defineProperty(globalThis, "document", {
-			configurable: true,
-			value: {
-				cookie: "auth_session=sess-id",
-			},
-		});
+		stubDocumentCookie("auth_session=sess-id");
 
 		globalThis.fetch = mock(async (input: RequestInfo | URL) => {
 			const url = String(input);
@@ -130,10 +146,7 @@ describe("AuthSession", () => {
 
 	it("restore becomes ready without auth when no session cookie", async () => {
 		const session = new AuthSession();
-		Object.defineProperty(globalThis, "document", {
-			configurable: true,
-			value: { cookie: "" },
-		});
+		stubDocumentCookie("");
 		const ok = await session.restore();
 		expect(ok).toBe(false);
 		expect(session.getStatus()).toBe("ready");
