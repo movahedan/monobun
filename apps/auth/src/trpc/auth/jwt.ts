@@ -1,6 +1,6 @@
 import { jwtVerify, SignJWT } from "jose";
 
-import { ROLE_SCOPES, type Scope, type TenantRole } from "@packages/auth-contract";
+import { ROLE_SCOPES, type Scope, type TenantRole } from "@packages/auth/contract";
 
 import { authConfig } from "../../config";
 import { getSigningMaterial } from "./keys";

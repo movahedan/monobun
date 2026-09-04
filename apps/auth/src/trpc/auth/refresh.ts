@@ -1,4 +1,4 @@
-import type { TenantRole } from "@packages/auth-contract";
+import type { TenantRole } from "@packages/auth/contract";
 
 import { authConfig } from "../../config";
 import { prisma } from "../../db";

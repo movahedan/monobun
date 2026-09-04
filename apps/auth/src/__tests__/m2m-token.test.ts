@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 
 import { exportJWK, generateKeyPair, SignJWT } from "jose";
 
-import { SCOPES } from "@packages/auth-contract";
+import { SCOPES } from "@packages/auth/contract";
 
 import { authConfig } from "../config";
 import { prisma } from "../db";

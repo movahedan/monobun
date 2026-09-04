@@ -1,6 +1,6 @@
 import { SetMetadata } from "@nestjs/common";
 
-import type { Scope } from "@packages/auth-contract";
+import type { Scope } from "@packages/auth/contract";
 
 export const REQUIRED_SCOPES_KEY = "requiredScopes";
 

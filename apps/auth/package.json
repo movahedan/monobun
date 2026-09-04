@@ -6,18 +6,19 @@
 	"type": "module",
 	"scripts": {
 		"postinstall": "bun run db:generate",
-		"dev": "bun --watch src/index.tsx",
+		"dev": "bun --env-file=.env --watch src/index.tsx",
 		"build": "bun run db:generate && bun build src/index.tsx --outdir dist --target bun",
-		"start": "bun dist/index.js",
+		"start": "bun --env-file=.env dist/index.js",
 		"typecheck": "bun run db:generate && tsc --noEmit",
-		"test": "bun test src/__tests__",
+		"test": "bun --env-file=.env test src/__tests__",
 		"db:generate": "prisma generate --schema src/prisma/schema.prisma",
-		"db:migrate": "bun scripts/ensure-db.ts && prisma migrate deploy --schema src/prisma/schema.prisma",
-		"db:push": "bun scripts/ensure-db.ts && prisma db push --schema src/prisma/schema.prisma",
-		"db:seed": "bun scripts/seed.ts"
+		"db:migrate": "bun --env-file=.env scripts/ensure-db.ts && bun --env-file=.env x prisma migrate deploy --schema src/prisma/schema.prisma",
+		"db:push": "bun --env-file=.env scripts/ensure-db.ts && bun --env-file=.env x prisma db push --schema src/prisma/schema.prisma",
+		"db:seed": "bun --env-file=.env scripts/seed.ts",
+		"keys:generate": "bun scripts/generate-dev-keys.ts"
 	},
 	"dependencies": {
-		"@packages/auth-contract": "workspace:*",
+		"@packages/auth": "workspace:*",
 		"@packages/utils": "workspace:*",
 		"@prisma/client": "6.19.3",
 		"@trpc/server": "11.8.0",

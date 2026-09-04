@@ -1,8 +1,10 @@
 import { useState } from "react";
 
+import { useAuth } from "@packages/auth/react";
 import { LoginForm, type LoginFormData } from "@packages/ui/molecules";
 
 export function LoginPage() {
+	const { login } = useAuth();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | undefined>();
 	const [success, setSuccess] = useState<string | undefined>();
@@ -13,29 +15,8 @@ export function LoginPage() {
 		setSuccess(undefined);
 
 		try {
-			// Simulate API call
-			await new Promise((resolve, reject) => {
-				setTimeout(() => {
-					// Mock authentication logic
-					if (data.email === "admin@example.com" && data.password === "password123") {
-						resolve({ success: true });
-					} else {
-						reject(new Error("Invalid credentials"));
-					}
-				}, 1000);
-			});
-
-			setSuccess("Login successful! Redirecting...");
-
-			// In a real app, you would:
-			// 1. Store the authentication token
-			// 2. Redirect to the dashboard
-			// 3. Update the app state
-
-			setTimeout(() => {
-				// Simulate redirect
-				console.log("Redirecting to dashboard...");
-			}, 2000);
+			await login(data.email, data.password);
+			setSuccess("Login successful");
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Login failed");
 		} finally {
@@ -48,7 +29,7 @@ export function LoginPage() {
 			<div className="max-w-md w-full space-y-8">
 				<div className="text-center">
 					<h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-					<p className="mt-2 text-sm text-gray-600">Sign in to access your admin panel</p>
+					<p className="mt-2 text-sm text-gray-600">Sign in with `@apps/auth`</p>
 				</div>
 
 				<LoginForm
@@ -62,7 +43,9 @@ export function LoginPage() {
 				/>
 
 				<div className="text-center">
-					<p className="text-xs text-gray-500">Demo credentials: admin@example.com / password123</p>
+					<p className="text-xs text-gray-500">
+						Seed credentials: admin@example.com / changeme (auth `.env`)
+					</p>
 				</div>
 			</div>
 		</div>

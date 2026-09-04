@@ -1,6 +1,6 @@
 import { type CanActivate, type ExecutionContext, Injectable } from "@nestjs/common";
 
-import { hasScope, type Scope } from "@packages/auth-contract";
+import { hasScope, type Scope } from "@packages/auth/contract";
 
 import { REQUIRED_SCOPES_KEY } from "../decorators/require-scopes.decorator";
 import { ApiException } from "../exceptions/api.exception";

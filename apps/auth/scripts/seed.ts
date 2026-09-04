@@ -1,12 +1,13 @@
 import { exportJWK, generateKeyPair } from "jose";
 
-import { SCOPES } from "@packages/auth-contract";
+import { SCOPES } from "@packages/auth/contract";
 
 import { authConfig } from "../src/config.ts";
 import { prisma } from "../src/db.ts";
 import { hashPassword } from "../src/trpc/auth/password.ts";
 
-const tenantId = "00000000-0000-4000-8000-000000000010";
+/** Must match `@apps/nestjs` seed tenant (`scripts/seed.ts`). */
+const tenantId = "00000000-0000-4000-8000-000000000001";
 const adminUserId = "00000000-0000-4000-8000-000000000011";
 
 async function seedMachineClient(): Promise<void> {
@@ -44,10 +45,19 @@ async function seedHuman(): Promise<void> {
 		update: { passwordHash },
 	});
 
+	const existingDemo = await prisma.tenant.findUnique({ where: { slug: "demo" } });
+	if (existingDemo && existingDemo.id !== tenantId) {
+		await prisma.session.updateMany({
+			where: { activeTenantId: existingDemo.id },
+			data: { activeTenantId: tenantId },
+		});
+		await prisma.tenant.delete({ where: { id: existingDemo.id } });
+	}
+
 	await prisma.tenant.upsert({
-		where: { slug: "demo" },
+		where: { id: tenantId },
 		create: { id: tenantId, name: "Demo Tenant", slug: "demo" },
-		update: { name: "Demo Tenant" },
+		update: { name: "Demo Tenant", slug: "demo" },
 	});
 
 	await prisma.tenantMember.upsert({

@@ -2,7 +2,7 @@ import type { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { exportJWK, generateKeyPair, SignJWT } from "jose";
 
-import { SCOPES } from "@packages/auth-contract";
+import { SCOPES } from "@packages/auth/contract";
 
 import { AppModule } from "../app.module";
 import { HttpExceptionFilter } from "../common/filters/http-exception.filter";

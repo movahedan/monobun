@@ -10,10 +10,14 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@packages/auth": "workspace:*",
+		"@packages/http": "workspace:*",
+		"@packages/nestjs-sdk": "workspace:*",
 		"@packages/ui": "workspace:*",
 		"@packages/utils": "workspace:*",
 		"react": "19.2.8",
-		"react-dom": "19.2.8"
+		"react-dom": "19.2.8",
+		"swr": "2.3.7"
 	},
 	"devDependencies": {
 		"@tools/typescript": "workspace:*",

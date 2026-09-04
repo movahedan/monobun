@@ -1,7 +1,7 @@
 import { Controller, Get, HttpCode, HttpStatus, Inject, Query, UseGuards } from "@nestjs/common";
 import { ApiHeader, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 
-import { SCOPES } from "@packages/auth-contract";
+import { SCOPES } from "@packages/auth/contract";
 
 import { type ListQuery, ListQuerySchema } from "../common/api/list-query.model";
 import { ApiStandardErrors } from "../common/api/openapi-responses";

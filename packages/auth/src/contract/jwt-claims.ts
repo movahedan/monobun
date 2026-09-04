@@ -1,4 +1,4 @@
-import type { Scope } from "./scopes.ts";
+import type { Scope } from "./scopes";
 
 export type HumanAccessClaims = {
 	sub: string;
