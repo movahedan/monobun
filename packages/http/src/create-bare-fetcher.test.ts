@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 
+import type { baseFetch } from "#base-fetch.js";
 import { createBareFetcher } from "./create-bare-fetcher";
 import { FetcherSettings } from "./fetcher/settings";
 import type { RequestOptions } from "./fetcher/types";
-import type { Client } from "./kubb-client";
 
 const emptyCallbacks = {
 	beforeRequest: [],
@@ -19,14 +19,14 @@ describe("createBareFetcher", () => {
 	it("does not invoke parent attachAccessToken on transport", async () => {
 		const parentAttachAccessToken = mock(async (options: RequestOptions) => ({
 			...options,
-			headers: { ...(options.headers ?? {}), Authorization: "Bearer parent-token" },
+			headers: { ...options.headers, Authorization: "Bearer parent-token" },
 		}));
 
 		let authorizationAtExecute: string | undefined;
 		const execute = mock(async (options: { readonly headers?: Record<string, string> }) => {
 			authorizationAtExecute = options.headers?.Authorization;
 			return { status: 200, data: { ok: true }, statusText: "OK", headers: new Headers() };
-		}) as Client;
+		}) as typeof baseFetch;
 
 		const settings = new FetcherSettings({
 			config: {

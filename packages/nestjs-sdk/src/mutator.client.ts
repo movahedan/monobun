@@ -1,8 +1,11 @@
 import useSWR, { type SWRConfiguration } from "swr";
 
-import { customFetch } from "./mutator.server";
+import { fetcher } from "@packages/http";
 
-export const swrFetcher = <TData>(url: string): Promise<TData> => customFetch<TData>(url);
+export type { Client, RequestConfig, ResponseConfig, ResponseErrorConfig } from "@packages/http";
+
+export const swrFetcher = <TData>(url: string): Promise<TData> =>
+	fetcher<TData>({ url, method: "GET" }).then((response) => response.data);
 
 export const swrConfig: SWRConfiguration = {
 	fetcher: swrFetcher,
@@ -17,5 +20,6 @@ export function useSWRWithConfig<TData>(
 	return useSWR<TData>(key, { ...swrConfig, ...config });
 }
 
-export type { RequestConfig, ResponseErrorConfig } from "./mutator.server";
-export { client, client as fetch, customFetch, default } from "./mutator.server";
+export const client = fetcher;
+export default fetcher;
+export { client as fetch, fetcher as customFetch };

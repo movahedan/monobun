@@ -77,6 +77,7 @@ Nested `AGENTS.md` under each app, package, and tool workspace.
 | `packages/ui` | `@packages/ui` | 3004 | React + Storybook | [AGENTS.md](packages/ui/AGENTS.md) |
 | `packages/utils` | `@packages/utils` | — | Shared utilities | [AGENTS.md](packages/utils/AGENTS.md) |
 | `packages/auth-contract` | `@packages/auth-contract` | — | Scopes + JWT claim types | [AGENTS.md](packages/auth-contract/AGENTS.md) |
+| `packages/http` | `@packages/http` | — | Kubb-shaped fetcher (client / server / static) | [AGENTS.md](packages/http/AGENTS.md) |
 | `packages/nestjs-sdk` | `@packages/nestjs-sdk` | — | Kubb client for `@apps/nestjs` | [AGENTS.md](packages/nestjs-sdk/AGENTS.md) |
 | `packages/shared-react` | `@packages/shared-react` | — | Shared React hooks | [AGENTS.md](packages/shared-react/AGENTS.md) |
 | `packages/shared-tanstack` | `@packages/shared-tanstack` | — | TanStack list/virtual helpers | [AGENTS.md](packages/shared-tanstack/AGENTS.md) |

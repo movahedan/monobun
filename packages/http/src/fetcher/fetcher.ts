@@ -1,7 +1,4 @@
-import type { Client, RequestConfig, ResponseConfig } from "../kubb-client";
-
-export type { Client, RequestConfig, ResponseConfig };
-
+import type { Client, RequestConfig, ResponseConfig } from "../base-fetch";
 import { resolveAttachAccessToken } from "../resolve-attach-access-token";
 import type { FetcherRuntimeContext } from "../runtime-context";
 import { isRuntimeContext } from "../runtime-context";
@@ -98,7 +95,7 @@ export function createFetcher(
 			inFlightRequests.delete(key);
 		});
 		inFlightRequests.set(key, next);
-		return (await next) as ResponseConfig<TData>;
+		return await next;
 	};
 
 	const transport = async <TData>(options: RequestOptions): Promise<ResponseConfig<TData>> => {
@@ -111,11 +108,9 @@ export function createFetcher(
 				refreshConfig: { refresh, shouldRefresh, refreshCoordination },
 			} = getTransport();
 
-			if (
-				refreshCoordination?.isRefreshInFlight() &&
-				!options.refreshed &&
-				shouldRefresh(options)
-			) {
+			const isRefreshInFlight = refreshCoordination?.isRefreshInFlight();
+			const waitForRefresh = isRefreshInFlight && !options.refreshed && shouldRefresh(options);
+			if (waitForRefresh && refreshCoordination) {
 				await refreshCoordination.waitForRefresh().catch(() => undefined);
 				const { attachAccessToken } = getTransport();
 				const optionsWithAuth = await attachAccessToken({ ...options, skipDedupe: true });
@@ -124,17 +119,7 @@ export function createFetcher(
 
 			try {
 				const { attachAccessToken } = getTransport();
-				const optionsWithAuth = await attachAccessToken({
-					...(options.baseURL !== undefined ? { baseURL: options.baseURL } : {}),
-					method: options.method,
-					url: options.url,
-					...(options.credentials !== undefined ? { credentials: options.credentials } : {}),
-					...(options.data !== undefined ? { data: options.data } : {}),
-					...(options.params !== undefined ? { params: options.params } : {}),
-					...(options.headers !== undefined ? { headers: options.headers } : {}),
-					...(runtimeContext?.signal !== undefined ? { signal: runtimeContext.signal } : {}),
-				});
-				const data = await execute<TData>(optionsWithAuth);
+				const data = await execute<TData>(await attachAccessToken(options));
 				if (data.status >= 400) {
 					throw {
 						status: data.status,
@@ -142,38 +127,29 @@ export function createFetcher(
 						message: data.statusText,
 					};
 				}
-				if (canUseCache) {
-					cachedResponses.set(key, data);
-				}
+				if (canUseCache) cachedResponses.set(key, data);
 
 				return data;
 			} catch (error) {
-				if (errorChecks.isUnauthorized(error) && !options.refreshed && shouldRefresh(options)) {
+				const isUnauthorizedAndCanRefresh =
+					errorChecks.isUnauthorized(error) && !options.refreshed && shouldRefresh(options);
+				if (isUnauthorizedAndCanRefresh) {
 					await refresh();
 					const { attachAccessToken } = getTransport();
 					const optionsWithAuth = await attachAccessToken({ ...options, refreshed: true });
 					return await transport<TData>(optionsWithAuth);
 				}
 
-				if (canUseCache && errorChecks.isNetworkError(error)) {
-					const cached = cachedResponses.get(key) as ResponseConfig<TData> | undefined;
-					if (cached !== undefined) {
-						return cached;
-					}
-				}
-
+				const isNetworkErrorAndCanUseCache = canUseCache && errorChecks.isNetworkError(error);
+				const cached = cachedResponses.get(key) as ResponseConfig<TData> | undefined;
+				if (isNetworkErrorAndCanUseCache && cached) return cached;
 				throw error;
 			}
 		};
 
-		if (
-			!isServerOrStatic &&
-			options.method === "GET" &&
-			!options.refreshed &&
-			!options.skipDedupe
-		) {
-			return await runDeduped<TData>(key, attempt);
-		}
+		const canDedupe =
+			!isServerOrStatic && options.method === "GET" && !options.refreshed && !options.skipDedupe;
+		if (canDedupe) return await runDeduped<TData>(key, attempt);
 		return await attempt();
 	};
 

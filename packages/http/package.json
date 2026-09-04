@@ -18,9 +18,6 @@
 	"scripts": {
 		"typecheck": "tsc --noEmit"
 	},
-	"dependencies": {
-		"@kubb/plugin-client": "4.8.1"
-	},
 	"devDependencies": {
 		"@tools/tests-preset": "workspace:*",
 		"@tools/typescript": "workspace:*",

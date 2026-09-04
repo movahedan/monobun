@@ -1,7 +1,7 @@
-import type { ApiError, ApiFieldErrorRow } from "../api-error";
-import type { Client, RequestConfig, RequestCredentials } from "../kubb-client";
+import type { ApiError } from "../api-error";
+import type { baseFetch, RequestConfig, RequestCredentials } from "../base-fetch";
 
-export type { ApiError, ApiFieldErrorRow };
+export type { ApiError, ApiFieldErrorRow } from "../api-error";
 
 export type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD";
 
@@ -67,7 +67,7 @@ export interface FetcherCallbacks {
 
 export interface FetcherSettingsConfig {
 	readonly baseRequestConfig?: Partial<RequestConfig>;
-	readonly execute?: Client;
+	readonly execute?: typeof baseFetch;
 	readonly refreshConfig?: RefreshConfig;
 	readonly attachAccessToken?: AttachAccessToken;
 }
@@ -89,6 +89,4 @@ export type HttpResponseErrorConfig<TError = unknown> = {
 };
 
 /** Thrown by the default fetcher after {@link normalizeFetcherError}. */
-export type UnifiedFetcherFailure = ApiError;
-
-export type ResponseErrorConfig<_TError = unknown> = UnifiedFetcherFailure;
+export type ResponseErrorConfig<_TError = unknown> = ApiError;

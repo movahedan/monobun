@@ -158,9 +158,6 @@
     },
     "packages/http": {
       "name": "@packages/http",
-      "dependencies": {
-        "@kubb/plugin-client": "4.8.1",
-      },
       "devDependencies": {
         "@tools/tests-preset": "workspace:*",
         "@tools/typescript": "workspace:*",
@@ -179,7 +176,7 @@
       "name": "@packages/nestjs-sdk",
       "version": "0.1.0",
       "dependencies": {
-        "@packages/utils": "workspace:*",
+        "@packages/http": "workspace:*",
         "swr": "2.3.7",
         "zod": "4.1.13",
       },
