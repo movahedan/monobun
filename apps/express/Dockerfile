@@ -1,4 +1,4 @@
-FROM oven/bun:1.4.1-alpine AS base
+FROM oven/bun:1.4.2-alpine AS base
 RUN bun install -g turbo@2.5.5
 
 FROM base AS turbo
@@ -26,7 +26,7 @@ COPY --from=pruner /app/tools ./tools
 COPY --from=installer /app/ .
 RUN bun run build --filter=@apps/express
 
-FROM oven/bun:1.4.1-alpine AS runner
+FROM oven/bun:1.4.2-alpine AS runner
 WORKDIR /app
 RUN addgroup --system --gid 1001 runner-group \
 	&& adduser --system --uid 1001 runner-user \
